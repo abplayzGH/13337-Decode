@@ -27,8 +27,8 @@ public class VisionTest extends LinearOpMode {
 
         VisionPortal visionPortal = new VisionPortal.Builder()
                 .addProcessor(tagProcessor)
-//                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .setCamera(BuiltinCameraDirection.BACK)
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+//                .setCamera(BuiltinCameraDirection.BACK)
                 .setCameraResolution(new Size(640, 480))
                 .build();
 
@@ -49,6 +49,7 @@ public class VisionTest extends LinearOpMode {
                     telemetry.addData("roll", tag.ftcPose.roll);
                     telemetry.addData("pitch", tag.ftcPose.pitch);
                     telemetry.addData("yaw", tag.ftcPose.yaw);
+                    telemetry.addData("Id", tag.id);
                 } else {
                     telemetry.addLine("Tag detected, but pose not available");
                 }
