@@ -8,7 +8,7 @@ public class MotorTest {
     private DcMotor motor1;
 
     public void init(HardwareMap hwMap){
-        motor1 = hwMap.get(DcMotor.class, "motor1");
+        motor1 = hwMap.get(DcMotor.class, "leftFront");
         motor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
     }
