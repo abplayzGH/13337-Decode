@@ -68,53 +68,30 @@ public class AutoDriveToArtifact extends LinearOpMode {
         rightBackDrive.setPower(rightPower); // Assuming right front and back get the same power
     }
 
-    private ColorBlobLocatorProcessor purpleLocator;
-    private ColorBlobLocatorProcessor greenLocator;
+//    private ColorBlobLocatorProcessor purpleLocator;
+//    private ColorBlobLocatorProcessor greenLocator;
     @Override
     public void runOpMode() {
-//        // --- VISION INITIALIZATION ---
-//        colorLocator = new ColorBlobLocatorProcessor.Builder()
-//                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)
-//                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-//                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-//                .setDrawContours(true)
-//                .setBoxFitColor(0)
-//                .setCircleFitColor(Color.rgb(255, 255, 0))
-//                .setBlurSize(5)
-//                .setDilateSize(15)
-//                .setErodeSize(15)
-//                .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
-//                .build();
-//
-//        portal = new VisionPortal.Builder()
-//                .addProcessor(colorLocator)
-//                .setCameraResolution(new Size(320, 240))
-//                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-//                .build();
-
         // --- VISION INITIALIZATION ---
-        purpleLocator = new ColorBlobLocatorProcessor.Builder()
-                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE) // Or your custom purple Scalar
+        colorLocator = new ColorBlobLocatorProcessor.Builder()
+                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)
                 .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
                 .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-                // ... other purpleLocator settings ...
-                .build();
-
-
-        greenLocator = new ColorBlobLocatorProcessor.Builder()
-                .setTargetColorRange(ColorRange.ARTIFACT_GREEN) // Use your defined green
-                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-                // ... other greenLocator settings (can be same or different) ...
-                .setCircleFitColor(Color.rgb(0, 255, 0)) // Green circle for green blobs
+                .setDrawContours(true)
+                .setBoxFitColor(0)
+                .setCircleFitColor(Color.rgb(255, 255, 0))
+                .setBlurSize(5)
+                .setDilateSize(15)
+                .setErodeSize(15)
+                .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
                 .build();
 
         portal = new VisionPortal.Builder()
-                .addProcessor(purpleLocator)
-                .addProcessor(greenLocator) // Add both processors
+                .addProcessor(colorLocator)
                 .setCameraResolution(new Size(320, 240))
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .build();
+
 
         // --- DRIVETRAIN INITIALIZATION ---
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFront");
@@ -145,51 +122,47 @@ public class AutoDriveToArtifact extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            List<ColorBlobLocatorProcessor.Blob> purpleBlobs = purpleLocator.getBlobs();
-            List<ColorBlobLocatorProcessor.Blob> greenBlobs = greenLocator.getBlobs();
 
-            // Filter blobs by size and shape for both lists
+
+        while (opModeIsActive()) {
+            // Get the list of detected blobs
+            List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
+
+            // Filter blobs by size and shape
             ColorBlobLocatorProcessor.Util.filterByCriteria(
                     ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
-                    50, 20000, purpleBlobs);
+                    50, 20000, blobs);
             ColorBlobLocatorProcessor.Util.filterByCriteria(
                     ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY,
-                    0.6, 1.0, purpleBlobs);
+                    0.6, 1.0, blobs);
 
-            ColorBlobLocatorProcessor.Util.filterByCriteria(
-                    ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
-                    50, 20000, greenBlobs);
-            ColorBlobLocatorProcessor.Util.filterByCriteria(
-                    ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY,
-                    0.6, 1.0, greenBlobs);
-
-            ColorBlobLocatorProcessor.Blob targetBlob = null;
-            String targetColorName = "None";
-
-            // --- Logic to select which color to target ---
-            // Example: Prioritize Purple, if not found, look for Green
-            if (!purpleBlobs.isEmpty()) {
-                targetBlob = purpleBlobs.get(0); // Assuming largest purple blob
-                targetColorName = "Purple";
-            } else if (!greenBlobs.isEmpty()) {
-                targetBlob = greenBlobs.get(0); // Assuming largest green blob
-                targetColorName = "Green";
-            }
-
-            if (targetBlob != null) {
+            // Check if any blobs were found
+            if (!blobs.isEmpty()) {
+                // Select the largest blob as the target
+                ColorBlobLocatorProcessor.Blob targetBlob = blobs.get(0);
                 Circle circleFit = targetBlob.getCircle();
-                telemetry.addData("Tracking Color", targetColorName);
 
+                // Check if we are close enough to the target
                 if (circleFit.getRadius() > STOP_RADIUS) {
+                    // Stop the robot
                     stopRobot();
                     telemetry.addLine("Target Reached!");
                 } else {
+                    // --- DRIVING LOGIC ---
+                    // Calculate the horizontal error
                     double error = TARGET_X - circleFit.getX();
+
+                    // Calculate the turn power based on the error
                     double turnPower = error * TURN_GAIN;
-                    double leftPower = FORWARD_SPEED - turnPower / 2;
-                    double rightPower = FORWARD_SPEED + turnPower / 2;
+
+                    // Calculate the power for each side of the drivetrain
+                    double leftPower = FORWARD_SPEED - turnPower/2;
+                    double rightPower = FORWARD_SPEED + turnPower/2;
+
+                    // Set motor powers
                     setDrivePower(leftPower, rightPower);
 
+                    // Provide telemetry for debugging
                     telemetry.addLine("Driving towards target...");
                     telemetry.addData("Target X", TARGET_X);
                     telemetry.addData("Current X", "%.1f", circleFit.getX());
@@ -198,66 +171,14 @@ public class AutoDriveToArtifact extends LinearOpMode {
                     telemetry.addData("Power", "L:%.2f R:%.2f", leftPower, rightPower);
                 }
             } else {
+                // No blobs detected, so stop the robot
                 stopRobot();
-                telemetry.addLine("No target (Purple or Green) detected.");
+                telemetry.addLine("No target detected.");
             }
             telemetry.update();
         }
-
-//        while (opModeIsActive()) {
-//            // Get the list of detected blobs
-//            List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
-//
-//            // Filter blobs by size and shape
-//            ColorBlobLocatorProcessor.Util.filterByCriteria(
-//                    ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA,
-//                    50, 20000, blobs);
-//            ColorBlobLocatorProcessor.Util.filterByCriteria(
-//                    ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY,
-//                    0.6, 1.0, blobs);
-//
-//            // Check if any blobs were found
-//            if (!blobs.isEmpty()) {
-//                // Select the largest blob as the target
-//                ColorBlobLocatorProcessor.Blob targetBlob = blobs.get(0);
-//                Circle circleFit = targetBlob.getCircle();
-//
-//                // Check if we are close enough to the target
-//                if (circleFit.getRadius() > STOP_RADIUS) {
-//                    // Stop the robot
-//                    stopRobot();
-//                    telemetry.addLine("Target Reached!");
-//                } else {
-//                    // --- DRIVING LOGIC ---
-//                    // Calculate the horizontal error
-//                    double error = TARGET_X - circleFit.getX();
-//
-//                    // Calculate the turn power based on the error
-//                    double turnPower = error * TURN_GAIN;
-//
-//                    // Calculate the power for each side of the drivetrain
-//                    double leftPower = FORWARD_SPEED - turnPower/2;
-//                    double rightPower = FORWARD_SPEED + turnPower/2;
-//
-//                    // Set motor powers
-//                    setDrivePower(leftPower, rightPower);
-//
-//                    // Provide telemetry for debugging
-//                    telemetry.addLine("Driving towards target...");
-//                    telemetry.addData("Target X", TARGET_X);
-//                    telemetry.addData("Current X", "%.1f", circleFit.getX());
-//                    telemetry.addData("Error", "%.1f", error);
-//                    telemetry.addData("Radius", "%.1f", circleFit.getRadius());
-//                    telemetry.addData("Power", "L:%.2f R:%.2f", leftPower, rightPower);
-//                }
-//            } else {
-//                // No blobs detected, so stop the robot
-//                stopRobot();
-//                telemetry.addLine("No target detected.");
-//            }
-//            telemetry.update();
-//        }
-        // Ensure the robot is stopped when the OpMode ends
+         //Ensure the robot is stopped when the OpMode ends
         stopRobot();
+    }
     }
 }
