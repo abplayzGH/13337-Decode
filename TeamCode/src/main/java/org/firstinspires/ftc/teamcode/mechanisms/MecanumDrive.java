@@ -11,28 +11,25 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class MecanumDrive {
 
-    private DcMotorEx leftFront, leftRear, rightFront, rightRear;
+    private DcMotorEx leftFront, leftBack, rightFront, rightBack;
     private IMU imu;
     public void init(HardwareMap hardwareMap){
 
-//        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
-//        leftRear = hardwareMap.get(DcMotorEx.class, "leftRear");
-//        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
-//        rightRear = hardwareMap.get(DcMotorEx.class, "rightRear");
-
-        leftFront = hardwareMap.get(DcMotorEx.class, "motor");
-        leftRear = hardwareMap.get(DcMotorEx.class, "motor");
-        rightFront = hardwareMap.get(DcMotorEx.class, "motor");
-        rightRear = hardwareMap.get(DcMotorEx.class, "motor");
+        leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
 
 
         leftFront.setDirection(DcMotor.Direction.REVERSE);
-        leftRear.setDirection(DcMotor.Direction.REVERSE);
+        leftBack.setDirection(DcMotor.Direction.REVERSE);
+        rightFront.setDirection(DcMotor.Direction.FORWARD);
+        leftBack.setDirection(DcMotor.Direction.FORWARD);
 
         leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightRear.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         imu = hardwareMap.get(IMU.class, "imu");
 
@@ -58,9 +55,9 @@ public class MecanumDrive {
         maxPower = Math.max(maxPower, Math.abs(rightRearPower));
 
         leftFront.setPower(maxSpeed * (leftFrontPower / maxPower));
-        leftRear.setPower(maxSpeed * (leftRearPower / maxPower));
+        leftBack.setPower(maxSpeed * (leftRearPower / maxPower));
         rightFront.setPower(maxSpeed * (rightFrontPower / maxPower));
-        rightRear.setPower(maxSpeed * (rightRearPower / maxPower));
+        rightBack.setPower(maxSpeed * (rightRearPower / maxPower));
 
     }
 
