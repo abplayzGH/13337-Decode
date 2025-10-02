@@ -1,4 +1,3 @@
-
 package org.firstinspires.ftc.teamcode; // Ensure this matches your team's package name
 
 import android.graphics.Color;
@@ -18,6 +17,8 @@ import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 
 import java.util.List;
+
+import com.acmerobotics.dashboard.FtcDashboard;
 
 /*
  * This OpMode uses a camera to locate a colored artifact and drive towards it.
@@ -92,7 +93,6 @@ public class AutoDriveToArtifact extends LinearOpMode {
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .build();
 
-
         // --- DRIVETRAIN INITIALIZATION ---
         leftFrontDrive = hardwareMap.get(DcMotor.class, "leftFront");
         leftBackDrive = hardwareMap.get(DcMotor.class, "leftBack");
@@ -121,8 +121,7 @@ public class AutoDriveToArtifact extends LinearOpMode {
         // Wait for the driver to press START
         waitForStart();
 
-        while (opModeIsActive()) {
-
+        FtcDashboard.getInstance().startCameraStream(portal, 30);
 
         while (opModeIsActive()) {
             // Get the list of detected blobs
@@ -179,6 +178,5 @@ public class AutoDriveToArtifact extends LinearOpMode {
         }
          //Ensure the robot is stopped when the OpMode ends
         stopRobot();
-    }
     }
 }
