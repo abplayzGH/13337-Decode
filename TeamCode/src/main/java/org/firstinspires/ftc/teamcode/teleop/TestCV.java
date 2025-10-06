@@ -19,7 +19,7 @@
  * SOFTWARE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode.teleop;
 
 import android.graphics.Color;
 import android.util.Size;
@@ -68,7 +68,7 @@ import java.util.List;
  */
 
 
-@TeleOp(name = "Concept: Vision Color-Locator (Circle)", group = "Concept")
+@TeleOp(name = "TestCV", group = "Concept")
 public class TestCV extends LinearOpMode {
     @Override
     public void runOpMode() {
