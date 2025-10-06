@@ -1,12 +1,8 @@
-package org.firstinspires.ftc.teamcode.auto;
-
-import androidx.annotation.NonNull;
+package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
@@ -15,17 +11,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
-@Autonomous(name = "DecodeAuto_RR", group = "Auto")
+@Autonomous(name = "Test Auto 1", group = "Auto")
 public class TestAuto1 extends LinearOpMode {
     // Hardware
     private MecanumDrive drive;  // or whatever your drivetrain class is
-    private DcMotorEx liftMotor;
-    private Servo manipulatorServo;
+//    private DcMotorEx liftMotor;
+//    private Servo manipulatorServo;
 
     // Vision / sensor class (you’ll implement this)
 //    private VisionCam vision;
@@ -39,8 +32,8 @@ public class TestAuto1 extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         // Initialize hardware
         drive = new MecanumDrive(hardwareMap, new Pose2d(START_X, START_Y, START_HEADING));
-        liftMotor = hardwareMap.get(DcMotorEx.class, "liftMotor");
-        manipulatorServo = hardwareMap.get(Servo.class, "manipServo");
+//        liftMotor = hardwareMap.get(DcMotorEx.class, "liftMotor");
+//        manipulatorServo = hardwareMap.get(Servo.class, "manipServo");
 
 //        vision = new VisionCam(hardwareMap);  // your class to detect artifacts / zones
 
@@ -59,7 +52,6 @@ public class TestAuto1 extends LinearOpMode {
         // These are speculative — you’ll change them once field layout is known.
         Action trajToScoreZone0 = drive.actionBuilder(drive.localizer.getPose())
                 .lineToX(30)
-                .lineToY(10)
                 .build();
 //                .splineTo(new Vector2d(30, 10), Math.toRadians(0))  // spline to (30,10) facing "forward"
 //                .splineTo(new Vector2d(30, 25), Math.toRadians(90));
