@@ -61,7 +61,10 @@ public class Red1Auto extends LinearOpMode {
             WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
             vision = new VisionManager(hardwareMap, webcamName, new Size(640, 480));
             // optional dashboard stream
-            try { vision.startDashboardStream(10); } catch (Exception ignored) {}
+            try {
+                vision.startDashboardStream(10);
+            } catch (Exception ignored) {
+            }
         } catch (Exception e) {
             telemetry.addData("Vision Init Error", e.getMessage());
             telemetry.update();
@@ -122,7 +125,7 @@ public class Red1Auto extends LinearOpMode {
         // Ensure pose estimate is current
         drive.updatePoseEstimate();
 
-       TrajectoryActionBuilder toPark = drive.actionBuilder(startPose)
+        TrajectoryActionBuilder toPark = drive.actionBuilder(startPose)
                 .strafeTo(new Vector2d(parkX, parkY));
 
         TrajectoryActionBuilder toGoal = drive.actionBuilder(startPose)
@@ -130,8 +133,9 @@ public class Red1Auto extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        toGoal.build(),
-                        toPark.build()
-        ));
+                        toGoal.build()
+//                        toPark.build()
+                ));
         // ---------- EXECUTE: toGoal ----------
         telemetry.addData("AutoStep", "Driving to goal approach...");
+    }}

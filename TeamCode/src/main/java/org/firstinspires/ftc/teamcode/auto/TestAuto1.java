@@ -24,8 +24,8 @@ public class TestAuto1 extends LinearOpMode {
 //    private VisionCam vision;
 
     // Example positions / constants you will tune
-    public static double START_X = 12;
-    public static double START_Y = 12;
+    public static double START_X = 60;
+    public static double START_Y = -12;
     public static double START_HEADING = 0;  // radians
 
     @Override
