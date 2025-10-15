@@ -1,17 +1,25 @@
-package org.firstinspires.ftc.teamcode.teleop;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-@Disabled
-@TeleOp(name = "TheGas")
-public class TheGas extends LinearOpMode {
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+
+import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
+
+@TeleOp(name = "TheGas2")
+public class TheGas2 extends LinearOpMode {
+    ballShooter ballShooter = new ballShooter();
     private DcMotorEx leftFront;
     private DcMotorEx leftBack;
     private DcMotorEx rightFront;
     private DcMotorEx rightBack;
+
+    public DcMotorEx leftFlyWheel;
+    public DcMotorEx rightFlyWheel;
+    public DcMotorEx conveyorBelt;
     //private DcMotorEx extend;
     // private Servo angle;
     // private Servo claw;
@@ -32,6 +40,16 @@ public class TheGas extends LinearOpMode {
         leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
+        leftFlyWheel = hardwareMap.get(DcMotorEx.class, "leftFlyWheel");
+        rightFlyWheel = hardwareMap.get(DcMotorEx.class, "rightFlyWheel");
+        conveyorBelt = hardwareMap.get(DcMotorEx.class, "conveyorBelt");
+
+        leftFlyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFlyWheel.setDirection(DcMotorSimple.Direction.FORWARD);
+        conveyorBelt.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftFlyWheel.setPower(1.0);
+        rightFlyWheel.setPower(1.0);
+        conveyorBelt.setPower(0.5);
 /*
         extend = hardwareMap.get(DcMotorEx.class, "extend");
         extend.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -76,7 +94,8 @@ public class TheGas extends LinearOpMode {
             double leftX = gamepad1.left_stick_x; // Forward/Backward
             double leftY = gamepad1.left_stick_y;  // Left/Right
             double rightX = -gamepad1.right_stick_x; // Rotate
-/*
+            double firePower = 1.0;
+/*          double firePower = 1.0
             double extendPower = gamepad2.left_stick_y; // extend
             double anglePower = gamepad2.right_stick_y * angleMult; // wrist
             if (anglePower < 0.0025 && anglePower > -0.0025) {
@@ -128,19 +147,18 @@ public class TheGas extends LinearOpMode {
 
             // extend
             // extend.setPower((extendPower * extendMult) + extend.getCurrentPosition()*0.000002);
-            /*
+
             // Pick up specimen
-            if (gamepad2.cross){
-                anglePos = 0.5;
-                clawPos = 0.28;
-            }
+//            if (gamepad2.cross){
+//                anglePos = 0.5;
+//                clawPos = 0.28;
+//            }
 
             // Place specimen if not using auto
-            if (gamepad2.square){
-                anglePos = 0.72;
-                clawPos = 0.325;
-            }
-
+//            if (gamepad1.square){
+//                ballShooter.shoot(firePower);
+//            }
+/*
             // place specimen auto
             if (gamepad1.triangle){
                 inAuto = true;
