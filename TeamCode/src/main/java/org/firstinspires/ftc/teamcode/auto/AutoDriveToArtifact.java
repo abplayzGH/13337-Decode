@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode; // Ensure this matches your team's package name
+package org.firstinspires.ftc.teamcode.auto; // Ensure this matches your team's package name
 
 import android.graphics.Color;
 import android.util.Size;
