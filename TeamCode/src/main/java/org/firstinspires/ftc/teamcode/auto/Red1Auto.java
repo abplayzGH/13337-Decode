@@ -33,7 +33,7 @@ public class Red1Auto extends LinearOpMode {
     private VisionManager vision;
 
     // Starting pose (in inches) and heading (radians)
-    private final Pose2d startPose = new Pose2d(60.0, -12.0, Math.toRadians(3*Math.PI/2));
+    private final Pose2d startPose = new Pose2d(60, -12, Math.toRadians(180));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -117,7 +117,7 @@ public class Red1Auto extends LinearOpMode {
         // Tune these to your practice field target points.
         double goalX = 40.0;    // example, TUNE
         double goalY = -40.0;   // example, TUNE
-        double goalHeading = Math.toRadians(5*Math.PI/4);
+        double goalHeading = Math.toRadians(225);
 
         double parkX = 20.0;    // example, TUNE to ensure leaving launch line
         double parkY = -12.0;
@@ -129,7 +129,7 @@ public class Red1Auto extends LinearOpMode {
                 .strafeTo(new Vector2d(parkX, parkY));
 
         TrajectoryActionBuilder toGoal = drive.actionBuilder(startPose)
-                .splineTo(new Vector2d(goalX, goalY), goalHeading);
+                .strafeTo(new Vector2d(goalX, goalY));
 
         Actions.runBlocking(
                 new SequentialAction(
