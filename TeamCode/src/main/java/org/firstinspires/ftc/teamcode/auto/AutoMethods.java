@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-@Disabled
-@Autonomous
+
+
 public class AutoMethods extends LinearOpMode {
     public double overallDistanceModifier = 38.0;
     public double theTurnAdjustor = 6.5;

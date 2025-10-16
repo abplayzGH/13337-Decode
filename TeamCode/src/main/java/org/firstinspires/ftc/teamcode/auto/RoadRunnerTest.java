@@ -21,7 +21,7 @@ import org.firstinspires.ftc.vision.opencv.ColorRange;
 
 import java.util.List;
 
-@Autonomous(name = "RoadRunner Test Auto", group = "RoadRunner")
+@Autonomous(name = "RoadRunner Test Auto", group = "Concept")
 public class RoadRunnerTest extends LinearOpMode {
     // Vision variables
     private VisionPortal visionPortal;

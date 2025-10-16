@@ -5,8 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-@Disabled
-@TeleOp
+@TeleOp(name = "Field Orientated", group = "Teleop")
 public class MecanumFieldOrientatedOpMode extends OpMode {
     MecanumDrive drive = new MecanumDrive();
     double forward, strafe, rotate;

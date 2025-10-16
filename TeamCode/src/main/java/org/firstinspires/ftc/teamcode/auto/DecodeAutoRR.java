@@ -35,7 +35,7 @@ import java.util.List;
  * - Target AprilTag IDs and logic for interacting with them.
  * - Ensure ColorRange.ARTIFACT_PURPLE is correctly defined and available.
  */
-@Autonomous(name = "Decode Auto RR", group = "RoadRunner")
+@Autonomous(name = "Decode Auto RR", group = "Concept")
 public class DecodeAutoRR extends LinearOpMode {
 
     // Vision variables

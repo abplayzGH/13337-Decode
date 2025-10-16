@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
-@Autonomous(name = "Test Auto 1", group = "Auto")
+@Autonomous(name = "Test Auto 1", group = "Concept")
 public class TestAuto1 extends LinearOpMode {
     // Hardware
     private MecanumDrive drive;  // or whatever your drivetrain class is
