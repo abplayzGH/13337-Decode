@@ -16,6 +16,7 @@ public class ballShooter {
     public DcMotorEx conveyorBelt;
     public static final double TUNING_CONSTANT = 0.6; // This is a starting value, you MUST tune it.
 
+
     public void init(HardwareMap hardwareMap) {
         leftFlyWheel = hardwareMap.get(DcMotorEx.class, "leftFlyWheel");
         rightFlyWheel = hardwareMap.get(DcMotorEx.class, "rightFlyWheel");
@@ -36,6 +37,13 @@ public class ballShooter {
     public void shoot(double power) {
         leftFlyWheel.setPower(power);
         rightFlyWheel.setPower(power);
+
+        try {
+            Thread.sleep(500); // 1000 ms = 1 second
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
         conveyorBelt.setPower(1.0);
     }
 
@@ -63,6 +71,15 @@ public class ballShooter {
         // 5. Set the calculated power to both flywheel motors.
         leftFlyWheel.setPower(finalPower);
         rightFlyWheel.setPower(finalPower);
+
+        try {
+            Thread.sleep(500); // 1000 ms = 1 second
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        conveyorBelt.setPower(1.0);
+
     }
 
     public void stop() {

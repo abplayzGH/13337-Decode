@@ -12,6 +12,8 @@ import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
+import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -84,8 +86,10 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
 
-    @Override public void runOpMode()
-    {
+    ballShooter shooter = new ballShooter();
+
+    @Override
+    public void runOpMode() throws InterruptedException{
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
         double  drive           = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
@@ -195,6 +199,11 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
             }
             telemetry.update();
 
+            if (gamepad1.right_bumper && targetFound && (desiredTag.ftcPose.range < 40.0)) {
+                shooter.setLaunchPowerFromAngle(desiredTag.ftcPose.bearing);
+            } else {
+                shooter.stop();
+            }
             // Apply desired axes motions to the drivetrain.
             moveRobot(drive, strafe, turn);
             sleep(10);

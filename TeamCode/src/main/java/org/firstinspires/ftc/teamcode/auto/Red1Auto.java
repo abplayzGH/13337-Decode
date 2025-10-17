@@ -2,7 +2,10 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import android.util.Size;
 
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.TrajectoryBuilder;
@@ -11,6 +14,7 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.Trajectory;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -18,6 +22,8 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Red1Auto
@@ -29,11 +35,20 @@ import org.firstinspires.ftc.teamcode.vision.VisionManager;
 @Autonomous(name = "Red1Auto", group = "Auto")
 public class Red1Auto extends LinearOpMode {
 
+    private static final Logger log = LoggerFactory.getLogger(Red1Auto.class);
     private MecanumDrive drive;
     private VisionManager vision;
+    private Intake intake = new Intake();
 
     // Starting pose (in inches) and heading (radians)
     private final Pose2d startPose = new Pose2d(60, -12, Math.toRadians(180));
+
+    public class RunIntake implements InstantFunction{
+        @Override
+        public void run() {
+            intake.runIntake();
+        }
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -79,6 +94,8 @@ public class Red1Auto extends LinearOpMode {
         long sampleStart = System.currentTimeMillis();
         long sampleTimeoutMs = 800; // ms to sample in init
 
+        intake.init(hardwareMap);
+
         while (!isStarted() && !isStopRequested()) {
             if (vision != null && System.currentTimeMillis() - sampleStart < sampleTimeoutMs) {
                 try {
@@ -117,7 +134,7 @@ public class Red1Auto extends LinearOpMode {
         // Tune these to your practice field target points.
         double goalX = 40.0;    // example, TUNE
         double goalY = -40.0;   // example, TUNE
-        double goalHeading = Math.toRadians(225);
+        double goalHeading = Math.toRadians(135);
 
         double parkX = 20.0;    // example, TUNE to ensure leaving launch line
         double parkY = -12.0;
@@ -131,10 +148,15 @@ public class Red1Auto extends LinearOpMode {
         TrajectoryActionBuilder toGoal = drive.actionBuilder(startPose)
                 .strafeTo(new Vector2d(goalX, goalY));
 
+        Action toSpike1 = drive.actionBuilder(startPose)
+                .splineToSplineHeading(new Pose2d(36, 32, Math.toRadians(90)), Math.toRadians(90))
+                .stopAndAdd(new RunIntake())
+                .build();
+
         Actions.runBlocking(
                 new SequentialAction(
-                        toGoal.build()
-//                        toPark.build()
+                        toSpike1
+
                 ));
         // ---------- EXECUTE: toGoal ----------
         telemetry.addData("AutoStep", "Driving to goal approach...");

@@ -12,6 +12,10 @@ public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
+        double goalX = 40.0;    // example, TUNE
+        double goalY = -40.0;   // example, TUNE
+        double goalHeading = Math.toRadians(135);
+
         // Declare our first bot
         RoadRunnerBotEntity myFirstBot = new DefaultBotBuilder(meepMeep)
                 // We set this bot to be blue
@@ -20,7 +24,7 @@ public class MeepMeepTesting {
                 .build();
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(new Pose2d(60, -12, Math.toRadians(180)))
-                        .strafeTo(new Vector2d(-45, 40)).turn(Math.toRadians(-45))
+                .splineToSplineHeading(new Pose2d(36, 32, Math.toRadians(90)), Math.toRadians(90))
                 .build())
   ;
 
