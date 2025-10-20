@@ -22,8 +22,8 @@ public class ballShooter {
         rightFlyWheel = hardwareMap.get(DcMotorEx.class, "rightFlyWheel");
         conveyorBelt = hardwareMap.get(DcMotorEx.class, "conveyorBelt");
 
-        leftFlyWheel.setDirection(DcMotorSimple.Direction.FORWARD);
-        rightFlyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        leftFlyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFlyWheel.setDirection(DcMotorSimple.Direction.FORWARD);
         conveyorBelt.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Set the motors to run without encoders, as we are controlling power directly.
@@ -85,6 +85,7 @@ public class ballShooter {
     public void stop() {
         leftFlyWheel.setPower(0);
         rightFlyWheel.setPower(0);
+        conveyorBelt.setPower(0);
     }
 
 

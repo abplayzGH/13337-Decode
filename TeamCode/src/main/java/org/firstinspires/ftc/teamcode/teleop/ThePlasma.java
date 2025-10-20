@@ -11,7 +11,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
 
-@TeleOp(name = "Mecanum TeleOp (Field-Oriented)")
+@TeleOp(name = "The Plasma", group = "Teleop")
 public class ThePlasma extends OpMode {
     private MecanumDrive drive;
 
