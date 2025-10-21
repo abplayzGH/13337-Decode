@@ -1,8 +1,11 @@
+// java
+// File: TeamCode/src/main/java/org/firstinspires/ftc/teamcode/vision/VisionManager.java
 package org.firstinspires.ftc.teamcode.vision;
 
 import android.util.Size;
 import android.graphics.Color;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
@@ -22,15 +25,12 @@ import java.util.List;
  */
 public class VisionManager {
 
-    private VisionPortal portal;
+    private final VisionPortal portal;
     private final ColorBlobLocatorProcessor purpleProcessor;
     private final ColorBlobLocatorProcessor greenProcessor;
-    private final Size resolution;
-    private final WebcamName camera;
+    private final AprilTagProcessor tagProcessor; // field to hold processor
 
     public VisionManager(HardwareMap hardwareMap, WebcamName camera, Size res) {
-        this.camera = camera;
-        this.resolution = res;
 
         // --- PURPLE DETECTOR ---
         purpleProcessor = new ColorBlobLocatorProcessor.Builder()
@@ -50,7 +50,8 @@ public class VisionManager {
                 .setCircleFitColor(Color.rgb(0, 255, 0))
                 .build();
 
-        AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
+        // assign to the field (was a local variable previously)
+        this.tagProcessor = new AprilTagProcessor.Builder()
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
                 .setDrawTagID(true)
@@ -59,17 +60,17 @@ public class VisionManager {
 
         portal = new VisionPortal.Builder()
                 .setCamera(hardwareMap.get(WebcamName.class, camera.getDeviceName()))
-                .setCameraResolution(resolution)
+                .setCameraResolution(res)
                 .addProcessor(purpleProcessor)
                 .addProcessor(greenProcessor)
-                .addProcessor(tagProcessor)
+                .addProcessor(this.tagProcessor)
                 .build();
     }
 
     /** Start Dashboard camera stream (optional) */
     public void startDashboardStream(int fps) {
         try {
-            com.acmerobotics.dashboard.FtcDashboard.getInstance().startCameraStream(portal, fps);
+            FtcDashboard.getInstance().startCameraStream(portal, fps);
         } catch (Exception ignored) {}
     }
 
@@ -108,7 +109,53 @@ public class VisionManager {
         return "NONE";
     }
 
+    public ColorBlobLocatorProcessor.Blob largestBlob(){
+        List<ColorBlobLocatorProcessor.Blob> purple = getPurpleBlobs();
+        List<ColorBlobLocatorProcessor.Blob> green = getGreenBlobs();
+
+        ColorBlobLocatorProcessor.Blob bestPurple = BlobUtils.largestBlob(purple);
+        ColorBlobLocatorProcessor.Blob bestGreen = BlobUtils.largestBlob(green);
+
+        double purpleArea = (bestPurple != null) ? bestPurple.getContourArea() : 0;
+        double greenArea = (bestGreen != null) ? bestGreen.getContourArea() : 0;
+
+        if (purpleArea > greenArea && purpleArea > 0) return bestPurple;
+        if (greenArea > purpleArea && greenArea > 0) return bestGreen;
+        return null;
+    }
+
     /** Access VisionPortal (if you want to add more processors later) */
     public VisionPortal getPortal() { return portal; }
+
+    public List<AprilTagDetection> getDetections() {
+        // guard: return empty list if tagProcessor wasn't created for any reason
+        if (tagProcessor == null) return new ArrayList<>();
+        List<AprilTagDetection> dets = tagProcessor.getDetections();
+        if (dets == null) return new ArrayList<>();
+        return dets;
+    }
+
+    /**
+     * Returns true if a detection matching `id` exists.
+     * If id < 0, treat as wildcard: return true if any valid tag (with metadata) is present.
+     */
+    public boolean tagDesired(int id) {
+        List<AprilTagDetection> dets = getDetections();
+        if (dets.isEmpty()) return false;
+
+        if (id < 0) {
+            for (AprilTagDetection detection : dets) {
+                if (detection.metadata != null) return true;
+            }
+            return false;
+        }
+
+        for (AprilTagDetection detection : dets) {
+            if (detection.id == id) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

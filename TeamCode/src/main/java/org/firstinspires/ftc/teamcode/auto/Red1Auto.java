@@ -8,61 +8,147 @@ import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseVelocity2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.Trajectory;
-import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
+
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.opencv.Circle;
+import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Red1Auto
- * - Start pose: (60, -12) heading 0°
- * - Uses Roadrunner sample-style MecanumDrive
- * - Uses single webcam VisionManager (color-dominant fallback)
- * - Intake/fire/gate ignored
+ * - Start pose: (60, -12) heading 180°
+ * - Uses Roadrunner MecanumDrive (your project)
+ * - Uses VisionManager (multi-color) with single webcam
  */
-@Autonomous(name = "Red1Auto", group = "Auto")
+@Autonomous(name = "Red Wall", group = "Auto")
 public class Red1Auto extends LinearOpMode {
 
     private static final Logger log = LoggerFactory.getLogger(Red1Auto.class);
     private MecanumDrive drive;
     private VisionManager vision;
     private Intake intake = new Intake();
+    private ballShooter shooter = new ballShooter();
 
     // Starting pose (in inches) and heading (radians)
     private final Pose2d startPose = new Pose2d(60, -12, Math.toRadians(180));
 
-    public class RunIntake implements InstantFunction{
+    // --- TUNING CONSTANTS ---
+    // NOTE: VisionManager below is created with 1280x720 - center X = 640
+    private static final int TARGET_X = 640;
+    private static final double TURN_GAIN = 0.006; // tune on-field
+    private static final double FORWARD_SPEED = 0.45; // safer default
+    private static final int STOP_RADIUS = 80;
+
+    private static final int DESIRED_TAG_ID = -1;   // Choose the tag you want to approach or set to -1 for ANY tag.
+    boolean targetFound = false;    // Set to true when an AprilTag target is detected
+    private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
+
+
+    public class DriveToArtifact implements InstantFunction {
         @Override
         public void run() {
+            if (vision == null) {
+                telemetry.addLine("Vision missing");
+                telemetry.update();
+                return;
+            }
+
+            ColorBlobLocatorProcessor.Blob targetBlob = vision.largestBlob();
+            if (targetBlob == null) {
+                telemetry.addLine("No blob");
+                telemetry.update();
+                return;
+            }
+
+            Circle circleFit = targetBlob.getCircle();
+            if (circleFit == null) {
+                telemetry.addLine("No circle fit");
+                telemetry.update();
+                return;
+            }
+
+            // If close enough, stop
+            if (circleFit.getRadius() > STOP_RADIUS) {
+                // Stop robot and intake
+                drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0.0));
+                try {
+                    intake.stopIntake();
+                } catch (Exception ignored) {
+                }
+                telemetry.addLine("Target reached");
+                telemetry.update();
+                return;
+            }
+
+            // Approach: forward + small angular correction based on horizontal error
             intake.runIntake();
+
+            double error = TARGET_X - circleFit.getX(); // positive => target is left of center if x is measured from left
+            double turn = error * TURN_GAIN;
+
+            // clamp turn
+            double maxTurn = 0.7;
+            if (turn > maxTurn) turn = maxTurn;
+            if (turn < -maxTurn) turn = -maxTurn;
+
+            // setDrivePowers accepts PoseVelocity2d(linearVelVector, angularVel)
+            // linear vector is (forward, lateral). We move forward along x (first component).
+            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(FORWARD_SPEED, 0.0), turn));
+
+            telemetry.addLine("Driving to artifact");
+            telemetry.addData("blobX", "%.1f", circleFit.getX());
+            telemetry.addData("err", "%.1f", error);
+            telemetry.addData("r", "%.1f", circleFit.getRadius());
+            telemetry.addData("turn", "%.3f", turn);
+            telemetry.update();
+        }
+    }
+
+    public class Shooter implements InstantFunction {
+        @Override
+        public void run() {
+            if (vision == null) {
+                shooter.stop();
+                return;
+            }
+
+            if (vision.tagDesired(DESIRED_TAG_ID)) {
+                shooter.shoot(1.0);
+            } else {
+                shooter.stop();
+            }
         }
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        telemetry.addData("Status", "Initializing drive...");
+        telemetry.addData("Status", "Init drive");
         telemetry.update();
 
-        // ---------- DRIVE ----------
-        // If your MecanumDrive constructor accepts only HardwareMap (sample style):
+        // Construct drive with start pose (constructor in your code takes HardwareMap & Pose2d)
         drive = new MecanumDrive(hardwareMap, startPose);
 
-        // If your MecanumDrive expects a start pose in ctor, replace the line above accordingly.
-        // Ensure Roadrunner pose estimate is set to the start pose we intend to place the robot at:
-        drive.updatePoseEstimate();
+        // Ensure localizer has correct start pose
+        try {
+            drive.localizer.setPose(startPose);
+        } catch (Exception e) {
+            // If localizer API differs, ignore but log
+            log.warn("Couldn't set localizer pose: " + e.getMessage());
+        }
+
+        drive.updatePoseEstimate(); // update once
 
         telemetry.addData("Pose", startPose);
         telemetry.update();
@@ -70,94 +156,68 @@ public class Red1Auto extends LinearOpMode {
         // ---------- VISION ----------
         telemetry.addData("Vision", "Initializing...");
         telemetry.update();
-
         try {
-            // Use the hardware-config name for your webcam (default: "Webcam 1")
-            WebcamName webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
-            vision = new VisionManager(hardwareMap, webcamName, new Size(640, 480));
-            // optional dashboard stream
+            WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+            vision = new VisionManager(hardwareMap, cam, new Size(1280, 720));
             try {
-                vision.startDashboardStream(10);
+                vision.startDashboardStream(15);
             } catch (Exception ignored) {
             }
         } catch (Exception e) {
-            telemetry.addData("Vision Init Error", e.getMessage());
+            telemetry.addData("Vision init error", e.getMessage());
             telemetry.update();
             vision = null;
         }
 
-        telemetry.addData("Status", "Init complete. Waiting for start...");
-        telemetry.update();
-
-        // ---------- SAMPLE VISION DURING INIT ----------
-        String sampledColor = "NONE";
-        long sampleStart = System.currentTimeMillis();
-        long sampleTimeoutMs = 800; // ms to sample in init
-
+        // Initialize intake
         intake.init(hardwareMap);
 
-        while (!isStarted() && !isStopRequested()) {
-            if (vision != null && System.currentTimeMillis() - sampleStart < sampleTimeoutMs) {
-                try {
-                    String dom = vision.getDominantColor();
-                    if (dom != null && !dom.equals("NONE")) sampledColor = dom;
-                    telemetry.addData("Vision Sample", dom);
-                } catch (Exception ex) {
-                    telemetry.addData("Vision Sample Error", ex.getMessage());
-                }
-            } else {
-                telemetry.addData("Vision Sample", "skipped/timeout");
-            }
-            telemetry.addData("SampledColor", sampledColor);
-            telemetry.addData("StartingPose", startPose);
-            telemetry.update();
-
-            sleep(50);
-        }
-
-        if (isStopRequested()) {
-            return;
-        }
-
-        // ---------- MOTIF FALLBACK (color-based) ----------
-        String motif;
-        if ("GREEN".equals(sampledColor)) motif = "GPP";
-        else if ("PURPLE".equals(sampledColor)) motif = "PPG";
-        else motif = "GPP"; // default fallback
-
-        telemetry.addData("Starting Auto", true);
-        telemetry.addData("SampledColor", sampledColor);
-        telemetry.addData("UsingMotifFallback", motif);
-        telemetry.update();
-
-        // ---------- TRAJECTORY PLAN (tune values) ----------
-        // Tune these to your practice field target points.
-        double goalX = 40.0;    // example, TUNE
-        double goalY = -40.0;   // example, TUNE
+        // Precompute example trajectories (tune values)
+        double goalX = -40.0;    // TUNE
+        double goalY = 40.0;     // TUNE
         double goalHeading = Math.toRadians(135);
 
-        double parkX = 20.0;    // example, TUNE to ensure leaving launch line
-        double parkY = -12.0;
+        double parkX = 37.0;     // TUNE
+        double parkY = 33.0;
 
-        // Ensure pose estimate is current
         drive.updatePoseEstimate();
 
         TrajectoryActionBuilder toPark = drive.actionBuilder(startPose)
                 .strafeTo(new Vector2d(parkX, parkY));
 
         TrajectoryActionBuilder toGoal = drive.actionBuilder(startPose)
-                .strafeTo(new Vector2d(goalX, goalY));
+                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90));
 
         Action toSpike1 = drive.actionBuilder(startPose)
                 .splineToSplineHeading(new Pose2d(36, 32, Math.toRadians(90)), Math.toRadians(90))
-                .stopAndAdd(new RunIntake())
+                .stopAndAdd(new DriveToArtifact())
                 .build();
 
-        Actions.runBlocking(
-                new SequentialAction(
-                        toSpike1
+        telemetry.addData("Status", "Init complete. Waiting...");
+        telemetry.update();
 
-                ));
-        // ---------- EXECUTE: toGoal ----------
-        telemetry.addData("AutoStep", "Driving to goal approach...");
-    }}
+        // allow small sampling during init
+        while (!isStarted() && !isStopRequested()) {
+            if (vision != null && vision.largestBlob() != null) {
+                Circle c = vision.largestBlob().getCircle();
+                if (c != null) {
+                    telemetry.addData("init blob x", "%.1f", c.getX());
+                    telemetry.addData("init blob r", "%.1f", c.getRadius());
+                }
+            }
+            telemetry.update();
+            sleep(50);
+        }
+
+        if (isStopRequested()) return;
+
+        telemetry.addData("AutoStep", "Running sequence");
+        telemetry.update();
+
+        Actions.runBlocking(new SequentialAction(
+                toSpike1,
+                toGoal.build(),
+                toPark.build()
+        ));
+    }
+}
