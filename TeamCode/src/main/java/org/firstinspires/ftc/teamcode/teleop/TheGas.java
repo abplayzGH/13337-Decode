@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
 
 @TeleOp(name = "The Gas", group = "Teleop")
@@ -12,6 +13,7 @@ public class TheGas extends LinearOpMode {
 
     double speedMult = 0.3;
     private ballShooter shooter = new ballShooter();
+    private Intake intake = new Intake();
 
     @Override
     public void runOpMode() {
@@ -40,6 +42,7 @@ public class TheGas extends LinearOpMode {
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         shooter.init(hardwareMap);
+        intake.init(hardwareMap);
 
         // Wait for the start button to be pressed
         waitForStart();
@@ -82,6 +85,12 @@ public class TheGas extends LinearOpMode {
                 shooter.shoot(1.0);
             } else {
                 shooter.stop();
+            }
+
+            if (gamepad1.left_bumper) {
+                intake.runIntake();
+            } else {
+                intake.stopIntake();
             }
 
             // Telemetry for debugging (optional)
