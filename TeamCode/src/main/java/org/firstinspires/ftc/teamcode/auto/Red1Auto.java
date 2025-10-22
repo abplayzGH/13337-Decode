@@ -50,7 +50,7 @@ public class Red1Auto extends LinearOpMode {
     private static final double FORWARD_SPEED = 0.45; // safer default
     private static final int STOP_RADIUS = 80;
 
-    private static final int DESIRED_TAG_ID = -1;   // Choose the tag you want to approach or set to -1 for ANY tag.
+    private static final int DESIRED_TAG_ID = 24;   // Choose the tag you want to approach or set to -1 for ANY tag.
     boolean targetFound = false;    // Set to true when an AprilTag target is detected
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
 
@@ -122,12 +122,12 @@ public class Red1Auto extends LinearOpMode {
                 shooter.stop();
                 return;
             }
-
-            if (vision.tagDesired(DESIRED_TAG_ID)) {
-                shooter.shoot(1.0);
-            } else {
-                shooter.stop();
-            }
+            shooter.shoot(1.0);
+//            if (vision.tagDesired(DESIRED_TAG_ID)) {
+//                shooter.shoot(1.0);
+//            } else {
+//                shooter.stop();
+//            }
         }
     }
 
@@ -139,6 +139,9 @@ public class Red1Auto extends LinearOpMode {
 
         // Construct drive with start pose (constructor in your code takes HardwareMap & Pose2d)
         drive = new MecanumDrive(hardwareMap, startPose);
+
+        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+        vision = new VisionManager(hardwareMap, cam, new Size(640, 480));
 
         // Ensure localizer has correct start pose
         try {
@@ -157,39 +160,33 @@ public class Red1Auto extends LinearOpMode {
         telemetry.addData("Vision", "Initializing...");
         telemetry.update();
         try {
-            WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-            vision = new VisionManager(hardwareMap, cam, new Size(1280, 720));
-            try {
-                vision.startDashboardStream(15);
-            } catch (Exception ignored) {
-            }
-        } catch (Exception e) {
-            telemetry.addData("Vision init error", e.getMessage());
-            telemetry.update();
-            vision = null;
+            vision.startDashboardStream(15);
+        } catch (Exception ignored) {
+            telemetry.addData("Vision", "No worky");
+
         }
 
         // Initialize intake
         intake.init(hardwareMap);
 
         // Precompute example trajectories (tune values)
-        double goalX = -40.0;    // TUNE
-        double goalY = 40.0;     // TUNE
+        double goalX = -30.0;    // TUNE
+        double goalY = 30.0;     // TUNE
         double goalHeading = Math.toRadians(135);
 
         double parkX = 37.0;     // TUNE
-        double parkY = 33.0;
+        double parkY = -33.0;
 
         drive.updatePoseEstimate();
 
         TrajectoryActionBuilder toPark = drive.actionBuilder(startPose)
-                .strafeTo(new Vector2d(parkX, parkY));
+                .strafeToSplineHeading(new Vector2d(parkX, parkY), Math.toRadians(90));
 
         TrajectoryActionBuilder toGoal = drive.actionBuilder(startPose)
                 .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90));
 
         Action toSpike1 = drive.actionBuilder(startPose)
-                .splineToSplineHeading(new Pose2d(36, 32, Math.toRadians(90)), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(36, 30, Math.toRadians(90)), Math.toRadians(90))
                 .stopAndAdd(new DriveToArtifact())
                 .build();
 

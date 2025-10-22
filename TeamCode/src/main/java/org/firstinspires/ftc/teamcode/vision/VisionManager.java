@@ -7,6 +7,8 @@ import android.graphics.Color;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -59,11 +61,12 @@ public class VisionManager {
                 .build();
 
         portal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, camera.getDeviceName()))
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
                 .setCameraResolution(res)
                 .addProcessor(purpleProcessor)
                 .addProcessor(greenProcessor)
                 .addProcessor(this.tagProcessor)
+                .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .build();
     }
 

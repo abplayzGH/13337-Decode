@@ -11,8 +11,8 @@ public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
-        double goalX = 37.0;    // example, TUNE
-        double goalY = 33.0;   // example, TUNE
+        double goalX = -30.0;    // example, TUNE
+        double goalY = 30.0;   // example, TUNE
         double goalHeading = Math.toRadians(135);
 
         // Declare our first bot
