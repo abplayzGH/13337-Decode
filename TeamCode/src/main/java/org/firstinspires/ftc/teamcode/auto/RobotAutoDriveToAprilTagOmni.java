@@ -211,6 +211,9 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
 //            }
             if (gamepad1.right_bumper && targetFound) {
                 shooter.setLaunchPowerFromAngle(desiredTag.ftcPose.bearing);
+                telemetry.addData("Left Power", shooter.leftFlyWheel.getPower());
+                telemetry.addData("Right Power", shooter.rightFlyWheel.getPower());
+
             } else {
                 shooter.stop();
             }

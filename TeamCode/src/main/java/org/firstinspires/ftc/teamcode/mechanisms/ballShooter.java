@@ -14,7 +14,7 @@ public class ballShooter {
     public DcMotorEx leftFlyWheel;
     public DcMotorEx rightFlyWheel;
     public DcMotorEx conveyorBelt;
-    public static final double TUNING_CONSTANT = 0.6; // This is a starting value, you MUST tune it.
+    public static final double TUNING_CONSTANT = 0.4; // This is a starting value, you MUST tune it.
 
 
     public void init(HardwareMap hardwareMap) {
@@ -62,15 +62,17 @@ public class ballShooter {
         // 3. Calculate the power based on a simplified physics model.
         // Power is inversely proportional to the cosine of the angle.
         // This means that as the launcher aims higher (a steeper angle), the power increases.
-        double calculatedPower = TUNING_CONSTANT / Math.cos(angleRadians);
+        double calculatedPowerL = TUNING_CONSTANT / Math.sin(angleRadians);
+        double calculatedPowerR = TUNING_CONSTANT / Math.cos(angleRadians);
 
         // 4. Clip the final power to the acceptable range for DC motors [0.0, 1.0].
         // We only want positive power for launching.
-        double finalPower = Range.clip(calculatedPower, 0.0, 1.0);
+        double finalPowerL = Range.clip(calculatedPowerL, 0.0, 1.0);
+        double finalPowerR = Range.clip(calculatedPowerR, 0.0, 1.0);
 
         // 5. Set the calculated power to both flywheel motors.
-        leftFlyWheel.setPower(finalPower);
-        rightFlyWheel.setPower(finalPower);
+        leftFlyWheel.setPower(finalPowerL);
+        rightFlyWheel.setPower(finalPowerR);
 
         try {
             Thread.sleep(500); // 1000 ms = 1 second
