@@ -83,9 +83,12 @@ public class ballShooter {
     }
 
     public void stop() {
-        leftFlyWheel.setPower(0);
-        rightFlyWheel.setPower(0);
-        conveyorBelt.setPower(0);
+        try {
+            leftFlyWheel.setPower(0);
+            rightFlyWheel.setPower(0);
+            conveyorBelt.setPower(0);
+        } catch (Exception ignored){
+        }
     }
 
 

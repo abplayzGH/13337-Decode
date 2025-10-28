@@ -100,6 +100,7 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
         initAprilTag();
 
         FtcDashboard.getInstance().startCameraStream(visionPortal, 30);
+        shooter.init(hardwareMap);
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -203,7 +204,12 @@ public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
             }
             telemetry.update();
 
-            if (gamepad1.right_bumper && targetFound && (desiredTag.ftcPose.range < 40.0)) {
+//            if (gamepad1.right_bumper && targetFound && (desiredTag.ftcPose.range < 40.0)) {
+//                shooter.setLaunchPowerFromAngle(desiredTag.ftcPose.bearing);
+//            } else {
+//                shooter.stop();
+//            }
+            if (gamepad1.right_bumper && targetFound) {
                 shooter.setLaunchPowerFromAngle(desiredTag.ftcPose.bearing);
             } else {
                 shooter.stop();
