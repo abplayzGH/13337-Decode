@@ -81,11 +81,8 @@ public class TheGas extends LinearOpMode {
             rightFront.setPower(frontRightPower * speedMult);
             rightBack.setPower(rearRightPower * speedMult);
 
-            if (gamepad1.right_bumper) {
-                shooter.shoot(1.0);
-            } else {
-                shooter.stop();
-            }
+
+            shooter.launch(gamepad1.rightBumperWasPressed());
 
             if (gamepad1.left_bumper) {
                 intake.runIntake();
