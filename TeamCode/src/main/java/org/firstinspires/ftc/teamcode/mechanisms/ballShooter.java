@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
@@ -10,8 +9,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
-import org.firstinspires.ftc.teamcode.teleop.TheGoo;
 
 @Config
 public class ballShooter {
@@ -79,7 +76,7 @@ public class ballShooter {
 
         leftFlyWheel.setDirection(DcMotorSimple.Direction.REVERSE);
         rightFlyWheel.setDirection(DcMotorSimple.Direction.FORWARD);
-        conveyorBelt.setDirection(DcMotorSimple.Direction.FORWARD);
+        conveyorBelt.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Set the motors to run without encoders, as we are controlling power directly.
         leftFlyWheel.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -91,6 +88,7 @@ public class ballShooter {
         launchState = LaunchState.IDLE;
 
         feeder.setPosition(0);
+        stopLauncher();
 
 
     }
@@ -154,7 +152,7 @@ public class ballShooter {
         }
     }
 
-    public void launch(boolean shotRequested) {
+    public void updateState(boolean shotRequested) {
         switch (launchState) {
             case IDLE:
                 if (shotRequested) {
@@ -164,6 +162,7 @@ public class ballShooter {
             case SPIN_UP:
                 leftFlyWheel.setVelocity(LAUNCHER_TARGET_VELOCITY);
                 rightFlyWheel.setVelocity(LAUNCHER_TARGET_VELOCITY);
+                conveyorBelt.setPower(1);
                 if (leftFlyWheel.getVelocity() > LAUNCHER_MIN_VELOCITY && rightFlyWheel.getVelocity() > LAUNCHER_MIN_VELOCITY) {
                     launchState = LaunchState.LAUNCH;
                 }
@@ -177,9 +176,31 @@ public class ballShooter {
                 if (feederTimer.seconds() > FEED_TIME_SECONDS) {
                     launchState = LaunchState.IDLE;
                     feeder.setPosition(0);
+                    conveyorBelt.setPower(1);
+
                 }
                 break;
         }
 
     }
+
+    public void startLauncher() {
+        if (launchState == LaunchState.IDLE) {
+            //Transition State
+            launchState = LaunchState.SPIN_UP;
+        }
+    }
+
+    public void stopLauncher() {
+        leftFlyWheel.setPower(0);
+        rightFlyWheel.setPower(0);
+        conveyorBelt.setPower(0);
+        launchState = LaunchState.IDLE;
+    }
+
+    public String getState() {
+        return launchState.toString();
+    }
+
 }
+

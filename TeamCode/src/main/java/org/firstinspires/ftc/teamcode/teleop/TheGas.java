@@ -82,7 +82,21 @@ public class TheGas extends LinearOpMode {
             rightBack.setPower(rearRightPower * speedMult);
 
 
-            shooter.launch(gamepad1.rightBumperWasPressed());
+            // --- CORRECTED SHOOTER LOGIC ---
+            // Determine if a shot is being requested by the operator
+            boolean shotRequested = gamepad2.b;
+
+            // The 'startLauncher()' method is redundant if 'updateState' is handled correctly.
+            // We can let the state machine handle the SPIN_UP transition.
+            if (!shotRequested) {
+                shooter.stopLauncher(); // Resets state to IDLE and stops motors
+            }
+
+            // Always update the shooter's state machine.
+            // Pass 'true' if the B button is pressed, which will trigger the launch sequence.
+            shooter.updateState(shotRequested);
+            // --- END OF CORRECTION ---
+
 
             if (gamepad1.left_bumper) {
                 intake.runIntake();
@@ -95,6 +109,12 @@ public class TheGas extends LinearOpMode {
             telemetry.addData("RL Power", rearLeftPower);
             telemetry.addData("FR Power", frontRightPower);
             telemetry.addData("RR Power", rearRightPower);
+            telemetry.update();
+
+            //Update State
+            shooter.updateState(false);
+
+            telemetry.addData("State", shooter.getState());
             telemetry.update();
         }
     }
