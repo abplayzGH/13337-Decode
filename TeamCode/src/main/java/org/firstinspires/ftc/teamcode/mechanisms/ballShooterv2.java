@@ -58,7 +58,7 @@ public class ballShooterv2 {
             Thread.currentThread().interrupt();
         }
 
-        conveyorBelt.setPower(1.0);
+        conveyorBelt.setPower(0.75);
     }
 
     public void moveConveyorBelt(double power){
@@ -94,7 +94,7 @@ public class ballShooterv2 {
             Thread.currentThread().interrupt();
         }
 
-        conveyorBelt.setPower(1.0);
+        conveyorBelt.setPower(0.75);
 
     }
 

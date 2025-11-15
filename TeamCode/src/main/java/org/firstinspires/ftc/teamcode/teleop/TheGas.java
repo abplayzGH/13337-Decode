@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
@@ -15,6 +16,8 @@ public class TheGas extends LinearOpMode {
     private ballShooter shooter = new ballShooter();
     private Intake intake = new Intake();
 
+
+
     @Override
     public void runOpMode() {
         // Initialize hardware
@@ -22,6 +25,8 @@ public class TheGas extends LinearOpMode {
         DcMotorEx leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
         DcMotorEx rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         DcMotorEx rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
+        Servo feeder = hardwareMap.get(Servo.class, "feeder");
+        feeder.setPosition(0);
 
         // Set motor directions if needed
         rightFront.setDirection(DcMotorEx.Direction.REVERSE);
@@ -43,6 +48,7 @@ public class TheGas extends LinearOpMode {
 
         shooter.init(hardwareMap);
         intake.init(hardwareMap);
+
 
         // Wait for the start button to be pressed
         waitForStart();
@@ -92,17 +98,29 @@ public class TheGas extends LinearOpMode {
                 shooter.stopLauncher(); // Resets state to IDLE and stops motors
             }
 
+
             // Always update the shooter's state machine.
             // Pass 'true' if the B button is pressed, which will trigger the launch sequence.
             shooter.updateState(shotRequested);
             // --- END OF CORRECTION ---
 
 
-            if (gamepad1.left_bumper) {
+            if (gamepad2.left_bumper) {
                 intake.runIntake();
             } else {
                 intake.stopIntake();
             }
+
+            double servo = 0.0;
+            if(gamepad2.triangle){
+                feeder.setPosition(90);
+                sleep(750);
+                feeder.setPosition(-90);
+            }
+
+//            if(gamepad2.square){
+//                feeder.setPosition(-90);
+//            }
 
             // Telemetry for debugging (optional)
             telemetry.addData("FL Power", frontLeftPower);

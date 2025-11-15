@@ -88,6 +88,7 @@ public class ballShooter {
         launchState = LaunchState.IDLE;
 
         feeder.setPosition(0);
+
         stopLauncher();
 
 
@@ -103,7 +104,7 @@ public class ballShooter {
             Thread.currentThread().interrupt();
         }
 
-        conveyorBelt.setPower(1.0);
+        conveyorBelt.setPower(1);
     }
 
     public void moveConveyorBelt(double power) {
@@ -139,7 +140,7 @@ public class ballShooter {
             Thread.currentThread().interrupt();
         }
 
-        conveyorBelt.setPower(1.0);
+        conveyorBelt.setPower(1);
 
     }
 
@@ -168,7 +169,7 @@ public class ballShooter {
                 }
                 break;
             case LAUNCH:
-                feeder.setPosition(1);
+                feeder.setPosition(90);
                 feederTimer.reset();
                 launchState = LaunchState.LAUNCHING;
                 break;
