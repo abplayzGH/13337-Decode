@@ -31,6 +31,7 @@ public class AprilTagVision {
     }
 
     public List<AprilTagDetection> getDetections() {
+        double cool = tagProcessor.getDetections().get(0).ftcPose.x;
         return tagProcessor.getDetections();
     }
 
