@@ -138,6 +138,37 @@ public class VisionManager {
         return dets;
     }
 
+    // java
+// File: TeamCode/src/main/java/org/firstinspires/ftc/teamcode/vision/VisionManager.java
+// ... (existing code, imports, class declaration)
+
+// ... (existing methods: getPurpleBlobs, getGreenBlobs, getDominantColor, largestBlob, getPortal, getDetections, tagDesired)
+
+    /**
+     * Retrieves the AprilTagDetection object for a specific tag ID.
+     * @param targetTagId The ID of the AprilTag to find.
+     * @return The detected AprilTag or null if not found.
+     */
+    public AprilTagDetection getTargetDetection(int targetTagId) {
+        List<AprilTagDetection> detections = getDetections();
+        if (detections.isEmpty()) {
+            return null;
+        }
+
+        for (AprilTagDetection detection : detections) {
+            // Check if the detection ID matches the target ID
+            if (detection.id == targetTagId) {
+                // Ensure the tag has valid pose data (metadata must be present for pose)
+                if (detection.metadata != null && detection.ftcPose != null) {
+                    return detection;
+                }
+            }
+        }
+        return null;
+    }
+
+// } // end of VisionManager class
+
     /**
      * Returns true if a detection matching `id` exists.
      * If id < 0, treat as wildcard: return true if any valid tag (with metadata) is present.

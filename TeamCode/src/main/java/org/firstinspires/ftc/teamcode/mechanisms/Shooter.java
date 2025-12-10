@@ -163,7 +163,8 @@ public class Shooter {
 
         if (detections == null || detections.isEmpty()) {
             // No tag → hold idle or power off
-            setIdle();
+            telemetry.addLine("No Tag");
+//            setIdle();
             return;
         }
 

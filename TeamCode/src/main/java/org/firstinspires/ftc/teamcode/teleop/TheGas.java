@@ -7,16 +7,16 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
+import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
 
     double speedMult = 0.3;
-    private ballShooter shooter = new ballShooter();
+//    private ballShooter shooter = new ballShooter();
     private Intake intake = new Intake();
 
-
+    private Shooter shooter;
 
     @Override
     public void runOpMode() {
@@ -26,8 +26,6 @@ public class TheGas extends LinearOpMode {
         DcMotorEx rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         DcMotorEx rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
         Servo feeder = hardwareMap.get(Servo.class, "feeder");
-        feeder.setPosition(0);
-
         // Set motor directions if needed
         rightFront.setDirection(DcMotorEx.Direction.REVERSE);
         rightBack.setDirection(DcMotorEx.Direction.REVERSE);
@@ -46,8 +44,9 @@ public class TheGas extends LinearOpMode {
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        shooter.init(hardwareMap);
+//        shooter.init(hardwareMap);
         intake.init(hardwareMap);
+        shooter = new Shooter(hardwareMap, telemetry);
 
 
         // Wait for the start button to be pressed
@@ -94,14 +93,10 @@ public class TheGas extends LinearOpMode {
 
             // The 'startLauncher()' method is redundant if 'updateState' is handled correctly.
             // We can let the state machine handle the SPIN_UP transition.
-            if (!shotRequested) {
-                shooter.stopLauncher(); // Resets state to IDLE and stops motors
-            }
 
 
             // Always update the shooter's state machine.
             // Pass 'true' if the B button is pressed, which will trigger the launch sequence.
-            shooter.updateState(shotRequested);
             // --- END OF CORRECTION ---
 
 
@@ -111,16 +106,24 @@ public class TheGas extends LinearOpMode {
                 intake.stopIntake();
             }
 
-            double servo = 0.0;
-            if(gamepad2.triangle){
-                feeder.setPosition(90);
-                sleep(750);
-                feeder.setPosition(-90);
+            if (gamepad2.a) {
+                // Fixed Velocity: Use a predetermined "long-shot" velocity
+                shooter.setVelocity(-1500); // Example high velocity
+            } else if (gamepad2.b) {
+                // Fixed Velocity: Use a predetermined "short-shot" velocity
+                shooter.setVelocity(-1000); // Example low velocity
+            } else if (gamepad2.x) {
+                // Dynamic Velocity: Use AprilTag vision to determine velocity
+                shooter.mode = Shooter.Mode.DYNAMIC;
+            } else if (gamepad2.y) {
+                // Idle Mode: Keep the motors spinning slowly
+                shooter.setIdle();
+            } else if (gamepad2.dpad_up) {
+                // RAW Mode: Manual control with gamepad stick
+                shooter.setRaw(-gamepad2.right_stick_y);
             }
 
-//            if(gamepad2.square){
-//                feeder.setPosition(-90);
-//            }
+            shooter.periodic();
 
             // Telemetry for debugging (optional)
             telemetry.addData("FL Power", frontLeftPower);
@@ -130,9 +133,6 @@ public class TheGas extends LinearOpMode {
             telemetry.update();
 
             //Update State
-            shooter.updateState(false);
-
-            telemetry.addData("State", shooter.getState());
             telemetry.update();
         }
     }
