@@ -51,6 +51,7 @@ public class TheGas extends LinearOpMode {
 
         // Wait for the start button to be pressed
         waitForStart();
+        shooter.setMode(Shooter.Mode.RAW);
 
         while (opModeIsActive()) {
             // Get joystick inputs
@@ -108,20 +109,26 @@ public class TheGas extends LinearOpMode {
 
             if (gamepad2.a) {
                 // Fixed Velocity: Use a predetermined "long-shot" velocity
-                shooter.setVelocity(-1500); // Example high velocity
-            } else if (gamepad2.b) {
-                // Fixed Velocity: Use a predetermined "short-shot" velocity
-                shooter.setVelocity(-1000); // Example low velocity
-            } else if (gamepad2.x) {
-                // Dynamic Velocity: Use AprilTag vision to determine velocity
-                shooter.mode = Shooter.Mode.DYNAMIC;
-            } else if (gamepad2.y) {
-                // Idle Mode: Keep the motors spinning slowly
-                shooter.setIdle();
-            } else if (gamepad2.dpad_up) {
-                // RAW Mode: Manual control with gamepad stick
-                shooter.setRaw(-gamepad2.right_stick_y);
+                shooter.setRaw(1); // Example high velocity
+            }else {
+                shooter.setRaw(0);
             }
+//            } else if (gamepad2.b) {
+//                // Fixed Velocity: Use a predetermined "short-shot" velocity
+//                shooter.setVelocity(-1000); // Example low velocity
+//            } else if (gamepad2.x) {
+//                // Dynamic Velocity: Use AprilTag vision to determine velocity
+//                shooter.mode = Shooter.Mode.DYNAMIC;
+//            } else if (gamepad2.y) {
+//                // Idle Mode: Keep the motors spinning slowly
+//                shooter.setIdle();
+//            } else if (gamepad2.dpad_up) {
+//                // RAW Mode: Manual control with gamepad stick
+//                shooter.setRaw(-gamepad2.right_stick_y);
+//            }
+
+
+//            shooter.setRaw(1); // Example high velocity
 
             shooter.periodic();
 

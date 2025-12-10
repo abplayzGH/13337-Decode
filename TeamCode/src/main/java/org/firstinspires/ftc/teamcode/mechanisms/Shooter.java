@@ -77,7 +77,9 @@ public class Shooter {
 
         distToVelo = buildLUT();
     }
-
+    public void setMode(Mode mode) {
+        Shooter.mode = mode;
+    }
     /* ---------------- LUT Setup ---------------- */
     private InterpLUT buildLUT() {
         InterpLUT lut = new InterpLUT();
