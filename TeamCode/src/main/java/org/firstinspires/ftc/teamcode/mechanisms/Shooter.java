@@ -31,18 +31,18 @@ public class Shooter {
     public static double kD = 0.0;
     public static double kV = 0.00045;   // feedforward
     public static double VELO_TOL = 50;
-    public static double IDLE_VELO = -600;
+    public static double IDLE_VELO = 600;
 
     public static boolean tuning = false;
     public static Mode mode = Mode.RAW;
 
-    public static double targetVelocity = 0;
+    public static double targetVelocity = 1000;
     public static double targetPower = 0;
 
     /* ---------------- Hardware ---------------- */
     private final DcMotorEx left;
     private final DcMotorEx right;
-    private final Servo latch;
+
     private final VoltageSensor battery;
 
     private final VisionManager vision;
@@ -58,8 +58,6 @@ public class Shooter {
 
         left = hw.get(DcMotorEx.class, "leftFlyWheel");
         right = hw.get(DcMotorEx.class, "rightFlyWheel");
-        latch = hw.get(Servo.class, "latchServo");
-
         left.setDirection(DcMotorSimple.Direction.REVERSE);
         right.setDirection(DcMotorSimple.Direction.FORWARD);
 

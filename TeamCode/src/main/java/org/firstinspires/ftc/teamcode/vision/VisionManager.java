@@ -61,7 +61,7 @@ public class VisionManager {
                 .build();
 
         portal = new VisionPortal.Builder()
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCamera(camera)
                 .setCameraResolution(res)
                 .addProcessor(purpleProcessor)
                 .addProcessor(greenProcessor)
@@ -69,6 +69,7 @@ public class VisionManager {
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .build();
     }
+    // CORRECTION
 
     /** Start Dashboard camera stream (optional) */
     public void startDashboardStream(int fps) {

@@ -30,7 +30,10 @@ public class Intake {
         IntakeServo2.setPower(1.0);
     }
 
+
     public void stopIntake() {
         IntakeMotor.setPower(0.0);
+        IntakeServo1.setPower(0.0);
+        IntakeServo2.setPower(0.0);
     }
 }

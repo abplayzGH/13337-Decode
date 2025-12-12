@@ -1,13 +1,21 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import android.util.Size;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
+import org.firstinspires.ftc.teamcode.mechanisms.Turret;
+import org.firstinspires.ftc.teamcode.vision.VisionManager;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+import java.util.Set;
 
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
@@ -15,8 +23,14 @@ public class TheGas extends LinearOpMode {
     double speedMult = 0.3;
 //    private ballShooter shooter = new ballShooter();
     private Intake intake = new Intake();
-
     private Shooter shooter;
+//    private VisionManager visionManager = null;
+    private Turret turretSubsystem = null;
+
+    // --- CONFIGURATION ---
+    private static final int TARGET_TAG_ID = 21;
+    private static final String CAMERA_NAME = "Webcam 1";
+    private static final String MOTOR_NAME = "turret_motor";
 
     @Override
     public void runOpMode() {
@@ -25,7 +39,9 @@ public class TheGas extends LinearOpMode {
         DcMotorEx leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
         DcMotorEx rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
         DcMotorEx rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
-        Servo feeder = hardwareMap.get(Servo.class, "feeder");
+
+        Servo latch = hardwareMap.get(Servo.class, "latchServo");
+
         // Set motor directions if needed
         rightFront.setDirection(DcMotorEx.Direction.REVERSE);
         rightBack.setDirection(DcMotorEx.Direction.REVERSE);
@@ -44,6 +60,14 @@ public class TheGas extends LinearOpMode {
         rightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
+
+//        turretSubsystem = new Turret();
+//        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+//        visionManager = new VisionManager(hardwareMap, cam , new Size(640, 480));
+//        turretSubsystem.TurretSubsystem(hardwareMap, MOTOR_NAME);
+
+
 //        shooter.init(hardwareMap);
         intake.init(hardwareMap);
         shooter = new Shooter(hardwareMap, telemetry);
@@ -52,6 +76,7 @@ public class TheGas extends LinearOpMode {
         // Wait for the start button to be pressed
         waitForStart();
         shooter.setMode(Shooter.Mode.RAW);
+        latch.setPosition(0);
 
         while (opModeIsActive()) {
             // Get joystick inputs
@@ -110,8 +135,15 @@ public class TheGas extends LinearOpMode {
             if (gamepad2.a) {
                 // Fixed Velocity: Use a predetermined "long-shot" velocity
                 shooter.setRaw(1); // Example high velocity
+                if (shooter.isAtTargetVelocity()) {
+                    latch.setPosition(0.5);
+                    intake.runIntake();
+                }
             }else {
                 shooter.setRaw(0);
+                intake.stopIntake();
+                latch.
+                        setPosition(0);
             }
 //            } else if (gamepad2.b) {
 //                // Fixed Velocity: Use a predetermined "short-shot" velocity
@@ -129,6 +161,21 @@ public class TheGas extends LinearOpMode {
 
 
 //            shooter.setRaw(1); // Example high velocity
+
+
+//            AprilTagDetection detection = visionManager.getTargetDetection(21);
+//
+//            // B. Pass the data to the TurretSubsystem for processing
+//            double motorPower = turretSubsystem.updateTurretTracking(detection, getRuntime());
+//
+//            // C. Telemetry (displaying status)
+//            if (detection != null) {
+//                telemetry.addData("Status", "Tracking Tag %d", TARGET_TAG_ID);
+//                telemetry.addData("Bearing Error", "%.2f", 0.0 - detection.ftcPose.bearing); // Target - Current
+//            } else {
+//                telemetry.addData("Status", "Searching for Tag %d...", TARGET_TAG_ID);
+//            }
+//            telemetry.addData("Motor Power", "%.2f", motorPower);
 
             shooter.periodic();
 
