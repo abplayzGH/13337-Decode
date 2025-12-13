@@ -15,20 +15,18 @@ import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-import java.util.Set;
-
-@TeleOp(name = "The Gas", group = "Teleop")
-public class TheGas extends LinearOpMode {
+@TeleOp(name = "The Gas Red", group = "Teleop")
+public class TheGasRed extends LinearOpMode {
 
     double speedMult = 0.3;
 //    private ballShooter shooter = new ballShooter();
     private Intake intake = new Intake();
     private Shooter shooter;
-//    private VisionManager visionManager = null;
+    private VisionManager visionManager = null;
     private Turret turretSubsystem = null;
 
     // --- CONFIGURATION ---
-    private static final int TARGET_TAG_ID = 21;
+    private static final int TARGET_TAG_ID = 24;
     private static final String CAMERA_NAME = "Webcam 1";
     private static final String MOTOR_NAME = "turret_motor";
 
@@ -62,10 +60,10 @@ public class TheGas extends LinearOpMode {
 
 
 
-//        turretSubsystem = new Turret();
-//        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-//        visionManager = new VisionManager(hardwareMap, cam , new Size(640, 480));
-//        turretSubsystem.TurretSubsystem(hardwareMap, MOTOR_NAME);
+        turretSubsystem = new Turret();
+        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+        visionManager = new VisionManager(hardwareMap, cam , new Size(640, 480));
+        turretSubsystem.TurretSubsystem(hardwareMap, MOTOR_NAME);
 
 
 //        shooter.init(hardwareMap);
@@ -126,24 +124,20 @@ public class TheGas extends LinearOpMode {
             // --- END OF CORRECTION ---
 
 
-            if (gamepad2.left_bumper) {
+            while (gamepad2.left_bumper) {
                 intake.runIntake();
-            } else {
-                intake.stopIntake();
-            }
 
             if (gamepad2.a) {
                 // Fixed Velocity: Use a predetermined "long-shot" velocity
                 shooter.setRaw(1); // Example high velocity
-                if (shooter.isAtTargetVelocity()) {
+                if (shooter.getVelocity() > 1400) {
                     latch.setPosition(0.5);
                     intake.runIntake();
                 }
             }else {
                 shooter.setRaw(0);
                 intake.stopIntake();
-                latch.
-                        setPosition(0);
+                latch.setPosition(0);
             }
 //            } else if (gamepad2.b) {
 //                // Fixed Velocity: Use a predetermined "short-shot" velocity
@@ -163,32 +157,33 @@ public class TheGas extends LinearOpMode {
 //            shooter.setRaw(1); // Example high velocity
 
 
-//            AprilTagDetection detection = visionManager.getTargetDetection(21);
+            AprilTagDetection detection = visionManager.getTargetDetection(TARGET_TAG_ID);
 //
-//            // B. Pass the data to the TurretSubsystem for processing
-//            double motorPower = turretSubsystem.updateTurretTracking(detection, getRuntime());
-//
-//            // C. Telemetry (displaying status)
-//            if (detection != null) {
-//                telemetry.addData("Status", "Tracking Tag %d", TARGET_TAG_ID);
-//                telemetry.addData("Bearing Error", "%.2f", 0.0 - detection.ftcPose.bearing); // Target - Current
-//            } else {
-//                telemetry.addData("Status", "Searching for Tag %d...", TARGET_TAG_ID);
-//            }
-//            telemetry.addData("Motor Power", "%.2f", motorPower);
+            // B. Pass the data to the TurretSubsystem for processing
+            double motorPower = turretSubsystem.updateTurretTracking(detection, getRuntime());
 
-            shooter.periodic();
+            // C. Telemetry (displaying status)
+            if (detection != null) {
+                telemetry.addData("Status", "Tracking Tag %d", TARGET_TAG_ID);
+                telemetry.addData("Bearing Error", "%.2f", 0.0 - detection.ftcPose.bearing); // Target - Current
+            } else {
+                telemetry.addData("Status", "Searching for Tag %d...", TARGET_TAG_ID);
+            }
+            telemetry.addData("Motor Power", "%.2f", motorPower);
+
+            shooter.periodic(detection);
 
             // Telemetry for debugging (optional)
             telemetry.addData("FL Power", frontLeftPower);
             telemetry.addData("RL Power", rearLeftPower);
             telemetry.addData("FR Power", frontRightPower);
             telemetry.addData("RR Power", rearRightPower);
-            telemetry.update();
+            telemetry.addData("Flywheel Velocity", shooter.getVelocity());
 
             //Update State
             telemetry.update();
         }
     }
 
+}
 }

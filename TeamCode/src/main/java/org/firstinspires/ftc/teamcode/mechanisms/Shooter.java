@@ -45,8 +45,6 @@ public class Shooter {
 
     private final VoltageSensor battery;
 
-    private final VisionManager vision;
-
     private final PIDFController pid = new PIDFController(kP, kI, kD, 0);
     private final InterpLUT distToVelo;
 
@@ -66,8 +64,6 @@ public class Shooter {
 
         left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
-        vision = new VisionManager(hw, hw.get(WebcamName.class, "Webcam 1"), new Size(640, 480));
 
         battery = hw.voltageSensor.iterator().next();
 
@@ -98,7 +94,7 @@ public class Shooter {
     }
 
     /* ---------------- Periodic Update ---------------- */
-    public void periodic() {
+    public void periodic(AprilTagDetection detections) {
         switch (mode) {
             case RAW:
                 applyRaw();
@@ -107,7 +103,7 @@ public class Shooter {
                 applyVelocity(targetVelocity);
                 break;
             case DYNAMIC:
-                applyDynamic();
+                applyDynamic(detections);
                 break;
         }
         log();
@@ -133,6 +129,9 @@ public class Shooter {
     }
 
     /* ---------------- Control Modes ---------------- */
+    public double getVelocity() {
+        return left.getVelocity();
+    }
 
     /** RAW MODE: direct motor power */
     private void applyRaw() {
@@ -158,17 +157,15 @@ public class Shooter {
     }
 
     /** DYNAMIC MODE: use Apriltag distance to determine velocity */
-    private void applyDynamic() {
-        List<AprilTagDetection> detections = vision.getDetections();
-
-        if (detections == null || detections.isEmpty()) {
+    private void applyDynamic(AprilTagDetection detections) {
+        if (detections == null) {
             // No tag → hold idle or power off
             telemetry.addLine("No Tag");
 //            setIdle();
             return;
         }
 
-        AprilTagDetection tag = detections.get(0);
+        AprilTagDetection tag = detections;
 
         // Use horizontal + forward distance
         double distanceFt = Math.hypot(tag.ftcPose.x, tag.ftcPose.z);
