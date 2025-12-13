@@ -21,16 +21,18 @@ public class Intake {
         IntakeServo2 = hardwareMap.get(CRServo.class, "intakeServo2");
         IntakeServo1.setDirection(DcMotorSimple.Direction.FORWARD);
         IntakeServo2.setDirection(DcMotorSimple.Direction.REVERSE);
+
     }
 
     public void runIntake() {
 
         IntakeMotor.setPower(1.0);
-        IntakeServo1.setPower(1.0);
-        IntakeServo2.setPower(1.0);
     }
 
-
+    public void servoTest(){
+        IntakeServo1.setPower(1);
+        IntakeServo2.setPower(1);
+    }
     public void stopIntake() {
         IntakeMotor.setPower(0.0);
         IntakeServo1.setPower(0.0);

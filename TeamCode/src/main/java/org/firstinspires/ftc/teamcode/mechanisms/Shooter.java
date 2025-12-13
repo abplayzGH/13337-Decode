@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.mechanisms;
 
 import android.util.Size;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -19,7 +18,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.List;
 
-@Config
 public class Shooter {
 
     /* ---------------- Mode ---------------- */
@@ -130,7 +128,7 @@ public class Shooter {
 
     /* ---------------- Control Modes ---------------- */
     public double getVelocity() {
-        return left.getVelocity();
+        return right.getVelocity();
     }
 
     /** RAW MODE: direct motor power */
@@ -147,7 +145,7 @@ public class Shooter {
             pid.setTolerance(VELO_TOL);
         }
 
-        double measured = left.getVelocity();
+        double measured = right.getVelocity();
         double ff = kV * target * voltageCompFactor();
 
         double output = pid.calculate(measured, target) + ff;

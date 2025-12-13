@@ -1,26 +1,43 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-import com.acmerobotics.roadrunner.PoseVelocity2d;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.MecanumDrive;
-
-@Autonomous
+@Autonomous(name="driveforward")
 public class driveforward extends LinearOpMode {
-    private MecanumDrive drive;
-    ElapsedTime timer = new ElapsedTime();
 
+    DcMotor leftFront, rightFront, leftBack, rightBack;
 
-    public void runOpMode() throws InterruptedException {
-        drive.setDrivePowers(new PoseVelocity2d(new Vector2d(1.0, 0), 0.0));
-        timer.seconds();
-        if (timer.seconds() > 2) {
-            drive.setDrivePowers(new PoseVelocity2d(new Vector2d(0, 0), 0.0));
+    @Override
+    public void runOpMode() {
 
-        }
+        // Map motors (names must match the Robot Config)
+        DcMotorEx leftFront = hardwareMap.get(DcMotorEx.class, "leftFront");
+        DcMotorEx leftBack = hardwareMap.get(DcMotorEx.class, "leftBack");
+        DcMotorEx rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        DcMotorEx rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
 
+        // Reverse left side for mecanum drive
+        rightFront.setDirection(DcMotor.Direction.REVERSE);
+        rightBack.setDirection(DcMotor.Direction.REVERSE);
+
+        waitForStart();
+
+        // Drive forward
+        leftFront.setPower(-0.5);
+        rightFront.setPower(-0.5);
+        leftBack.setPower(-0.5);
+        rightBack.setPower(-0.5);
+
+        sleep(2000); // 2 seconds
+
+        // Stop motors
+        leftFront.setPower(0);
+        rightFront.setPower(0);
+        leftBack.setPower(0);
+        rightBack.setPower(0);
     }
 }

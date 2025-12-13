@@ -2,10 +2,10 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import android.util.Size;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -19,7 +19,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 public class TheGasBlue extends LinearOpMode {
 
     double speedMult = 0.3;
-//    private ballShooter shooter = new ballShooter();
+    //    private ballShooter shooter = new ballShooter();
     private Intake intake = new Intake();
     private Shooter shooter;
     private VisionManager visionManager = null;
@@ -123,25 +123,40 @@ public class TheGasBlue extends LinearOpMode {
             // Pass 'true' if the B button is pressed, which will trigger the launch sequence.
             // --- END OF CORRECTION ---
 
-
-            if (gamepad2.left_bumper) {
-                intake.runIntake();
-            } else {
-                intake.stopIntake();
-            }
+//
+//            while (gamepad2.left_bumper) {
+//                intake.runIntake();4
 
             if (gamepad2.a) {
                 // Fixed Velocity: Use a predetermined "long-shot" velocity
                 shooter.setRaw(1); // Example high velocity
-                if (shooter.isAtTargetVelocity()) {
+                if (shooter.getVelocity() > 500) {
                     latch.setPosition(0.5);
-                    intake.runIntake();
+//                    intake.servoTest();
+//                    intake.runIntake();
+//                    latch.setPosition(1);
+
                 }
             }else {
                 shooter.setRaw(0);
                 intake.stopIntake();
                 latch.setPosition(0);
             }
+
+            if (gamepad2.left_bumper){
+                intake.runIntake();
+                intake.servoTest();
+            } else {
+                intake.stopIntake();
+            }
+
+//            if (gamepad2.right_bumper){
+//                latch.setPosition(.5);
+//            } else {
+//                latch.setPosition(0);
+//            }
+
+
 //            } else if (gamepad2.b) {
 //                // Fixed Velocity: Use a predetermined "short-shot" velocity
 //                shooter.setVelocity(-1000); // Example low velocity
@@ -181,6 +196,7 @@ public class TheGasBlue extends LinearOpMode {
             telemetry.addData("RL Power", rearLeftPower);
             telemetry.addData("FR Power", frontRightPower);
             telemetry.addData("RR Power", rearRightPower);
+            telemetry.addData("Flywheel Velocity", shooter.getVelocity());
 
             //Update State
             telemetry.update();
@@ -188,3 +204,4 @@ public class TheGasBlue extends LinearOpMode {
     }
 
 }
+
