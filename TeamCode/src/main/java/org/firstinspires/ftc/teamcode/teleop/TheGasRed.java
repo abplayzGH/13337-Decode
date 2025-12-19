@@ -63,7 +63,7 @@ public class TheGasRed extends LinearOpMode {
         turretSubsystem = new Turret();
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
         visionManager = new VisionManager(hardwareMap, cam , new Size(640, 480));
-        turretSubsystem.TurretSubsystem(hardwareMap, MOTOR_NAME);
+        turretSubsystem.init(hardwareMap, MOTOR_NAME);
 
 
 //        shooter.init(hardwareMap);
@@ -145,7 +145,12 @@ public class TheGasRed extends LinearOpMode {
 
             if (gamepad2.left_bumper){
                 intake.runIntake();
-                intake.servoTest();
+            } else {
+                intake.stopIntake();
+            }
+
+            if (gamepad2.right_bumper){
+                intake.runIntake();
             } else {
                 intake.stopIntake();
             }

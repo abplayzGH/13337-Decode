@@ -71,33 +71,44 @@ public class VisionManager {
     }
     // CORRECTION
 
-    /** Start Dashboard camera stream (optional) */
+    /**
+     * Start Dashboard camera stream (optional)
+     */
     public void startDashboardStream(int fps) {
         try {
             FtcDashboard.getInstance().startCameraStream(portal, fps);
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
-    /** Stop vision portal */
+    /**
+     * Stop vision portal
+     */
     public void stop() {
         if (portal != null) portal.close();
     }
 
-    /** Get list of purple blobs */
+    /**
+     * Get list of purple blobs
+     */
     public List<ColorBlobLocatorProcessor.Blob> getPurpleBlobs() {
         List<ColorBlobLocatorProcessor.Blob> blobs = purpleProcessor.getBlobs();
         if (blobs == null) return new ArrayList<>();
         return new ArrayList<>(blobs);
     }
 
-    /** Get list of green blobs */
+    /**
+     * Get list of green blobs
+     */
     public List<ColorBlobLocatorProcessor.Blob> getGreenBlobs() {
         List<ColorBlobLocatorProcessor.Blob> blobs = greenProcessor.getBlobs();
         if (blobs == null) return new ArrayList<>();
         return new ArrayList<>(blobs);
     }
 
-    /** Determine which color is more dominant (larger blob area) */
+    /**
+     * Determine which color is more dominant (larger blob area)
+     */
     public String getDominantColor() {
         List<ColorBlobLocatorProcessor.Blob> purple = getPurpleBlobs();
         List<ColorBlobLocatorProcessor.Blob> green = getGreenBlobs();
@@ -113,7 +124,7 @@ public class VisionManager {
         return "NONE";
     }
 
-    public ColorBlobLocatorProcessor.Blob largestBlob(){
+    public ColorBlobLocatorProcessor.Blob largestBlob() {
         List<ColorBlobLocatorProcessor.Blob> purple = getPurpleBlobs();
         List<ColorBlobLocatorProcessor.Blob> green = getGreenBlobs();
 
@@ -128,8 +139,12 @@ public class VisionManager {
         return null;
     }
 
-    /** Access VisionPortal (if you want to add more processors later) */
-    public VisionPortal getPortal() { return portal; }
+    /**
+     * Access VisionPortal (if you want to add more processors later)
+     */
+    public VisionPortal getPortal() {
+        return portal;
+    }
 
     public List<AprilTagDetection> getDetections() {
         // guard: return empty list if tagProcessor wasn't created for any reason
@@ -147,6 +162,7 @@ public class VisionManager {
 
     /**
      * Retrieves the AprilTagDetection object for a specific tag ID.
+     *
      * @param targetTagId The ID of the AprilTag to find.
      * @return The detected AprilTag or null if not found.
      */
@@ -166,31 +182,6 @@ public class VisionManager {
             }
         }
         return null;
-    }
-
-// } // end of VisionManager class
-
-    /**
-     * Returns true if a detection matching `id` exists.
-     * If id < 0, treat as wildcard: return true if any valid tag (with metadata) is present.
-     */
-    public boolean tagDesired(int id) {
-        List<AprilTagDetection> dets = getDetections();
-        if (dets.isEmpty()) return false;
-
-        if (id < 0) {
-            for (AprilTagDetection detection : dets) {
-                if (detection.metadata != null) return true;
-            }
-            return false;
-        }
-
-        for (AprilTagDetection detection : dets) {
-            if (detection.id == id) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

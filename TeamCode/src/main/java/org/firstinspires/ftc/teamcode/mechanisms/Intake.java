@@ -27,15 +27,19 @@ public class Intake {
     public void runIntake() {
 
         IntakeMotor.setPower(1.0);
+        IntakeServo1.setPower(1.0);
+        IntakeServo2.setPower(1.0);
     }
 
-    public void servoTest(){
-        IntakeServo1.setPower(1);
-        IntakeServo2.setPower(1);
-    }
     public void stopIntake() {
         IntakeMotor.setPower(0.0);
         IntakeServo1.setPower(0.0);
         IntakeServo2.setPower(0.0);
+    }
+
+    public void runOutTake() {
+        IntakeMotor.setPower(-1.0);
+        IntakeServo1.setPower(-1.0);
+        IntakeServo2.setPower(-1.0);
     }
 }
