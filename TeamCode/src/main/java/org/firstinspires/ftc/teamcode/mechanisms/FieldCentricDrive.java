@@ -44,7 +44,7 @@ public class FieldCentricDrive {
         imu = hw.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, //TODO Adjust based on your hub orientation
                         RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         ));

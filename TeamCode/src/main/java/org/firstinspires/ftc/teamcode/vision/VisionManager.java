@@ -32,7 +32,7 @@ public class VisionManager {
     private final ColorBlobLocatorProcessor greenProcessor;
     private final AprilTagProcessor tagProcessor; // field to hold processor
 
-    public VisionManager(HardwareMap hardwareMap, WebcamName camera, Size res) {
+    public VisionManager(HardwareMap hardwareMap, WebcamName camera, Size res) { //TODO Make way to disable color processors
 
         // --- PURPLE DETECTOR ---
         purpleProcessor = new ColorBlobLocatorProcessor.Builder()

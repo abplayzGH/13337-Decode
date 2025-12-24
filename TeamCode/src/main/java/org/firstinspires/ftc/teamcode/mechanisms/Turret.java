@@ -8,9 +8,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 public class Turret {
     private DcMotorEx turretMotor;
-    private static final int LEFT_LIMIT = -1000;
+    private static final int LEFT_LIMIT = -1000; //TODO Tune limits
     private static final int RIGHT_LIMIT = 1000;
-    private static final double kP = 0.02;
+    private static final double kP = 0.02; // Proportional gain for turret tracking
     private static final double kD = 0.001;
     private static final double MAX_AUTO_POWER = 0.7;
 

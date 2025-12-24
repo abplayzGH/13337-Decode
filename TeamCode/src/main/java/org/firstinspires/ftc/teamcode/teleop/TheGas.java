@@ -24,8 +24,10 @@ public class TheGas extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
-
+        //TODO Make subsystem robot class
+        //TODO Make this in to a state machine
+        //TODO Add better error handling
+        //TODO Optimize
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
 
         /* ---------------- SUBSYSTEMS ---------------- */
@@ -39,9 +41,9 @@ public class TheGas extends LinearOpMode {
         turret.init(hardwareMap, MOTOR_NAME);
 
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480));
+        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
-        FieldCentricDrive drive = new FieldCentricDrive();
+        FieldCentricDrive drive = new FieldCentricDrive(); //TODO Test field centric drive
         drive.init(hardwareMap);
 
         waitForStart();
@@ -69,13 +71,17 @@ public class TheGas extends LinearOpMode {
             boolean intakeOut = gamepad1.left_bumper;
             boolean shootDynamic = gamepad2.b;
 
+            //TODO Add vibration feedback for shooter ready
+            //TODO Add vibration for end game
+            //TODO Add color sensor feedback for intake
+            //TODO Test dynamic shooting
 
             if (shootRaw) {
                 shooter.setMode(Shooter.Mode.RAW);
                 shooter.setRaw(1);
                 if (shooter.getVelocity() > SHOOTER_READY_VELOCITY) {
                     latch.setPosition(0.3);
-                    intake.runIntake();
+                    intake.runIntake(); //TODO Prevent more than one ball from being shot
                 }
             } else if (shootDynamic) {
                 shooter.setMode(Shooter.Mode.DYNAMIC);
@@ -98,16 +104,16 @@ public class TheGas extends LinearOpMode {
             }
 
             /* -------- VISION / TURRET -------- */
-            AprilTagDetection target = null;
+            AprilTagDetection target = null; //TODO Test edge cases with no target
             for (int id : TARGET_TAGS) {
                 target = vision.getTargetDetection(id);
                 if (target != null) break;
             }
-
+            //TODO Test turret tracking
             if (Math.abs(gamepad2.right_stick_x) > 0.05) {
                 turret.setManualPower(gamepad2.right_stick_x * 0.9);
             } else {
-                turret.updateTurretTracking(target, getRuntime());
+                turret.updateTurretTracking(target, getRuntime()); //TODO Add angle limit to auto tracking
             }
 
             shooter.periodic(target);
