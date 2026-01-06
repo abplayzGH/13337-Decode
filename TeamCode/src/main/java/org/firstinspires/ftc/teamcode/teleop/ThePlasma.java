@@ -1,95 +1,87 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
-import com.acmerobotics.roadrunner.Rotation2d;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.PoseVelocity2d;
+import android.util.Size;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.mechanisms.ballShooter;
+import com.qualcomm.robotcore.hardware.Servo;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
+import org.firstinspires.ftc.teamcode.vision.VisionManager;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+
+import org.firstinspires.ftc.teamcode.mechanisms.FieldCentricDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.Intake;
+import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
+import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 
 @TeleOp(name = "The Plasma", group = "Teleop")
-public class ThePlasma extends OpMode {
-    private MecanumDrive drive;
+public class ThePlasma extends LinearOpMode {
 
-    private double translationalScale = 1.0;
-    private double rotationalScale = 1.0;
-
-    private static final double JOYSTICK_DEADZONE = 0.05;
-
-    private ballShooter shooter = new ballShooter();
+    private enum State { IDLE, INTAKING, SHOOTING_DYNAMIC, SHOOTING_RAW }
+    private State currentState = State.IDLE;
 
     @Override
-    public void init() {
-        drive = new MecanumDrive(hardwareMap, new Pose2d(0, 0, 0));
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
+    public void runOpMode() {
+        // Hardware Init
+        Servo latch = hardwareMap.get(Servo.class, "latchServo");
+        Intake intake = new Intake(); intake.init(hardwareMap);
+        Shooter shooter = new Shooter(hardwareMap, telemetry);
+        Mecanum mecanum = new Mecanum(); mecanum.Init(hardwareMap);
+        VisionManager vision = new VisionManager(hardwareMap, hardwareMap.get(WebcamName.class, "Webcam 1"), new Size(640, 480));
 
-        shooter.init(hardwareMap);
-    }
+        waitForStart();
 
-    @Override
-    public void loop() {
-        // Raw joystick inputs
-        double rawFwd = -gamepad1.left_stick_y;
-        double rawStr =  gamepad1.left_stick_x;
-        double rawRot =  gamepad1.right_stick_x;
+        while (opModeIsActive()) {
+            // Drive Logic
+            double speed = 0.3 + 0.7 * gamepad1.right_trigger;
+            mecanum.Drive(gamepad1.left_stick_x, gamepad1.left_stick_y, -gamepad1.right_stick_x, speed);
 
-        // Deadzone & scale
-        double fwd = applyDeadzone(rawFwd, JOYSTICK_DEADZONE) * translationalScale;
-        double str = applyDeadzone(rawStr, JOYSTICK_DEADZONE) * translationalScale;
-        double rot = applyDeadzone(rawRot, JOYSTICK_DEADZONE) * rotationalScale;
+            // Vision Target
+            AprilTagDetection target = vision.getTargetDetection(20); // Or loop through IDs
 
-        // Get current robot heading (in radians)
-        // You can get it from your IMU or localizer; here’s one way assuming your MecanumDrive’s localizer holds the pose:
-        Pose2d pose = drive.localizer.getPose();
-        double robotHeading = pose.heading.toDouble();
-        // (Alternatively, read directly from IMU: YawPitchRollAngles)
+            // --- State Selection ---
+            if (gamepad2.b) currentState = State.SHOOTING_DYNAMIC;
+            else if (gamepad2.a) currentState = State.SHOOTING_RAW;
+            else if (gamepad1.right_bumper) currentState = State.INTAKING;
+            else currentState = State.IDLE;
 
-        // Rotate the joystick vector by –heading to get field-centric vector
-        Vector2d input = Rotation2d.exp(-robotHeading).times(new Vector2d(fwd, str));
+            // --- State Execution ---
+            switch (currentState) {
+                case SHOOTING_DYNAMIC:
+                    shooter.setMode(Shooter.Mode.DYNAMIC);
+                    if (shooter.isAtTargetVelocity()) {
+                        latch.setPosition(0.3);
+                        intake.runIntake();
+                    } else {
+                        latch.setPosition(0);
+                        intake.stopIntake();
+                    }
+                    break;
 
+                case SHOOTING_RAW:
+                    shooter.setRaw(1.0); // Full speed
+                    if (shooter.isAtTargetVelocity()) {
+                        latch.setPosition(0.3);
+                        intake.runIntake();
+                    }
+                    break;
 
-        // Build the motion command: input.x = field-forward component, input.y = field-strafe component
-        PoseVelocity2d cmd = new PoseVelocity2d(new Vector2d(input.x, input.y), rot);
+                case INTAKING:
+                    shooter.setRaw(0);
+                    intake.runIntake();
+                    latch.setPosition(0);
+                    break;
 
-        drive.setDrivePowers(cmd);
+                case IDLE:
+                    shooter.setIdle(); // Keep motors warm
+                    intake.stopIntake();
+                    latch.setPosition(0);
+                    break;
+            }
 
-
-        if (gamepad1.right_bumper) {
-            shooter.shoot(1.0);
-        } else {
-            shooter.stop();
+            shooter.periodic(target);
+            telemetry.update();
         }
-
-        // Telemetry
-        telemetry.addData("robotHeading (deg)", "%.1f", Math.toDegrees(robotHeading));
-        telemetry.addData("fwd(str rotated)", "%.2f", input.x);
-        telemetry.addData("str(strafe rotated)", "%.2f", input.y);
-        telemetry.addData("rot", "%.2f", rot);
-
-        // Optionally: pose
-        Pose2d p = drive.localizer.getPose();
-        telemetry.addData("pose x", "%.2f", p.position.x);
-        telemetry.addData("pose y", "%.2f", p.position.y);
-        telemetry.addData("pose heading (deg)", "%.1f", Math.toDegrees(p.heading.toDouble()));
-
-        telemetry.update();
-    }
-
-    @Override
-    public void stop() {
-        drive.leftFront.setPower(0);
-        drive.leftBack.setPower(0);
-        drive.rightBack.setPower(0);
-        drive.rightFront.setPower(0);
-    }
-
-    private double applyDeadzone(double v, double dz) {
-        if (Math.abs(v) < dz) return 0.0;
-        return Math.copySign((Math.abs(v) - dz) / (1.0 - dz), v);
     }
 }

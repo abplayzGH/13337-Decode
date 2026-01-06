@@ -44,7 +44,7 @@ public class FieldCentricDrive {
         imu = hw.get(IMU.class, "imu");
         imu.initialize(new IMU.Parameters(
                 new RevHubOrientationOnRobot(
-                        RevHubOrientationOnRobot.LogoFacingDirection.RIGHT, //TODO Adjust based on your hub orientation
+                        RevHubOrientationOnRobot.LogoFacingDirection.LEFT, //TODO Adjust based on your hub orientation
                         RevHubOrientationOnRobot.UsbFacingDirection.UP
                 )
         ));
@@ -71,8 +71,8 @@ public class FieldCentricDrive {
         double cosA = Math.cos(-heading);
         double sinA = Math.sin(-heading);
 
-        double fieldX = x * cosA - y * sinA;
-        double fieldY = x * sinA + y * cosA;
+        double fieldX = x * Math.cos(-heading) - y * Math.sin(-heading);
+        double fieldY = x * Math.sin(-heading) + y * Math.cos(-heading);
 
         /* -------- Heading Hold -------- */
         double turn;
