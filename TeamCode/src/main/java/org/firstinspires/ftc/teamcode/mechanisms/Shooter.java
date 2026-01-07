@@ -304,10 +304,10 @@ public class Shooter {
     public static double kD = 0.0;
     public static double kV = 0.00045;
     public static double VELO_TOL = 50;
-    public static double IDLE_VELO = 600; // Match your LUT sign (negative)
+    public static double IDLE_VELO = 0; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;
-    public static double targetVelocity = 0;
+    public static double targetVelocity = 1000;
     public static double targetPower = 0;
 
     private final DcMotorEx left, right;
@@ -358,7 +358,8 @@ public class Shooter {
                     targetVelocity = distToVelo.get(Range.clip(dist, 0, 12));
                     applyVelocity(targetVelocity);
                 } else {
-                    applyVelocity(IDLE_VELO);
+//                    applyVelocity(IDLE_VELO);
+                    telemetry.addLine("??");
                 }
                 break;
         }

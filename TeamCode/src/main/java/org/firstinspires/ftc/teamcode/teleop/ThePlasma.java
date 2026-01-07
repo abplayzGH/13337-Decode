@@ -43,16 +43,17 @@ public class ThePlasma extends LinearOpMode {
             // --- State Selection ---
             if (gamepad2.b) currentState = State.SHOOTING_DYNAMIC;
             else if (gamepad2.a) currentState = State.SHOOTING_RAW;
-            else if (gamepad1.right_bumper) currentState = State.INTAKING;
+            else if (gamepad1.right_bumper || gamepad2.right_bumper) currentState = State.INTAKING;
             else currentState = State.IDLE;
 
-            // --- State Execution ---
+            // 5. STATE EXECUTION
             switch (currentState) {
                 case SHOOTING_DYNAMIC:
                     shooter.setMode(Shooter.Mode.DYNAMIC);
-                    if (shooter.isAtTargetVelocity()) {
+                    // Only open latch if we have a target AND we are at speed
+                    if (target != null && shooter.isAtTargetVelocity()) {
                         latch.setPosition(0.3);
-                        intake.runIntake();
+                        intake.runIntake(); // Help push the ring
                     } else {
                         latch.setPosition(0);
                         intake.stopIntake();
@@ -60,25 +61,29 @@ public class ThePlasma extends LinearOpMode {
                     break;
 
                 case SHOOTING_RAW:
-                    shooter.setRaw(1.0); // Full speed
-                    if (shooter.isAtTargetVelocity()) {
+                    shooter.setRaw(1.0);
+                    // Wait for spool up before releasing latch
+                    if (shooter.isAtTargetVelocity()) { // Replace with your target threshold
                         latch.setPosition(0.3);
                         intake.runIntake();
+                    } else {
+                        latch.setPosition(0);
                     }
                     break;
 
                 case INTAKING:
-                    shooter.setRaw(0);
+                    shooter.setIdle();
                     intake.runIntake();
                     latch.setPosition(0);
                     break;
 
                 case IDLE:
-                    shooter.setIdle(); // Keep motors warm
+                    shooter.setIdle();
                     intake.stopIntake();
                     latch.setPosition(0);
                     break;
             }
+
 
             shooter.periodic(target);
             telemetry.update();
