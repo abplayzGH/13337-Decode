@@ -27,6 +27,8 @@ public class Intake {
     public void runIntake() {
 
         IntakeMotor.setPower(1.0);
+    }
+    public void runTransfer(){
         IntakeServo1.setPower(1.0);
         IntakeServo2.setPower(1.0);
     }

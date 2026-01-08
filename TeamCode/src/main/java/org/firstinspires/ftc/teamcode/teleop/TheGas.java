@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import android.graphics.Color;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
@@ -14,6 +16,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
+import org.firstinspires.ftc.vision.opencv.ColorRange;
 
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
@@ -22,6 +25,9 @@ public class TheGas extends LinearOpMode {
     private static final String MOTOR_NAME = "turret_motor";
 
     private static final double SHOOTER_READY_VELOCITY = 900;
+    private static final double LATCH_OPEN = 0.1;
+    private static final double LATCH_CLOSED = 0;
+
 
     @Override
     public void runOpMode() {
@@ -30,6 +36,7 @@ public class TheGas extends LinearOpMode {
         //TODO Add better error handling
         //TODO Optimize
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         /* ---------------- SUBSYSTEMS ---------------- */
         Intake intake = new Intake();
@@ -76,31 +83,41 @@ public class TheGas extends LinearOpMode {
             //TODO Add color sensor feedback for intake
             //TODO Test dynamic shooting
 
+            float[] hsv = new float[3];
+            Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+
+            float hue = hsv[0]; // Hue is measured in degrees (0-360)
+
+
+
             if (shootRaw) {
                 shooter.setMode(Shooter.Mode.RAW);
                 shooter.setRaw(1);
                 if (shooter.isAtTargetVelocity()) {
-                    latch.setPosition(0.3);
+                    latch.setPosition(LATCH_OPEN);
                     intake.runIntake(); //TODO Prevent more than one ball from being shot
                 }
             } else if (shootDynamic) {
                 shooter.setMode(Shooter.Mode.DYNAMIC);
                 if (shooter.isAtTargetVelocity()) {
-                    latch.setPosition(0.3);
+                    latch.setPosition(LATCH_OPEN);
                     intake.runIntake();
                 }
             } else if (intakeOut) {
                 shooter.setRaw(-0.5);
                 intake.runOutTake();
-                latch.setPosition(0.3);
+                latch.setPosition(LATCH_OPEN);
             } else if (intakeIn) {
                 shooter.setRaw(0);
                 intake.runIntake();
-                latch.setPosition(0);
+                if (hue > 250 && hue < 310) {
+                    intake.runTransfer();
+                }
+                latch.setPosition(LATCH_CLOSED);
             } else {
                 shooter.setRaw(0);
                 intake.stopIntake();
-                latch.setPosition(0);
+                latch.setPosition(LATCH_CLOSED);
             }
 
             /* -------- VISION / TURRET -------- */
@@ -109,6 +126,8 @@ public class TheGas extends LinearOpMode {
                 target = vision.getTargetDetection(id);
                 if (target != null) break;
             }
+
+
             //TODO Test turret tracking``
 //            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
 //                turret.setManualPower(gamepad2.right_stick_x * 0.9);
@@ -122,6 +141,9 @@ public class TheGas extends LinearOpMode {
 //            telemetry.addData("Shooter Vel", shooter.getVelocity());
             telemetry.addData("Turret Pos", turret.getPosition());
             telemetry.addData("Tag", target != null ? target.id : "None");
+            telemetry.addData("Servo Position", latch.getPosition());
+            telemetry.addData("Color", colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue());
+            telemetry.addData("Hue", hue);
             telemetry.update();
         }
     }
