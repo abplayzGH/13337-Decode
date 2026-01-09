@@ -64,23 +64,27 @@ public class test extends LinearOpMode {
                 }
             };
         }
-
         public Action fire() {
-            return packet -> {
-                telemetry.addLine("FIRE");
-                latch.setPosition(0.1);
-                intake.runTransfer();
-                intake.runIntake();
-                return false;
+            return new Action() {
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    telemetry.addLine("FIRE");
+                    latch.setPosition(0.1);
+                    intake.runTransfer();
+                    intake.runIntake();
+                    return false;
+                }
             };
         }
-
         public Action stop() {
-            return packet -> {
-                shooter.setRaw(0);
-                latch.setPosition(0);
-                intake.stopIntake();
-                return false;
+            return new Action() {
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    shooter.setRaw(0);
+                    latch.setPosition(0);
+                    intake.stopIntake();
+                    return false;
+                }
             };
         }
     }
@@ -122,14 +126,14 @@ public class test extends LinearOpMode {
         ShooterSub shooter = new ShooterSub(hardwareMap, intake);
         TurretSub turret = new TurretSub(hardwareMap, vision);
 
-        Pose2d startPose = new Pose2d(12, 60, Math.toRadians(-90));
+        Pose2d startPose = new Pose2d(60, -12, Math.toRadians(-90));
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
         // ... Trajectories ...
 
         Action driveToShootPos = drive.actionBuilder(startPose)
-                .lineToY(36)
-                .strafeTo(new Vector2d(36, 36))
+                .splineToConstantHeading(new Vector2d(-20, -20), Math.toRadians(135))
+
                 .build();
 
         Action park = drive.actionBuilder(new Pose2d(36, 36, Math.toRadians(-90)))
@@ -145,7 +149,7 @@ public class test extends LinearOpMode {
                         driveToShootPos,
                         shooter.spinUp(),      // Spins flywheels until fast
                         shooter.fire(),        // Opens latch + starts intake/transfer
-                        new SleepAction(1.5),  // WAIT: Give it 1.5s to actually shoot the ball
+                        new SleepAction(3),  // WAIT: Give it 1.5s to actually shoot the ball
                         shooter.stop()         // Everything turns off
                 )
         );
