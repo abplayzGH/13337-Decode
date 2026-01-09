@@ -11,8 +11,8 @@ public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
-        double goalX = -30.0;    // TUNE
-        double goalY = 30.0;     // TUNE
+        double goalX = -25.0;    // TUNE
+        double goalY = 25.0;     // TUNE
         double goalHeading = Math.toRadians(135);
 
         double parkX = 37.0;     // TUNE
@@ -26,34 +26,21 @@ public class MeepMeepTesting {
                 .build();
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(new Pose2d(60, -12, Math.toRadians(180)))
-                .splineToSplineHeading(new Pose2d(36, 30, Math.toRadians(90)), Math.toRadians(90))
-                .lineToY(55)
-                .lineToY(30)
 
-                .strafeTo(new Vector2d(11, 25))
+                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
 
-                .strafeTo(new Vector2d(11, 56))
+                .strafeToLinearHeading(new Vector2d(-12, 25), Math.toRadians(90))
 
-                .strafeTo(new Vector2d(11, 25))
+                .strafeTo(new Vector2d(-12, 60))
 
-                .strafeTo(new Vector2d(-11, 25))
+                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
 
-                .strafeTo(new Vector2d(-11, 56))
+                .strafeToLinearHeading(new Vector2d(12, 25), Math.toRadians(90))
 
+                .strafeTo(new Vector2d(12, 60))
 
-//                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
-//
-//                .splineToSplineHeading(new Pose2d(12, 20, Math.toRadians(90)), Math.toRadians(90))
-//                .lineToY(55)
-//                .lineToY(30)
-//
-//                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
-//
-//                .splineToSplineHeading(new Pose2d(-16, 30, Math.toRadians(90)), Math.toRadians(90))
-//                .lineToY(55)
-//
-//                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
-//                .strafeToSplineHeading(new Vector2d(parkX, parkY), Math.toRadians(90))
+                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
+
                 .build());
 
 

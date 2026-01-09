@@ -95,13 +95,24 @@ public class TheGas extends LinearOpMode {
                 shooter.setRaw(1);
                 if (shooter.isAtTargetVelocity()) {
                     latch.setPosition(LATCH_OPEN);
-                    intake.runIntake(); //TODO Prevent more than one ball from being shot
+                    intake.runIntake();
+                    intake.runTransfer();
                 }
             } else if (shootDynamic) {
                 shooter.setMode(Shooter.Mode.DYNAMIC);
                 if (shooter.isAtTargetVelocity()) {
                     latch.setPosition(LATCH_OPEN);
                     intake.runIntake();
+                    intake.runTransfer();
+
+                }
+            } else if (gamepad2.right_trigger >= .05){
+                shooter.setMode(Shooter.Mode.RAW);
+                shooter.setRaw(gamepad2.right_trigger);
+                if (gamepad2.left_bumper) {
+                    latch.setPosition(LATCH_OPEN);
+                    intake.runIntake();
+                    intake.runTransfer();
                 }
             } else if (intakeOut) {
                 shooter.setRaw(-0.5);
@@ -110,7 +121,8 @@ public class TheGas extends LinearOpMode {
             } else if (intakeIn) {
                 shooter.setRaw(0);
                 intake.runIntake();
-                if (hue > 250 && hue < 310) {
+                if (!(hue > 145 && hue < 180)) {
+                    telemetry.addLine("Transferring");
                     intake.runTransfer();
                 }
                 latch.setPosition(LATCH_CLOSED);

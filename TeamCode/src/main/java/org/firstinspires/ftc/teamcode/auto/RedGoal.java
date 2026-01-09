@@ -1,14 +1,23 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import android.graphics.Color;
 import android.util.Size;
+import androidx.annotation.NonNull;
+
+
+// RR-specific imports
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.Trajectory;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -21,16 +30,50 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 //TODO Make this code actually work lol
 
-
 @Autonomous(name = "Start at Red Goal", group = "Auto")
 public class RedGoal extends LinearOpMode {
+    public class shoot implements Action {
+        // checks if the lift motor has been powered on
+        private boolean initialized = false;
 
+        // actions are formatted via telemetry packets as below
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            // powers on motor, if it is not on
+            if (!initialized) {
+                shooter.setRaw(1.0);
+                initialized = true;
+            }
+
+            // checks lift's current position
+            float[] hsv = new float[3];
+            Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+
+            float hue = hsv[0]; // Hue is measured in degrees (0-360)
+
+            if ((hue > 145 && hue < 180)) {
+                // true causes the action to rerun
+                return true;
+            } else {
+                // false stops action rerun
+                shooter.setRaw(1.0);
+                intake.runTransfer();
+                intake.runIntake();
+                return false;
+            }
+            // overall, the action powers the lift until it surpasses
+            // 3000 encoder ticks, then powers it off
+        }
+    }
+    public Action shoot() {
+        return new shoot();
+    }
     private MecanumDrive drive;
     private VisionManager vision;
     private Intake intake;
     private Shooter shooter;
     private Turret turret;
-
+    public ColorSensor colorSensor;
     private final Pose2d startPose = new Pose2d(60, -12, Math.toRadians(180));
 
     private static final int[] TARGET_TAGS = {20, 24};
@@ -45,6 +88,7 @@ public class RedGoal extends LinearOpMode {
         turret = new Turret(); turret.init(hardwareMap, "turret_motor");
 
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
 
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
@@ -107,7 +151,8 @@ public class RedGoal extends LinearOpMode {
 
         // ---------------- Go to Park ----------------
         Actions.runBlocking(new SequentialAction(
-                parkTrajectory.build()
+                parkTrajectory.build(),
+                shoot()
         ));
     }
 }

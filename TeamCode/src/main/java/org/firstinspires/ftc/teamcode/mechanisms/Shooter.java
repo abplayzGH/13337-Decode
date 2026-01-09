@@ -307,7 +307,7 @@ public class Shooter {
     public static double IDLE_VELO = 0; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;
-    public static double targetVelocity = 1000;
+    public static double targetVelocity = 900;
     public static double targetPower = 0;
 
     private final DcMotorEx left, right;
@@ -333,12 +333,12 @@ public class Shooter {
 
     private InterpLUT buildLUT() {
         InterpLUT lut = new InterpLUT();
-        lut.add(0, -970);
-        lut.add(2, -990);
-        lut.add(4, -1050);
-        lut.add(7, -1260);
-        lut.add(9, -1440);
-        lut.add(12, -1580);
+        lut.add(0, 400);
+        lut.add(2, 500);
+        lut.add(4, 600);
+        lut.add(7, 760);
+        lut.add(9, 940);
+        lut.add(12, 1080);
         lut.build();
         return lut;
     }
