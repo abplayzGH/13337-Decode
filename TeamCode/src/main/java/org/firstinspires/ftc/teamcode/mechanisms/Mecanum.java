@@ -25,28 +25,21 @@ public class Mecanum {
     }
 
     public void Drive(double leftX, double leftY, double rightX, double speed){
-
-        //Calculate motor power
-        double frontLeftPower = leftY - leftX + rightX;
-        double rearLeftPower = leftY + leftX + rightX;
+        double frontLeftPower  = leftY - leftX + rightX;
+        double rearLeftPower   = leftY + leftX + rightX;
         double frontRightPower = leftY + leftX - rightX;
-        double rearRightPower = leftY - leftX - rightX;
+        double rearRightPower  = leftY - leftX - rightX;
 
-
-        // Normalize the power values if any exceed 1.0
-        double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(rearLeftPower),
-                Math.max(Math.abs(frontRightPower), Math.abs(rearRightPower))));
+        double maxPower = Math.max(Math.abs(frontLeftPower),
+                Math.max(Math.abs(rearLeftPower),
+                        Math.max(Math.abs(frontRightPower), Math.abs(rearRightPower))));
         if (maxPower > 1.0) {
-            frontLeftPower /= maxPower;
-            rearLeftPower /= maxPower;
+            frontLeftPower  /= maxPower;
+            rearLeftPower   /= maxPower;
             frontRightPower /= maxPower;
-            rearRightPower /= maxPower;
-            frontLeftPower /= maxPower; rearLeftPower /= maxPower;
-            frontRightPower /= maxPower; rearRightPower /= maxPower;
+            rearRightPower  /= maxPower;
         }
 
-
-        // Set wheel power
         leftFront.setPower(frontLeftPower * speed);
         leftBack.setPower(rearLeftPower * speed);
         rightFront.setPower(frontRightPower * speed);

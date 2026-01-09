@@ -13,7 +13,8 @@ public class Intake {
 
     public void init(HardwareMap hardwareMap) {
         IntakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
-        IntakeMotor.setDirection(DcMotorEx.Direction.REVERSE);
+        // Use DcMotorSimple.Direction for consistency
+        IntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         IntakeMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         IntakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
@@ -21,7 +22,6 @@ public class Intake {
         IntakeServo2 = hardwareMap.get(CRServo.class, "intakeServo2");
         IntakeServo1.setDirection(DcMotorSimple.Direction.FORWARD);
         IntakeServo2.setDirection(DcMotorSimple.Direction.REVERSE);
-
     }
 
     public void runIntake() {

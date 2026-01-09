@@ -23,8 +23,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import java.lang.Math;
 
 @Config
-@Autonomous(name = "Start at red goal", group = "Autonomous")
-public class RedGoal extends LinearOpMode {
+@Autonomous(name = "Start at red wall", group = "Autonomous")
+public class RedWall extends LinearOpMode {
 
     /* ---------------- CONSTANTS ---------------- */
     public static double LATCH_OPEN = 0.1;
@@ -43,7 +43,7 @@ public class RedGoal extends LinearOpMode {
     final Vector2d SPIKE_3_FINAL = new Vector2d(-12, 50);
     final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
     final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
-    final Pose2d START_POSE = new Pose2d(-49, 49, Math.toRadians(305));
+    final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
 
 
     /* ---------------- ACTIONS ---------------- */
@@ -116,54 +116,51 @@ public class RedGoal extends LinearOpMode {
         if (isStopRequested()) return;
 
         /* ---------------- TRAJECTORIES ---------------- */
-        TrajectoryActionBuilder base = drive.actionBuilder(START_POSE);
 
-        Action toFirstGoal = base
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-                .build();
+        TrajectoryActionBuilder toFirstGoal = drive.actionBuilder(START_POSE)
+                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90));
 
-        Action toSpike3 = base.endTrajectory().fresh()
-                .strafeTo(SPIKE_3)
-                .build();
-
-        TrajectoryActionBuilder parkTrajectory = base.endTrajectory().fresh()
+        TrajectoryActionBuilder parkTrajectory = drive.actionBuilder(START_POSE)
                 .strafeTo(PARK);
 
-        TrajectoryActionBuilder driveIntoSpike3 = base.endTrajectory().fresh()
+        TrajectoryActionBuilder toSpike3 = drive.actionBuilder(START_POSE)
+                .strafeTo(SPIKE_3);
+
+        TrajectoryActionBuilder driveIntoSpike3 = drive.actionBuilder(START_POSE)
                 .strafeTo(SPIKE_3_FINAL);
 
-        TrajectoryActionBuilder toSpike2 = base.endTrajectory().fresh()
+        TrajectoryActionBuilder toSpike2 = drive.actionBuilder(START_POSE)
                 .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
 
-        TrajectoryActionBuilder driveIntoSpike2 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_2_FINAL, Math.toRadians(90));
+        TrajectoryActionBuilder driveIntoSpike2 = drive.actionBuilder(START_POSE)
+                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
 
-        TrajectoryActionBuilder toSpike1 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90));
+        TrajectoryActionBuilder toSpike1 = drive.actionBuilder(START_POSE)
+                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
 
-        TrajectoryActionBuilder driveIntoSpike1 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_1_FINAL, Math.toRadians(90));
+        TrajectoryActionBuilder driveIntoSpike1 = drive.actionBuilder(START_POSE)
+                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
 
 
         /* ---------------- RUN AUTO ---------------- */
         Actions.runBlocking(
                 new SequentialAction(
-                        toFirstGoal,
+                        toFirstGoal.build(),
                         new ShootAction(shooter, intake, latch),
 
-                        toSpike3,
+                        toSpike3.build(),
                         driveIntoSpike3.build(),
-                        toFirstGoal,
+                        toFirstGoal.build(),
                         new ShootAction(shooter, intake, latch),
 
                         toSpike2.build(),
                         driveIntoSpike2.build(),
-                        toFirstGoal,
+                        toFirstGoal.build(),
                         new ShootAction(shooter, intake, latch),
 
                         toSpike1.build(),
                         driveIntoSpike1.build(),
-                        toFirstGoal,
+                        toFirstGoal.build(),
                         new ShootAction(shooter, intake, latch),
 
                         parkTrajectory.build()

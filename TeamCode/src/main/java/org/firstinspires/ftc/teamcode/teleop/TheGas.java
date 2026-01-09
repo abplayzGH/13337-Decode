@@ -8,15 +8,14 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-import org.firstinspires.ftc.teamcode.mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
-import org.firstinspires.ftc.vision.opencv.ColorRange;
+import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
+
 
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
@@ -80,7 +79,6 @@ public class TheGas extends LinearOpMode {
 
             //TODO Add vibration feedback for shooter ready
             //TODO Add vibration for end game
-            //TODO Add color sensor feedback for intake
             //TODO Test dynamic shooting
 
             float[] hsv = new float[3];
@@ -133,14 +131,14 @@ public class TheGas extends LinearOpMode {
             }
 
             /* -------- VISION / TURRET -------- */
-            AprilTagDetection target = null; //TODO Test edge cases with no target
+            AprilTagDetection target = null;
             for (int id : TARGET_TAGS) {
                 target = vision.getTargetDetection(id);
                 if (target != null) break;
             }
 
 
-            //TODO Test turret tracking``
+            //TODO Test turret tracking
 //            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
 //                turret.setManualPower(gamepad2.right_stick_x * 0.9);
 //            } else {
