@@ -121,7 +121,7 @@ public class TheGas extends LinearOpMode {
             } else if (intakeIn) {
                 shooter.setRaw(0);
                 intake.runIntake();
-                if (!(hue > 145 && hue < 180)) {
+                if (!(hue > 145 && hue < 205)) {
                     telemetry.addLine("Transferring");
                     intake.runTransfer();
                 }

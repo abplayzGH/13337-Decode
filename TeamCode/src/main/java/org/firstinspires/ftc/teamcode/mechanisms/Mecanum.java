@@ -25,26 +25,27 @@ public class Mecanum {
     }
 
     public void Drive(double leftX, double leftY, double rightX, double speed){
+        // Negate leftY because stick-up is negative in FTC
+        double y = leftY;
+        double x = -leftX;
+        double rx = rightX;
 
-        //Calculate motor power
-        double frontLeftPower = leftY - leftX + rightX;
-        double rearLeftPower = leftY + leftX + rightX;
-        double frontRightPower = leftY + leftX - rightX;
-        double rearRightPower = leftY - leftX - rightX;
+        // Calculate motor power (Standard Mecanum Kinematics)
+        double frontLeftPower  = y + x + rx;
+        double rearLeftPower   = y - x + rx;
+        double frontRightPower = y - x - rx;
+        double rearRightPower  = y + x - rx;
 
-
-        // Normalize the power values if any exceed 1.0
+        // Normalize power
         double maxPower = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(rearLeftPower),
                 Math.max(Math.abs(frontRightPower), Math.abs(rearRightPower))));
+
         if (maxPower > 1.0) {
             frontLeftPower /= maxPower;
             rearLeftPower /= maxPower;
             frontRightPower /= maxPower;
             rearRightPower /= maxPower;
-            frontLeftPower /= maxPower; rearLeftPower /= maxPower;
-            frontRightPower /= maxPower; rearRightPower /= maxPower;
         }
-
 
         // Set wheel power
         leftFront.setPower(frontLeftPower * speed);
@@ -52,5 +53,6 @@ public class Mecanum {
         rightFront.setPower(frontRightPower * speed);
         rightBack.setPower(rearRightPower * speed);
     }
+
 
 }
