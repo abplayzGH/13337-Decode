@@ -16,6 +16,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -29,7 +30,7 @@ import org.firstinspires.ftc.teamcode.vision.VisionManager;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 //TODO Make this code actually work lol
-
+@Disabled
 @Autonomous(name = "Start at Red Goal", group = "Auto")
 public class RedGoal extends LinearOpMode {
     public class shoot implements Action {

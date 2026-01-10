@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 import android.util.Size;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,7 +15,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.FieldCentricDrive;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
-
+@Disabled
 @TeleOp(name = "The Plasma", group = "Teleop")
 public class ThePlasma extends LinearOpMode {
 

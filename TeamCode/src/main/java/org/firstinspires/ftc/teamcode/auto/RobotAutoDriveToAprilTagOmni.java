@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
  *
  */
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-
+@Disabled
 @Autonomous(name="Omni Drive To AprilTag", group = "Concept")
 public class RobotAutoDriveToAprilTagOmni extends LinearOpMode
 {

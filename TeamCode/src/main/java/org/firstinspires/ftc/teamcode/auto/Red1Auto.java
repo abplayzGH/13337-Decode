@@ -11,6 +11,7 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * - Uses Roadrunner MecanumDrive (your project)
  * - Uses VisionManager (multi-color) with single webcam
  */
+@Disabled
 @Autonomous(name = "Red Wall", group = "Auto")
 public class Red1Auto extends LinearOpMode {
 

@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import static java.lang.Math.toRadians;
+
 import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -26,11 +28,11 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import android.util.Size;
 
 @Config
-@Autonomous(name = "Test", group = "Autonomous")
-public class test extends LinearOpMode {
+@Autonomous(name = "Red", group = "Auto")
+public class Red extends LinearOpMode {
 
     public class ShooterSub {
-        private Shooter shooter;
+        public Shooter shooter;
         private Servo latch;
         private Intake intake;
 
@@ -49,7 +51,7 @@ public class test extends LinearOpMode {
 
                     // 1. Set the targets
                     shooter.setMode(Shooter.Mode.RAW);
-                    shooter.setRaw(1.0);
+                    shooter.setRaw(1);
 
                     // 2. CRITICAL: Actually tell the hardware to move
                     // Your Shooter class needs this to run the switch/case logic!
@@ -57,7 +59,7 @@ public class test extends LinearOpMode {
 
                     packet.put("Velo", shooter.isAtTargetVelocity());
 
-                    boolean atSpeed = shooter.isAtTargetVelocity();
+                    boolean atSpeed = shooter.getVelocity() >= 350;
                     boolean timeout = (System.currentTimeMillis() - startTime) > 2500;
 
                     return !(atSpeed || timeout);
@@ -126,18 +128,19 @@ public class test extends LinearOpMode {
         ShooterSub shooter = new ShooterSub(hardwareMap, intake);
         TurretSub turret = new TurretSub(hardwareMap, vision);
 
-        Pose2d startPose = new Pose2d(60, -12, Math.toRadians(-90));
+        Pose2d startPose = new Pose2d(60, 12, toRadians(180));
+        Vector2d goalVec = new Vector2d(-10, 10);
+        Pose2d goalPose = new Pose2d(goalVec, Math.toRadians(135));
+        Vector2d parkVec = new Vector2d(-40,10);
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
         // ... Trajectories ...
 
-        Action driveToShootPos = drive.actionBuilder(startPose)
-                .splineToConstantHeading(new Vector2d(-20, 20), Math.toRadians(225))
+        TrajectoryActionBuilder driveToShootPos = drive.actionBuilder(startPose)
+                .splineToLinearHeading(goalPose, 1);
 
-                .build();
-
-        Action park = drive.actionBuilder(new Pose2d(36, 36, Math.toRadians(-135)))
-                .splineTo(new Vector2d(60, 60), Math.toRadians(0))
+        Action park = drive.actionBuilder(goalPose)
+                .strafeToLinearHeading(parkVec, Math.toRadians(180))
                 .build();
 
         waitForStart();
@@ -146,11 +149,12 @@ public class test extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        driveToShootPos,
-                        shooter.spinUp(),      // Spins flywheels until fast
+                        driveToShootPos.build(),
+                        shooter.spinUp(),// Spins flywheels until fast
                         shooter.fire(),        // Opens latch + starts intake/transfer
-                        new SleepAction(3),  // WAIT: Give it 1.5s to actually shoot the ball
-                        shooter.stop()         // Everything turns off
+                        new SleepAction(5),  // WAIT: Give it 1.5s to actually shoot the ball
+                        shooter.stop(),// Everything turns off
+                        park
                 )
         );
     }
