@@ -132,11 +132,11 @@ public class test extends LinearOpMode {
         // ... Trajectories ...
 
         Action driveToShootPos = drive.actionBuilder(startPose)
-                .splineToConstantHeading(new Vector2d(-20, -20), Math.toRadians(135))
+                .splineToConstantHeading(new Vector2d(-20, 20), Math.toRadians(225))
 
                 .build();
 
-        Action park = drive.actionBuilder(new Pose2d(36, 36, Math.toRadians(-90)))
+        Action park = drive.actionBuilder(new Pose2d(36, 36, Math.toRadians(-135)))
                 .splineTo(new Vector2d(60, 60), Math.toRadians(0))
                 .build();
 
