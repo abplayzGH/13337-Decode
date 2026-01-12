@@ -304,7 +304,7 @@ public class Shooter {
     public static double kD = 0.0;
     public static double kV = 0.00045;
     public static double VELO_TOL = 50;
-    public static double IDLE_VELO = 0; // Match your LUT sign (negative)
+    public static double IDLE_VELO = 100; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;
     public static double targetVelocity = 800;
@@ -334,11 +334,14 @@ public class Shooter {
     private InterpLUT buildLUT() {
         InterpLUT lut = new InterpLUT();
         lut.add(0, 400);
-        lut.add(2, 500);
-        lut.add(4, 600);
-        lut.add(7, 760);
-        lut.add(9, 940);
-        lut.add(12, 1080);
+        lut.add(2, 450);
+        lut.add(4, 500);
+        lut.add(7, 560);
+        lut.add(9, 740);
+        lut.add(12, 880);
+        lut.add(13, 900);
+        lut.add(14, 980);
+        lut.add(15, 1000);
         lut.build();
         return lut;
     }
@@ -350,12 +353,13 @@ public class Shooter {
                 right.setPower(targetPower);
                 break;
             case FIXED:
+                targetVelocity = 800;
                 applyVelocity(targetVelocity);
                 break;
             case DYNAMIC:
                 if (detection != null) {
                     double dist = Math.hypot(detection.ftcPose.x, detection.ftcPose.z);
-                    targetVelocity = distToVelo.get(Range.clip(dist, 0, 12));
+                    targetVelocity = distToVelo.get(Range.clip(dist, 0, 15));
                     applyVelocity(targetVelocity);
                 } else {
 //                    applyVelocity(IDLE_VELO);

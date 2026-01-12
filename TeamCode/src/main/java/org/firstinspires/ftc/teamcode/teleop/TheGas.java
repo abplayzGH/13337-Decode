@@ -92,8 +92,7 @@ public class TheGas extends LinearOpMode {
 
 
             if (shootRaw) {
-                shooter.setMode(Shooter.Mode.RAW);
-                shooter.setRaw(1);
+                shooter.setMode(Shooter.Mode.FIXED);
                 if (shooter.isAtTargetVelocity()) {
                     latch.setPosition(LATCH_OPEN);
                     intake.runIntake();
@@ -131,6 +130,7 @@ public class TheGas extends LinearOpMode {
                 shooter.setRaw(0);
                 intake.stopIntake();
                 latch.setPosition(LATCH_CLOSED);
+//                shooter.setIdle();
             }
 
             /* -------- VISION / TURRET -------- */
