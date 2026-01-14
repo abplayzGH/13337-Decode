@@ -24,6 +24,7 @@ package org.firstinspires.ftc.teamcode.teleop;
 import android.graphics.Color;
 import android.util.Size;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -67,7 +68,7 @@ import java.util.List;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-
+@Disabled
 @TeleOp(name = "TestCV", group = "Concept")
 public class TestCV extends LinearOpMode {
     @Override

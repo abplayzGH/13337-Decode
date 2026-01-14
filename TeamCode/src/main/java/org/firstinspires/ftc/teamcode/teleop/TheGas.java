@@ -56,6 +56,7 @@ public class TheGas extends LinearOpMode {
         waitForStart();
 
         latch.setPosition(0);
+//        vision.startDashboardStream(15);
 
         /* ================= MAIN LOOP ================= */
         while (opModeIsActive()) {
@@ -74,8 +75,8 @@ public class TheGas extends LinearOpMode {
             boolean shootRaw = gamepad2.a;
             boolean shootDynamic = gamepad2.b;
 
-            boolean intakeIn = gamepad1.right_bumper;
-            boolean intakeOut = gamepad1.left_bumper;
+            boolean intakeIn = gamepad1.right_bumper || gamepad2.right_bumper;
+            boolean intakeOut = gamepad1.left_bumper || gamepad2.left_bumper;
 
             //TODO Add vibration feedback for shooter ready
             //TODO Add vibration for end game
@@ -119,7 +120,7 @@ public class TheGas extends LinearOpMode {
             } else if (intakeIn) {
                 shooter.setRaw(0);
                 intake.runIntake();
-                if (!(hue > 145 && hue < 180)) {
+                if (!(hue > 145 && hue < 205)) {
                     telemetry.addLine("Transferring");
                     intake.runTransfer();
                 }

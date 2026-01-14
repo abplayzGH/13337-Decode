@@ -1,15 +1,24 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import android.graphics.Color;
 import android.util.Size;
-
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
-import com.acmerobotics.roadrunner.*;
+
+// RR-specific imports
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.Trajectory;
 import com.acmerobotics.roadrunner.ftc.Actions;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.acmerobotics.roadrunner.Action;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -20,154 +29,131 @@ import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
-import java.lang.Math;
-
-@Config
-@Autonomous(name = "Start at red goal", group = "Autonomous")
+//TODO Make this code actually work lol
+@Disabled
+@Autonomous(name = "Start at Red Goal", group = "Auto")
 public class RedGoal extends LinearOpMode {
+    public class shoot implements Action {
+        // checks if the lift motor has been powered on
+        private boolean initialized = false;
 
-    /* ---------------- CONSTANTS ---------------- */
-    public static double LATCH_OPEN = 0.1;
-    public static double LATCH_CLOSED = 0.0;
-    public static double SHOOT_POWER = 1.0;
+        // actions are formatted via telemetry packets as below
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            // powers on motor, if it is not on
+            if (!initialized) {
+                shooter.setRaw(1.0);
+                initialized = true;
+            }
+
+            // checks lift's current position
+            float[] hsv = new float[3];
+            Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
+
+            float hue = hsv[0]; // Hue is measured in degrees (0-360)
+
+            if ((hue > 145 && hue < 180)) {
+                // true causes the action to rerun
+                return true;
+            } else {
+                // false stops action rerun
+                shooter.setRaw(1.0);
+                intake.runTransfer();
+                intake.runIntake();
+                return false;
+            }
+            // overall, the action powers the lift until it surpasses
+            // 3000 encoder ticks, then powers it off
+        }
+    }
+    public Action shoot() {
+        return new shoot();
+    }
+    private MecanumDrive drive;
+    private VisionManager vision;
+    private Intake intake;
+    private Shooter shooter;
+    private Turret turret;
+    public ColorSensor colorSensor;
+    private final Pose2d startPose = new Pose2d(60, -12, Math.toRadians(180));
 
     private static final int[] TARGET_TAGS = {20, 24};
 
-    double GOAL_HEADING = Math.toRadians(135);
-    final Vector2d GOAL = new Vector2d(-36, 30);
-    final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
-    final Vector2d PARK = new Vector2d(37, -33);
-    final Vector2d SPIKE_3 = new Vector2d(-12, 25);
-    final Vector2d SPIKE_2 = new Vector2d(12, 25);
-    final Vector2d SPIKE_1 = new Vector2d(36, 25);
-    final Vector2d SPIKE_3_FINAL = new Vector2d(-12, 50);
-    final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
-    final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
-    final Pose2d START_POSE = new Pose2d(-49, 49, Math.toRadians(305));
-
-
-    /* ---------------- ACTIONS ---------------- */
-
-    public class ShootAction implements Action {
-        private final Shooter shooter;
-        private final Intake intake;
-        private final Servo latch;
-        private boolean fired = false;
-
-        public ShootAction(Shooter shooter, Intake intake, Servo latch) {
-            this.shooter = shooter;
-            this.intake = intake;
-            this.latch = latch;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-            if (!fired) {
-                shooter.setRaw(SHOOT_POWER);
-                if (shooter.isAtTargetVelocity()) {
-                    latch.setPosition(LATCH_OPEN);
-                    intake.runTransfer();
-                    intake.runIntake();
-                    fired = true;
-                }
-                return true;
-            } else {
-                latch.setPosition(LATCH_CLOSED);
-                intake.stopIntake();
-                shooter.setRaw(0);
-                return false;
-            }
-        }
-    }
-
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
-        /* ---------------- INIT ---------------- */
-        MecanumDrive drive = new MecanumDrive(hardwareMap, START_POSE);
-
-        Intake intake = new Intake();
-        intake.init(hardwareMap);
-
-        Shooter shooter = new Shooter(hardwareMap, telemetry);
-        shooter.setMode(Shooter.Mode.RAW);
-
-        Turret turret = new Turret();
-        turret.init(hardwareMap, "turret_motor");
+        // ---------------- Init Subsystems ----------------
+        drive = new MecanumDrive(hardwareMap, startPose);
+        intake = new Intake(); intake.init(hardwareMap);
+        shooter = new Shooter(hardwareMap, telemetry);
+        turret = new Turret(); turret.init(hardwareMap, "turret_motor");
 
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
-        latch.setPosition(LATCH_CLOSED);
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+
 
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480));
+        vision = new VisionManager(hardwareMap, cam, new Size(640, 480));
+        vision.startDashboardStream(15);
 
-        /* ---------------- VISION INIT LOOP ---------------- */
-        AprilTagDetection tag = null;
-        while (!isStarted() && !isStopRequested()) {
-            for (int id : TARGET_TAGS) {
-                tag = vision.getTargetDetection(id);
-                if (tag != null) break;
-            }
-            telemetry.addData("Tag", tag != null ? tag.id : "None");
-            telemetry.update();
-        }
+        drive.updatePoseEstimate();
 
+        telemetry.addLine("Waiting for start...");
+        telemetry.update();
         waitForStart();
+
         if (isStopRequested()) return;
 
-        /* ---------------- TRAJECTORIES ---------------- */
-        TrajectoryActionBuilder base = drive.actionBuilder(START_POSE);
+        // ---------------- Prebuilt Trajectories ----------------
+        TrajectoryActionBuilder toFirstGoal = drive.actionBuilder(startPose)
+                .splineTo(new Vector2d(36, 30), Math.toRadians(90));
 
-        Action toFirstGoal = base
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-                .build();
+        TrajectoryActionBuilder parkTrajectory = drive.actionBuilder(startPose)
+                .strafeTo(new Vector2d(37, -33));
 
-        Action toSpike3 = base.endTrajectory().fresh()
-                .strafeTo(SPIKE_3)
-                .build();
+        // ---------------- Run Auto ----------------
+        Actions.runBlocking(new SequentialAction(
+                toFirstGoal.build()
+        ));
 
-        TrajectoryActionBuilder parkTrajectory = base.endTrajectory().fresh()
-                .strafeTo(PARK);
+        while (opModeIsActive()) {
 
-        TrajectoryActionBuilder driveIntoSpike3 = base.endTrajectory().fresh()
-                .strafeTo(SPIKE_3_FINAL);
+            drive.updatePoseEstimate();
 
-        TrajectoryActionBuilder toSpike2 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
+            // ---------------- Vision ----------------
+            AprilTagDetection target = null;
+            for (int id : TARGET_TAGS) {
+                target = vision.getTargetDetection(id);
+                if (target != null) break;
+            }
 
-        TrajectoryActionBuilder driveIntoSpike2 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_2_FINAL, Math.toRadians(90));
+            // ---------------- Shooter ----------------
+            if (target != null) {
+                shooter.setMode(Shooter.Mode.DYNAMIC);
+                if (shooter.isAtTargetVelocity()) {
+                    latch.setPosition(0.3);
+                    intake.runIntake();
+                }
+            } else {
+                shooter.setRaw(0);
+                intake.stopIntake();
+            }
 
-        TrajectoryActionBuilder toSpike1 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90));
+            // ---------------- Turret ----------------
+            if (target != null) {
+                turret.updateTurretTracking(target, getRuntime());
+            } else {
+                turret.setManualPower(0);
+            }
 
-        TrajectoryActionBuilder driveIntoSpike1 = base.endTrajectory().fresh()
-                .strafeToLinearHeading(SPIKE_1_FINAL, Math.toRadians(90));
+            // ---------------- Update Drive ----------------
+            drive.updatePoseEstimate();
+        }
 
-
-        /* ---------------- RUN AUTO ---------------- */
-        Actions.runBlocking(
-                new SequentialAction(
-                        toFirstGoal,
-                        new ShootAction(shooter, intake, latch),
-
-                        toSpike3,
-                        driveIntoSpike3.build(),
-                        toFirstGoal,
-                        new ShootAction(shooter, intake, latch),
-
-                        toSpike2.build(),
-                        driveIntoSpike2.build(),
-                        toFirstGoal,
-                        new ShootAction(shooter, intake, latch),
-
-                        toSpike1.build(),
-                        driveIntoSpike1.build(),
-                        toFirstGoal,
-                        new ShootAction(shooter, intake, latch),
-
-                        parkTrajectory.build()
-                )
-        );
+        // ---------------- Go to Park ----------------
+        Actions.runBlocking(new SequentialAction(
+                parkTrajectory.build(),
+                shoot()
+        ));
     }
 }
