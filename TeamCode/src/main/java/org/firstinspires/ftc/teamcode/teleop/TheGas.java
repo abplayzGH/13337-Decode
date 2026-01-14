@@ -3,10 +3,14 @@ package org.firstinspires.ftc.teamcode.teleop;
 import android.graphics.Color;
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
@@ -17,7 +21,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 import org.firstinspires.ftc.vision.opencv.ColorRange;
-
+@Config
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
 
@@ -28,6 +32,9 @@ public class TheGas extends LinearOpMode {
     private static final double LATCH_OPEN = 0.1;
     private static final double LATCH_CLOSED = 0;
 
+    public FtcDashboard dashboard;
+
+    public Telemetry dashboardTelemetry;
 
     @Override
     public void runOpMode() {
@@ -57,7 +64,10 @@ public class TheGas extends LinearOpMode {
         waitForStart();
 
         latch.setPosition(0);
-//        vision.startDashboardStream(15);
+        vision.startDashboardStream(15);
+
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
 
         /* ================= MAIN LOOP ================= */
         while (opModeIsActive()) {
@@ -88,8 +98,6 @@ public class TheGas extends LinearOpMode {
             Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
 
             float hue = hsv[0]; // Hue is measured in degrees (0-360)
-
-
 
             if (shootRaw) {
                 shooter.setMode(Shooter.Mode.FIXED);
@@ -142,11 +150,13 @@ public class TheGas extends LinearOpMode {
 
 
             //TODO Test turret tracking``
-//            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
-//                turret.setManualPower(gamepad2.right_stick_x * 0.9);
-//            } else {
-//                turret.updateTurretTracking(target, getRuntime()); //TODO Add angle limit to auto tracking
-//            }
+            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
+                turret.setManualPower(gamepad2.right_stick_x * 0.8);
+            } else if (target != null){
+                turret.updateTurretTracking(target, getRuntime()); //TODO Add angle limit to auto tracking
+            } else {
+                turret.setManualPower(0);
+            }
 
             shooter.periodic(target);
 
@@ -158,6 +168,8 @@ public class TheGas extends LinearOpMode {
             telemetry.addData("Color", colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue());
             telemetry.addData("Hue", hue);
             telemetry.update();
+            dashboardTelemetry.update();
+
         }
     }
 }

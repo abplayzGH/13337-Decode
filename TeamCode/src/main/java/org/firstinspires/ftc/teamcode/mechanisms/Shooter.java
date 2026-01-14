@@ -159,129 +159,10 @@
 //        if (detections == null) {
 //            // No tag → hold idle or power off
 //            telemetry.addLine("No Tag");
-////            setIdle();
-//            return;
-//        }
-//
-//        AprilTagDetection tag = detections;
-//
-//        // Use horizontal + forward distance
-//        double distanceFt = Math.hypot(tag.ftcPose.x, tag.ftcPose.z);
-//
-//        distanceFt = Range.clip(distanceFt, 1.0, 12.0);
-//
-//        double target = distToVelo.get(distanceFt);
-//
-//        applyVelocity(target);
-//    }
-//
-//    /* ---------------- Voltage Compensation ---------------- */
-//    private double voltageCompFactor() {
-//        // Normal battery voltage range 12.0–13.0 V
-//        double nominal = 13.0;
-//        double current = battery.getVoltage();
-//        return nominal / current;
-//    }
-//
-//    /* ---------------- Logging ---------------- */
-//    private void log() {
-//        telemetry.addLine("== Shooter ==");
-//        telemetry.addData("Mode", mode);
-//        telemetry.addData("Target Velo", targetVelocity);
-//        telemetry.addData("Measured", left.getVelocity());
-//        telemetry.addData("Power L", left.getPower());
-//        telemetry.addData("Power R", right.getPower());
-//        telemetry.addData("Battery", battery.getVoltage());
-//    }
-//
-//    /* ====================================================
-//                        PIDF Controller
-//       ==================================================== */
-//    private static class PIDFController {
-//
-//        double kP, kI, kD, kF;
-//        double tolerance = 0;
-//        double integral = 0;
-//        double prevError = 0;
-//
-//        public PIDFController(double p, double i, double d, double f) {
-//            setPIDF(p, i, d, f);
-//        }
-//
-//        public void setPIDF(double p, double i, double d, double f) {
-//            kP = p;
-//            kI = i;
-//            kD = d;
-//            kF = f;
-//        }
-//
-//        public void setTolerance(double t) { tolerance = t; }
-//
-//        public double calculate(double measured, double target) {
-//            double error = target - measured;
-//
-//            integral += error;
-//            integral = Range.clip(integral, -5000, 5000);   // anti-windup
-//
-//            double derivative = error - prevError;
-//            prevError = error;
-//
-//            return kP * error + kI * integral + kD * derivative + kF * target;
-//        }
-//
-//        public boolean atSetPoint() {
-//            return Math.abs(prevError) <= tolerance;
-//        }
-//    }
-//
-//    /* ====================================================
-//                        Interpolation LUT
-//       ==================================================== */
-//    private static class InterpLUT {
-//        private final java.util.List<Double> xs = new java.util.ArrayList<>();
-//        private final java.util.List<Double> ys = new java.util.ArrayList<>();
-//
-//        public void add(double x, double y) {
-//            xs.add(x);
-//            ys.add(y);
-//        }
-//
-//        public void build() {
-//            for (int i = 0; i < xs.size() - 1; i++) {
-//                for (int j = i + 1; j < xs.size(); j++) {
-//                    if (xs.get(j) < xs.get(i)) {
-//                        double tx = xs.get(i);
-//                        double ty = ys.get(i);
-//                        xs.set(i, xs.get(j));
-//                        ys.set(i, ys.get(j));
-//                        xs.set(j, tx);
-//                        ys.set(j, ty);
-//                    }
-//                }
-//            }
-//        }
-//
-//        public double get(double x) {
-//            if (x <= xs.get(0)) return ys.get(0);
-//            if (x >= xs.get(xs.size() - 1)) return ys.get(ys.size() - 1);
-//
-//            for (int i = 0; i < xs.size() - 1; i++) {
-//                double x0 = xs.get(i);
-//                double x1 = xs.get(i + 1);
-//
-//                if (x >= x0 && x <= x1) {
-//                    double y0 = ys.get(i);
-//                    double y1 = ys.get(i + 1);
-//                    double t = (x - x0) / (x1 - x0);
-//                    return y0 + t * (y1 - y0);
-//                }
-//            }
-//            return ys.get(0);
-//        }
-//    }
-//}
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -293,16 +174,16 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Config
 public class Shooter {
 
     public enum Mode { RAW, FIXED, DYNAMIC }
 
     /* ---------------- Tunable Config Values ---------------- */
-    public static double kP = 0.007;
+    public static double kP = 0.0001;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kV = 0.00045;
+    public static double kV = 0.00035;
     public static double VELO_TOL = 50;
     public static double IDLE_VELO = 100; // Match your LUT sign (negative)
 
@@ -316,6 +197,9 @@ public class Shooter {
     private final InterpLUT distToVelo;
     private final Telemetry telemetry;
 
+    public FtcDashboard dashboard;
+
+    public Telemetry dashboardTelemetry;
     public Shooter(HardwareMap hw, Telemetry tele) {
         this.telemetry = tele;
         left = hw.get(DcMotorEx.class, "leftFlyWheel");
@@ -329,6 +213,9 @@ public class Shooter {
 
         battery = hw.voltageSensor.iterator().next();
         distToVelo = buildLUT();
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
+
     }
 
     private InterpLUT buildLUT() {
@@ -347,13 +234,13 @@ public class Shooter {
     }
 
     public void periodic(AprilTagDetection detection) {
+        dashboardTelemetry.addData("Shooter Mode", mode);
         switch (mode) {
             case RAW:
                 left.setPower(targetPower);
                 right.setPower(targetPower);
                 break;
             case FIXED:
-                targetVelocity = 800;
                 applyVelocity(targetVelocity);
                 break;
             case DYNAMIC:
@@ -361,9 +248,13 @@ public class Shooter {
                     double dist = Math.hypot(detection.ftcPose.x, detection.ftcPose.z);
                     targetVelocity = distToVelo.get(Range.clip(dist, 0, 15));
                     applyVelocity(targetVelocity);
+                    dashboardTelemetry.addLine("--- Vision Debug ---");
+                    dashboardTelemetry.addData("Raw Dist", dist); // You'll need to store this variable
+                    dashboardTelemetry.addData("LUT Output", distToVelo.get(dist));
+
                 } else {
-//                    applyVelocity(IDLE_VELO);
-                    telemetry.addLine("??");
+                    applyVelocity(IDLE_VELO);
+                    dashboardTelemetry.addLine("No Tag");
                 }
                 break;
         }
@@ -372,12 +263,18 @@ public class Shooter {
 
     private void applyVelocity(double target) {
         double measured = right.getVelocity();
+        dashboardTelemetry.addData("Measured", measured);
+        dashboardTelemetry.addData("Target", target);
+
         // Feedforward handles the bulk of the power based on battery voltage
         double ff = kV * target * (13.0 / battery.getVoltage());
+
         // PID handles the correction
         double feedback = pid.calculate(measured, target);
 
         double power = ff + feedback;
+        dashboardTelemetry.addData("Power", power);
+        dashboardTelemetry.update();
         left.setPower(Range.clip(power, -1, 1));
         right.setPower(Range.clip(power, -1, 1));
     }
@@ -395,6 +292,8 @@ public class Shooter {
         telemetry.addData("Shooter Mode", mode);
         telemetry.addData("Target Velo", targetVelocity);
         telemetry.addData("Actual Velo", right.getVelocity());
+        dashboardTelemetry.update();
+
     }
 
     /* --- Internal Classes --- */
