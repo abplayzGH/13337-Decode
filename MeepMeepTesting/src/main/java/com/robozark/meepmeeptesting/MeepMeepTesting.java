@@ -11,12 +11,19 @@ public class MeepMeepTesting {
     public static void main(String[] args) {
         MeepMeep meepMeep = new MeepMeep(800);
 
-        double goalX = -25.0;    // TUNE
-        double goalY = 25.0;     // TUNE
-        double goalHeading = Math.toRadians(135);
 
-        double parkX = 37.0;     // TUNE
-        double parkY = -33.0;
+        double GOAL_HEADING = Math.toRadians(135);
+        final Vector2d GOAL = new Vector2d(-36, 30);
+        final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
+        final Vector2d PARK = new Vector2d(37, -33);
+        final Vector2d SPIKE_3 = new Vector2d(-12, 25);
+        final Vector2d SPIKE_2 = new Vector2d(12, 25);
+        final Vector2d SPIKE_1 = new Vector2d(36, 25);
+        final Vector2d SPIKE_3_FINAL = new Vector2d(-12, 50);
+        final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
+        final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
+//        final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
+        final Pose2d START_POSE = new Pose2d(-49, 49, Math.toRadians(305));
 
         // Declare our first bot
         RoadRunnerBotEntity myFirstBot = new DefaultBotBuilder(meepMeep)
@@ -25,21 +32,27 @@ public class MeepMeepTesting {
                 .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 15)
                 .build();
 
-        myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(new Pose2d(60, -12, Math.toRadians(180)))
+        myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(START_POSE)
 
-                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
+                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
 
-                .strafeToLinearHeading(new Vector2d(-12, 25), Math.toRadians(90))
+                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
 
-                .strafeTo(new Vector2d(-12, 60))
+                .strafeTo(SPIKE_3_FINAL)
 
-                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
+                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
 
-                .strafeToLinearHeading(new Vector2d(12, 25), Math.toRadians(90))
+                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90))
 
-                .strafeTo(new Vector2d(12, 60))
+                .strafeTo(SPIKE_2_FINAL)
 
-                .splineToSplineHeading(new Pose2d(goalX, goalY, goalHeading), Math.toRadians(90))
+                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
+
+                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90))
+
+                .strafeTo(SPIKE_1_FINAL)
+
+                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
 
                 .build());
 
