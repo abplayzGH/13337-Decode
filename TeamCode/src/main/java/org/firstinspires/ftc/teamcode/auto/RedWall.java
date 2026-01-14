@@ -10,6 +10,7 @@ import com.acmerobotics.roadrunner.*;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -43,42 +44,110 @@ public class RedWall extends LinearOpMode {
     final Vector2d SPIKE_3_FINAL = new Vector2d(-12, 50);
     final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
     final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
-    final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
+    final Pose2d START_POSE = new Pose2d(60, 12, Math.toRadians(180)); // Starting away from goal
 
 
     /* ---------------- ACTIONS ---------------- */
 
-    public class ShootAction implements Action {
-        private final Shooter shooter;
-        private final Intake intake;
-        private final Servo latch;
-        private boolean fired = false;
+    public class ShooterSub {
+        public Shooter shooter;
+        private Servo latch;
+        private Intake intake;
 
-        public ShootAction(Shooter shooter, Intake intake, Servo latch) {
-            this.shooter = shooter;
-            this.intake = intake;
-            this.latch = latch;
+        public ShooterSub(HardwareMap hw, Intake sharedIntake) {
+            shooter = new Shooter(hw, telemetry);
+            latch = hw.get(Servo.class, "latchServo");
+            this.intake = sharedIntake;
         }
 
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-            if (!fired) {
-                shooter.setRaw(SHOOT_POWER);
-                if (shooter.isAtTargetVelocity()) {
-                    latch.setPosition(LATCH_OPEN);
+        public Action spinUp() {
+            return new Action() {
+                private double startTime = -1;
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    if (startTime < 0) startTime = System.currentTimeMillis();
+
+                    // 1. Set the targets
+                    shooter.setMode(Shooter.Mode.RAW);
+                    shooter.setRaw(1);
+
+                    // 2. CRITICAL: Actually tell the hardware to move
+                    // Your Shooter class needs this to run the switch/case logic!
+                    shooter.periodic(null);
+
+                    packet.put("Velo", shooter.isAtTargetVelocity());
+
+                    boolean atSpeed = shooter.getVelocity() >= 350;
+                    boolean timeout = (System.currentTimeMillis() - startTime) > 2500;
+
+                    return !(atSpeed || timeout);
+                }
+            };
+        }
+        public Action fire() {
+            return new Action() {
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    telemetry.addLine("FIRE");
+                    latch.setPosition(0.1);
                     intake.runTransfer();
                     intake.runIntake();
-                    fired = true;
+                    return false;
                 }
-                return true;
-            } else {
-                latch.setPosition(LATCH_CLOSED);
-                intake.stopIntake();
-                shooter.setRaw(0);
-                return false;
+            };
+        }
+
+        public Action runIntake() {
+            return new Action() {
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    telemetry.addLine("Intake");
+                    latch.setPosition(0);
+                    intake.runTransfer();
+                    intake.runIntake();
+                    return true;
+                }
+            };
             }
+
+        public Action stop() {
+            return new Action() {
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    shooter.setRaw(0);
+                    latch.setPosition(0);
+                    intake.stopIntake();
+                    return false;
+                }
+            };
         }
     }
+
+    public class TurretSub {
+        private Turret turret;
+        private VisionManager vision;
+
+        public TurretSub(HardwareMap hw, VisionManager vision) {
+            turret = new Turret();
+            turret.init(hw, "turret_motor");
+            this.vision = vision;
+        }
+
+        public Action aimAtTag(int tagId) {
+            return new Action() {
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    AprilTagDetection target = vision.getTargetDetection(tagId);
+                    if (target != null) {
+                        turret.updateTurretTracking(target, getRuntime());
+                        return Math.abs(target.ftcPose.bearing) > 2.0;
+                    }
+                    return true;
+                }
+            };
+        }
+    }
+
 
     @Override
     public void runOpMode() {
@@ -89,17 +158,14 @@ public class RedWall extends LinearOpMode {
         Intake intake = new Intake();
         intake.init(hardwareMap);
 
-        Shooter shooter = new Shooter(hardwareMap, telemetry);
-        shooter.setMode(Shooter.Mode.RAW);
-
-        Turret turret = new Turret();
-        turret.init(hardwareMap, "turret_motor");
-
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
         latch.setPosition(LATCH_CLOSED);
 
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
         VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480));
+
+        ShooterSub shooter = new ShooterSub(hardwareMap, intake);
+        TurretSub turret = new TurretSub(hardwareMap, vision);
 
         /* ---------------- VISION INIT LOOP ---------------- */
         AprilTagDetection tag = null;
@@ -133,35 +199,73 @@ public class RedWall extends LinearOpMode {
                 .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
 
         TrajectoryActionBuilder driveIntoSpike2 = drive.actionBuilder(START_POSE)
-                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
+                .strafeToLinearHeading(SPIKE_2_FINAL, Math.toRadians(90));
 
         TrajectoryActionBuilder toSpike1 = drive.actionBuilder(START_POSE)
-                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
+                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90));
 
         TrajectoryActionBuilder driveIntoSpike1 = drive.actionBuilder(START_POSE)
-                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90));
+                .strafeToLinearHeading(SPIKE_1_FINAL, Math.toRadians(90));
 
 
         /* ---------------- RUN AUTO ---------------- */
         Actions.runBlocking(
                 new SequentialAction(
-                        toFirstGoal.build(),
-                        new ShootAction(shooter, intake, latch),
+                        new ParallelAction(
+                                toFirstGoal.build(),
+                                shooter.spinUp()
+                        ),
+                        shooter.fire(),
+                        new SleepAction(1.5),
+                        shooter.stop(),
 
                         toSpike3.build(),
-                        driveIntoSpike3.build(),
-                        toFirstGoal.build(),
-                        new ShootAction(shooter, intake, latch),
+
+                        new ParallelAction(
+                        shooter.runIntake(),
+                        driveIntoSpike3.build()
+                        ),
+
+                        new ParallelAction(
+                                toFirstGoal.build(),
+                                shooter.spinUp()
+                        ),
+
+                        shooter.fire(),
+                        new SleepAction(1.5),
+                        shooter.stop(),
 
                         toSpike2.build(),
+
+                        new ParallelAction(
                         driveIntoSpike2.build(),
-                        toFirstGoal.build(),
-                        new ShootAction(shooter, intake, latch),
+                        shooter.runIntake()
+                        ),
+
+                        new ParallelAction(
+                                toFirstGoal.build(),
+                                shooter.spinUp()
+                        ),
+                        shooter.fire(),
+                        new SleepAction(1.5),
+                        shooter.stop(),
 
                         toSpike1.build(),
-                        driveIntoSpike1.build(),
-                        toFirstGoal.build(),
-                        new ShootAction(shooter, intake, latch),
+
+                        new ParallelAction(
+                                driveIntoSpike1.build(),
+                                shooter.spinUp()
+                        ),
+
+                        new ParallelAction(
+                                toFirstGoal.build(),
+                                shooter.spinUp()
+                        ),
+
+                        shooter.fire(),
+                        new SleepAction(1.5),
+                        shooter.stop(),
+
 
                         parkTrajectory.build()
                 )
