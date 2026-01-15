@@ -288,6 +288,11 @@ public class Shooter {
         return Math.abs(targetVelocity - right.getVelocity()) < VELO_TOL;
     }
 
+    public void setTargetVelocity(double v) {
+        targetVelocity = v;
+    }
+
+
     private void log() {
         telemetry.addData("Shooter Mode", mode);
         telemetry.addData("Target Velo", targetVelocity);

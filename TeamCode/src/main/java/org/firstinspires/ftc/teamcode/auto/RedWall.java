@@ -35,7 +35,7 @@ public class RedWall extends LinearOpMode {
     private static final int[] TARGET_TAGS = {20, 24};
 
     double GOAL_HEADING = Math.toRadians(135);
-    final Vector2d GOAL = new Vector2d(-30, 24);
+    final Vector2d GOAL = new Vector2d(-25, 19);
     final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
     final Pose2d PARK = new Pose2d(new Vector2d(37, -33), Math.toRadians(0));
     final Pose2d SPIKE_3 = new Pose2d((new Vector2d(-12, 25)), Math.toRadians(90));
@@ -68,19 +68,17 @@ public class RedWall extends LinearOpMode {
                     if (startTime < 0) startTime = System.currentTimeMillis();
 
                     // 1. Set the targets
-                    shooter.setMode(Shooter.Mode.RAW);
-                    shooter.setRaw(.4);
+                    shooter.setMode(Shooter.Mode.FIXED);
+                    shooter.setTargetVelocity(600);
 
                     // 2. CRITICAL: Actually tell the hardware to move
                     // Your Shooter class needs this to run the switch/case logic!
                     shooter.periodic(null);
 
-                    packet.put("Velo", shooter.isAtTargetVelocity());
+                    packet.put("Velo", shooter.getVelocity());
 
-                    boolean atSpeed = shooter.getVelocity() >= 350;
-                    boolean timeout = (System.currentTimeMillis() - startTime) > 2500;
 
-                    return !(atSpeed || timeout);
+                    return (shooter.isAtTargetVelocity());
                 }
             };
         }
@@ -232,9 +230,10 @@ public class RedWall extends LinearOpMode {
                         toSpike3.build(),
 
                         new ParallelAction(
-                        shooter.runIntake(),
-                        driveIntoSpike3.build()
+                            shooter.runIntake(),
+                            driveIntoSpike3.build()
                         ),
+                        shooter.stop(),
 
                         new ParallelAction(
                                 toFirstGoal.build(),
@@ -248,9 +247,10 @@ public class RedWall extends LinearOpMode {
                         toSpike2.build(),
 
                         new ParallelAction(
-                        driveIntoSpike2.build(),
-                        shooter.runIntake()
+                            driveIntoSpike2.build(),
+                            shooter.runIntake()
                         ),
+                        shooter.stop(),
 
                         new ParallelAction(
                                 toFirstGoal.build(),
