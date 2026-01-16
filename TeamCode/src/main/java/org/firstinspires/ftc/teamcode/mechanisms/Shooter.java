@@ -188,7 +188,8 @@ public class Shooter {
     public static double IDLE_VELO = 100; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;
-    public static double targetVelocity = 800;
+    public static double shootVelocity = 700;
+    public static double targetVelocity = shootVelocity;
     public static double targetPower = 0;
 
     private final DcMotorEx left, right;

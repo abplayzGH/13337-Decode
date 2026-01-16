@@ -28,7 +28,7 @@ public class TheGas extends LinearOpMode {
     private static final int[] TARGET_TAGS = {20, 24};
     private static final String MOTOR_NAME = "turret_motor";
 
-    private static final double SHOOTER_READY_VELOCITY = 900;
+    private static final double SHOOTER_READY_VELOCITY = 700;
     private static final double LATCH_OPEN = 0.1;
     private static final double LATCH_CLOSED = 0;
 
@@ -101,6 +101,7 @@ public class TheGas extends LinearOpMode {
 
             if (shootRaw) {
                 shooter.setMode(Shooter.Mode.FIXED);
+                shooter.setTargetVelocity(SHOOTER_READY_VELOCITY);
                 if (shooter.isAtTargetVelocity()) {
                     latch.setPosition(LATCH_OPEN);
                     intake.runIntake();

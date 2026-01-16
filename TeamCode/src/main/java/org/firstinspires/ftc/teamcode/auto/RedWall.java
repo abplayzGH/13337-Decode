@@ -35,7 +35,7 @@ public class RedWall extends LinearOpMode {
     private static final int[] TARGET_TAGS = {20, 24};
 
     double GOAL_HEADING = Math.toRadians(135);
-    final Vector2d GOAL = new Vector2d(-25, 19);
+    final Vector2d GOAL = new Vector2d(-25, 25);
     final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
     final Pose2d PARK = new Pose2d(new Vector2d(37, -33), Math.toRadians(0));
     final Pose2d SPIKE_3 = new Pose2d((new Vector2d(-12, 25)), Math.toRadians(90));
@@ -69,14 +69,14 @@ public class RedWall extends LinearOpMode {
 
                     // 1. Set the targets
                     shooter.setMode(Shooter.Mode.FIXED);
-                    shooter.setTargetVelocity(600);
+                    shooter.setTargetVelocity(500);
 
                     // 2. CRITICAL: Actually tell the hardware to move
                     // Your Shooter class needs this to run the switch/case logic!
                     shooter.periodic(null);
 
                     packet.put("Velo", shooter.getVelocity());
-
+                    telemetry.addData("Velocity", shooter.getVelocity());
 
                     return (shooter.isAtTargetVelocity());
                 }
@@ -263,17 +263,17 @@ public class RedWall extends LinearOpMode {
                         toSpike1.build(),
 
                         new ParallelAction(
-                                driveIntoSpike1.build()
-//                                shooter.spinUp()
+                                driveIntoSpike1.build(),
+                                shooter.runIntake()
                         ),
 
                         new ParallelAction(
-                                toFirstGoal.build()
-//                                shooter.spinUp()
+                                toFirstGoal.build(),
+                                shooter.spinUp()
                         ),
 
                         shooter.fire(),
-                        new SleepAction(1.5),
+                        new SleepAction(2),
                         shooter.stop(),
 
 
