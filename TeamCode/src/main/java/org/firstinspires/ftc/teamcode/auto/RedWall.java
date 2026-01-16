@@ -69,7 +69,7 @@ public class RedWall extends LinearOpMode {
 
                     // 1. Set the targets
                     shooter.setMode(Shooter.Mode.FIXED);
-                    shooter.setTargetVelocity(500);
+                    shooter.setTargetVelocity(700);
 
                     // 2. CRITICAL: Actually tell the hardware to move
                     // Your Shooter class needs this to run the switch/case logic!
