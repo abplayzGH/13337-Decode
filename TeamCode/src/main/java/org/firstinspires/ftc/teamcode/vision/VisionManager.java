@@ -63,8 +63,8 @@ public class VisionManager {
         portal = new VisionPortal.Builder()
                 .setCamera(camera)
                 .setCameraResolution(res)
-                .addProcessor(purpleProcessor)
-                .addProcessor(greenProcessor)
+//                .addProcessor(purpleProcessor)
+//                .addProcessor(greenProcessor)
                 .addProcessor(this.tagProcessor)
                 .setStreamFormat(VisionPortal.StreamFormat.MJPEG)
                 .build();

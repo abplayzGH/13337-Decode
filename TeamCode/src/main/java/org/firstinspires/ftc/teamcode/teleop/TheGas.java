@@ -25,7 +25,7 @@ import org.firstinspires.ftc.vision.opencv.ColorRange;
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
 
-    private static final int[] TARGET_TAGS = {20, 24};
+    private static final int[] TARGET_TAGS = {20, 24, 23};
     private static final String MOTOR_NAME = "turret_motor";
 
     private static final double SHOOTER_READY_VELOCITY = 700;
@@ -83,8 +83,8 @@ public class TheGas extends LinearOpMode {
             mecanum.Drive(leftX, leftY, rightX, speed);
 
             /* -------- SHOOTER / INTAKE -------- */
-            boolean shootRaw = gamepad2.a;
-            boolean shootDynamic = gamepad2.b;
+            boolean shootRaw = gamepad2.a || gamepad1.a;
+            boolean shootDynamic = gamepad2.b || gamepad1.b;
 
             boolean intakeIn = gamepad1.right_bumper || gamepad2.right_bumper;
             boolean intakeOut = gamepad1.left_bumper || gamepad2.left_bumper;
@@ -98,6 +98,26 @@ public class TheGas extends LinearOpMode {
             Color.RGBToHSV(colorSensor.red(), colorSensor.green(), colorSensor.blue(), hsv);
 
             float hue = hsv[0]; // Hue is measured in degrees (0-360)
+
+            /* -------- VISION / TURRET -------- */
+            AprilTagDetection target = null; //TODO Test edge cases with no target
+            for (int id : TARGET_TAGS) {
+                target = vision.getTargetDetection(id);
+                if (target != null) break;
+            }
+
+
+            //TODO Test turret tracking``
+            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
+                turret.setManualPower(gamepad2.right_stick_x * 0.8);
+            } else if (target != null){
+                turret.updateTurretTracking(target, getRuntime()); //TODO Add angle limit to auto tracking
+            } else {
+                turret.setManualPower(0);
+            }
+
+            shooter.periodic(target);
+
 
             if (shootRaw) {
                 shooter.setMode(Shooter.Mode.FIXED);
@@ -142,24 +162,6 @@ public class TheGas extends LinearOpMode {
 //                shooter.setIdle();
             }
 
-            /* -------- VISION / TURRET -------- */
-            AprilTagDetection target = null; //TODO Test edge cases with no target
-            for (int id : TARGET_TAGS) {
-                target = vision.getTargetDetection(id);
-                if (target != null) break;
-            }
-
-
-            //TODO Test turret tracking``
-            if (Math.abs(gamepad2.right_stick_x) > 0.05) {
-                turret.setManualPower(gamepad2.right_stick_x * 0.8);
-            } else if (target != null){
-                turret.updateTurretTracking(target, getRuntime()); //TODO Add angle limit to auto tracking
-            } else {
-                turret.setManualPower(0);
-            }
-
-            shooter.periodic(target);
 
             /* -------- TELEMETRY -------- */
 //            telemetry.addData("Shooter Vel", shooter.getVelocity());

@@ -234,28 +234,71 @@ public class Shooter {
         return lut;
     }
 
+//    public void periodic(AprilTagDetection detection) {
+//        dashboardTelemetry.addData("Shooter Mode", mode);
+//        switch (mode) {
+//            case RAW:
+//                left.setPower(targetPower);
+//                right.setPower(targetPower);
+//                break;
+//            case FIXED:
+//                applyVelocity(targetVelocity);
+//                break;
+//            case DYNAMIC:
+//                if (detection != null) {
+//                    double dist = Math.hypot(detection.ftcPose.x, detection.ftcPose.z);
+//                    targetVelocity = distToVelo.get(Range.clip(dist, 0, 15));
+//                    applyVelocity(targetVelocity);
+//                    dashboardTelemetry.addLine("--- Vision Debug ---");
+//                    dashboardTelemetry.addData("Raw Dist", dist); // You'll need to store this variable
+//                    dashboardTelemetry.addData("LUT Output", distToVelo.get(dist));
+//
+//                } else {
+//                    applyVelocity(IDLE_VELO);
+//                    dashboardTelemetry.addLine("No Tag");
+//                }
+//                break;
+//        }
+//        log();
+//    }
+
     public void periodic(AprilTagDetection detection) {
         dashboardTelemetry.addData("Shooter Mode", mode);
+
         switch (mode) {
             case RAW:
                 left.setPower(targetPower);
                 right.setPower(targetPower);
                 break;
+
             case FIXED:
                 applyVelocity(targetVelocity);
                 break;
+
             case DYNAMIC:
                 if (detection != null) {
-                    double dist = Math.hypot(detection.ftcPose.x, detection.ftcPose.z);
-                    targetVelocity = distToVelo.get(Range.clip(dist, 0, 15));
-                    applyVelocity(targetVelocity);
-                    dashboardTelemetry.addLine("--- Vision Debug ---");
-                    dashboardTelemetry.addData("Raw Dist", dist); // You'll need to store this variable
-                    dashboardTelemetry.addData("LUT Output", distToVelo.get(dist));
+                    // 1. Calculate distance in INCHES
+                    double distInches = Math.hypot(detection.ftcPose.x, detection.ftcPose.y);
+                    // 2. Convert to FEET (since your LUT is 0-15)
+                    double distFeet = distInches / 12.0;
 
+                    // 3. Update target velocity
+                    targetVelocity = distToVelo.get(Range.clip(distFeet, 0, 15));
+
+                    applyVelocity(targetVelocity);
+
+                    // Debugging
+                    dashboardTelemetry.addLine("--- Vision Debug ---");
+                    dashboardTelemetry.addData("Dist (Inches)", distInches);
+                    dashboardTelemetry.addData("Dist (Feet)", distFeet);
+                    dashboardTelemetry.addData("Target RPM", targetVelocity);
                 } else {
-                    applyVelocity(IDLE_VELO);
-                    dashboardTelemetry.addLine("No Tag");
+                    // 4. PREVENT SPIN DOWN:
+                    // If we lose the tag, keep spinning at the last known targetVelocity
+                    // instead of dropping to IDLE_VELO immediately.
+                    applyVelocity(targetVelocity);
+
+                    dashboardTelemetry.addLine("No Tag - Holding Last Velocity");
                 }
                 break;
         }
