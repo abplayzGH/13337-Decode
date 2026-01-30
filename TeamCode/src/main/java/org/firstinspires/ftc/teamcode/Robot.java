@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -16,12 +17,12 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 
 public class Robot {
-    private static final int[] TARGET_TAGS = {20, 24};
-    private static final String MOTOR_NAME = "turret_motor";
+    public static int TARGET_TAG = 20;
+    public static final String MOTOR_NAME = "turret_motor";
 
-    private static final double SHOOTER_READY_VELOCITY = 700;
-    private static final double LATCH_OPEN = 0.1;
-    private static final double LATCH_CLOSED = 0;
+    public static double SHOOTER_READY_VELOCITY = 700;
+    public static double LATCH_OPEN = 0.1;
+    public static double LATCH_CLOSED = 0;
 
     public FtcDashboard dashboard;
     public Telemetry dashboardTelemetry;
@@ -33,6 +34,19 @@ public class Robot {
     public Turret turret;
     public VisionManager vision;;
     public Mecanum mecanum;
+    public final ElapsedTime matchTimer = new ElapsedTime();
+
+    public enum Mode {
+        AUTO,
+        TELEOP
+    }
+
+    public enum Alliance {
+        RED, BLUE
+    }
+
+    public static Alliance alliance = Alliance.RED;
+    public static Mode mode = Mode.AUTO;
 
 
     public Robot(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -55,5 +69,11 @@ public class Robot {
 
         mecanum = new Mecanum();
         mecanum.Init(hardwareMap);
+        TARGET_TAG = (alliance == Alliance.RED) ? 20 : 24;
+
+        latch.setPosition(0);
+        vision.startDashboardStream(15); // TODO disable for comp
+        matchTimer.reset();
+
     }
 }

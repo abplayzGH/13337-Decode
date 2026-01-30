@@ -2,10 +2,11 @@ package org.firstinspires.ftc.teamcode.teleop;
 
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
-
+@Disabled
 public class ThePlasma extends LinearOpMode {
 
     public Robot robot = new Robot(hardwareMap, telemetry);

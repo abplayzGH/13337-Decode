@@ -170,6 +170,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
@@ -191,7 +192,7 @@ public class Shooter {
     public static double shootVelocity = 700;
     public static double targetVelocity = shootVelocity;
     public static double targetPower = 0;
-    public static double LUTKv = 1.3;
+    public static double LUTKv = 1.31;
 
     private final DcMotorEx left, right;
     private final VoltageSensor battery;
@@ -199,9 +200,7 @@ public class Shooter {
     private final InterpLUT distToVelo;
     private final Telemetry telemetry;
 
-    public FtcDashboard dashboard;
-
-    public Telemetry dashboardTelemetry;
+    private Robot robot;
     public Shooter(HardwareMap hw, Telemetry tele) {
         this.telemetry = tele;
         left = hw.get(DcMotorEx.class, "leftFlyWheel");
@@ -215,8 +214,8 @@ public class Shooter {
 
         battery = hw.voltageSensor.iterator().next();
         distToVelo = buildLUT();
-        dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = dashboard.getTelemetry();
+        robot = new Robot(hw, tele);
+
 
     }
 
@@ -235,36 +234,8 @@ public class Shooter {
         return lut;
     }
 
-//    public void periodic(AprilTagDetection detection) {
-//        dashboardTelemetry.addData("Shooter Mode", mode);
-//        switch (mode) {
-//            case RAW:
-//                left.setPower(targetPower);
-//                right.setPower(targetPower);
-//                break;
-//            case FIXED:
-//                applyVelocity(targetVelocity);
-//                break;
-//            case DYNAMIC:
-//                if (detection != null) {
-//                    double dist = Math.hypot(detection.ftcPose.x, detection.ftcPose.z);
-//                    targetVelocity = distToVelo.get(Range.clip(dist, 0, 15));
-//                    applyVelocity(targetVelocity);
-//                    dashboardTelemetry.addLine("--- Vision Debug ---");
-//                    dashboardTelemetry.addData("Raw Dist", dist); // You'll need to store this variable
-//                    dashboardTelemetry.addData("LUT Output", distToVelo.get(dist));
-//
-//                } else {
-//                    applyVelocity(IDLE_VELO);
-//                    dashboardTelemetry.addLine("No Tag");
-//                }
-//                break;
-//        }
-//        log();
-//    }
-
     public void periodic(AprilTagDetection detection) {
-        dashboardTelemetry.addData("Shooter Mode", mode);
+        robot.dashboardTelemetry.addData("Shooter Mode", mode);
 
         switch (mode) {
             case RAW:
@@ -289,7 +260,7 @@ public class Shooter {
                     applyVelocity(targetVelocity);
 
                     // Debugging
-                    dashboardTelemetry.addLine("--- Vision Debug ---");
+                    robot.dashboardTelemetry.addLine("--- Vision Debug ---");
                     dashboardTelemetry.addData("Dist (Inches)", distInches);
                     dashboardTelemetry.addData("Dist (Feet)", distFeet);
                     dashboardTelemetry.addData("Target RPM", targetVelocity);

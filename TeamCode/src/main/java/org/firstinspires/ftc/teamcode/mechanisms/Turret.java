@@ -1,19 +1,32 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
+@Config
 public class Turret {
-    private DcMotorEx turretMotor;
-    private static final int LEFT_LIMIT = -1000; //TODO Tune limits
-    private static final int RIGHT_LIMIT = 1000;
-    private static final double kP = 0.02; // Proportional gain for turret tracking
-    private static final double kD = 0.001;
-    private static final double MAX_AUTO_POWER = 0.7;
 
+    private DcMotorEx turretMotor;
+    private final ElapsedTime timer = new ElapsedTime();
+
+    // ---- Encoder Limits (TUNE THESE) ----
+    private static  int LEFT_LIMIT  = -1000;
+    private static  int RIGHT_LIMIT = 1000;
+
+    // ---- Control Constants ----
+    private static  double kP = 0.02;
+    private static  double kD = 0.001;
+    private static  double kF = 0.05;      // Feedforward (helps overcome friction)
+    private static  double MAX_AUTO_POWER = 0.6;
+    private static  double DEADZONE_DEG = 0.5;
+
+    // ---- State ----
     private double lastError = 0.0;
     private double lastTime = 0.0;
 
@@ -23,41 +36,82 @@ public class Turret {
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turretMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        timer.reset();
+        lastTime = timer.seconds();
     }
 
+    // ---- Soft Limits ----
     private double limitPower(double power) {
-        int currentPos = turretMotor.getCurrentPosition();
-        if (currentPos <= LEFT_LIMIT && power < 0) return 0;
-        if (currentPos >= RIGHT_LIMIT && power > 0) return 0;
+        int pos = turretMotor.getCurrentPosition();
+
+        if (pos <= LEFT_LIMIT && power < 0) return 0;
+        if (pos >= RIGHT_LIMIT && power > 0) return 0;
+
         return power;
     }
 
+    // ---- Manual Control ----
     public void setManualPower(double power) {
         turretMotor.setPower(limitPower(power));
     }
 
-    public double updateTurretTracking(AprilTagDetection detection, double currentTime) {
-        if (detection != null) {
-            double currentBearing = detection.ftcPose.bearing;
-            double dt = currentTime - lastTime;
-            if (dt < 0.005) return turretMotor.getPower();
+    // ---- AprilTag Tracking ----
+    public double updateTracking(AprilTagDetection detection) {
 
-            double error = 0.0 - currentBearing;
-            double derivative = (error - lastError) / dt;
-            double correction = (error * kP) + (derivative * kD);
+        double currentTime = timer.seconds();
+        double dt = currentTime - lastTime;
 
+        if (dt <= 0.01) {
+            return turretMotor.getPower();
+        }
+
+        // Lost target → stop + reset controller
+        if (detection == null) {
+            resetController(currentTime);
+            turretMotor.setPower(0);
+            return 0;
+        }
+
+        double error = -detection.ftcPose.bearing;
+
+        // Deadzone prevents jitter
+        if (Math.abs(error) < DEADZONE_DEG) {
+            turretMotor.setPower(0);
             lastError = error;
             lastTime = currentTime;
-
-            double drivePower = Range.clip(correction, -MAX_AUTO_POWER, MAX_AUTO_POWER);
-            double limitedPower = limitPower(drivePower);
-            turretMotor.setPower(limitedPower);
-            return limitedPower;
-        } else {
-            turretMotor.setPower(0.0);
-            return 0.0;
+            return 0;
         }
+
+        // Derivative (clamped to reduce noise)
+        double derivative = Range.clip(
+                (error - lastError) / dt,
+                -50, 50
+        );
+
+        // PD + Feedforward
+        double output =
+                (kP * error) +
+                        (kD * derivative) +
+                        (Math.signum(error) * kF);
+
+        double power = Range.clip(output, -MAX_AUTO_POWER, MAX_AUTO_POWER);
+        power = limitPower(power);
+
+        turretMotor.setPower(power);
+
+        lastError = error;
+        lastTime = currentTime;
+
+        return power;
     }
 
-    public int getPosition() { return turretMotor.getCurrentPosition(); }
+    private void resetController(double time) {
+        lastError = 0;
+        lastTime = time;
+    }
+
+    public int getPosition() {
+        return turretMotor.getCurrentPosition();
+    }
 }
