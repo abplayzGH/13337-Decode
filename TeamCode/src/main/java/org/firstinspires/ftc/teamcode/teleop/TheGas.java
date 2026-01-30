@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import static org.firstinspires.ftc.teamcode.Robot.alliance;
+
 import android.graphics.Color;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.ftc.FlightRecorder;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -39,7 +42,6 @@ public class TheGas extends LinearOpMode {
 
     ShooterState shooterState = ShooterState.IDLE;
 
-
     @Override
     public void runOpMode() {
         //TODO Make subsystem robot class
@@ -47,10 +49,8 @@ public class TheGas extends LinearOpMode {
         //TODO Add better error handling
         //TODO Optimize
 
-        robot = new Robot(hardwareMap, telemetry);
-
         // Safe to use robot fields now
-
+        robot = Robot.get().Init(Robot.Mode.AUTO, hardwareMap, telemetry);
         waitForStart();
 
         boolean endgameRumbled = false;
@@ -164,13 +164,9 @@ public class TheGas extends LinearOpMode {
 
             /* -------- TELEMETRY -------- */
 //            telemetry.addData("Shooter Vel", shooter.getVelocity());
-            telemetry.addData("Turret Pos", robot.turret.getPosition());
-            telemetry.addData("Tag", target != null ? target.id : "None");
-            telemetry.addData("Servo Position", robot.latch.getPosition());
-            telemetry.addData("Color", robot.colorSensor.red() + ", " + robot.colorSensor.green() + ", " + robot.colorSensor.blue());
-            telemetry.addData("Hue", hue);
-            telemetry.update();
-            robot.dashboardTelemetry.update();
+            robot.flightRecorder.addData("Tag", target != null ? target.id : "None");
+            robot.flightRecorder.addData("Hue", hue);
+            robot.endLoop();
 
         }
     }

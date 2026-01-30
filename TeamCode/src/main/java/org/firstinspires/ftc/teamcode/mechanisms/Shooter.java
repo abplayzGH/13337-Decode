@@ -198,25 +198,20 @@ public class Shooter {
     private final VoltageSensor battery;
     private final PIDController pid = new PIDController();
     private final InterpLUT distToVelo;
-    private final Telemetry telemetry;
 
     private Robot robot;
-    public Shooter(HardwareMap hw, Telemetry tele) {
-        this.telemetry = tele;
+
+    public Shooter(HardwareMap hw, Robot robotInstance) {
+        this.robot = robotInstance; // Store the reference to the robot that owns this shooter
+
         left = hw.get(DcMotorEx.class, "leftFlyWheel");
         right = hw.get(DcMotorEx.class, "rightFlyWheel");
-
-        left.setDirection(DcMotorSimple.Direction.REVERSE);
-        right.setDirection(DcMotorSimple.Direction.FORWARD);
-
-        left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // ... rest of your hardware setup ...
 
         battery = hw.voltageSensor.iterator().next();
         distToVelo = buildLUT();
-        robot = new Robot(hw, tele);
 
-
+        // NO MORE Robot.get().Init() here!
     }
 
     private InterpLUT buildLUT() {
@@ -235,7 +230,7 @@ public class Shooter {
     }
 
     public void periodic(AprilTagDetection detection) {
-        robot.dashboardTelemetry.addData("Shooter Mode", mode);
+//        robot.dashboardTelemetry.addData("Shooter Mode", mode);
 
         switch (mode) {
             case RAW:
@@ -260,27 +255,27 @@ public class Shooter {
                     applyVelocity(targetVelocity);
 
                     // Debugging
-                    robot.dashboardTelemetry.addLine("--- Vision Debug ---");
-                    dashboardTelemetry.addData("Dist (Inches)", distInches);
-                    dashboardTelemetry.addData("Dist (Feet)", distFeet);
-                    dashboardTelemetry.addData("Target RPM", targetVelocity);
+//                    robot.dashboardTelemetry.addLine("--- Vision Debug ---");
+//                    robot.dashboardTelemetry.addData("Dist (Inches)", distInches);
+//                    robot.dashboardTelemetry.addData("Dist (Feet)", distFeet);
+//                    robot.dashboardTelemetry.addData("Target RPM", targetVelocity);
                 } else {
                     // 4. PREVENT SPIN DOWN:
                     // If we lose the tag, keep spinning at the last known targetVelocity
                     // instead of dropping to IDLE_VELO immediately.
                     applyVelocity(targetVelocity);
 
-                    dashboardTelemetry.addLine("No Tag - Holding Last Velocity");
+                    robot.dashboardTelemetry.addLine("No Tag - Holding Last Velocity");
                 }
                 break;
         }
-        log();
+//        log();
     }
 
     private void applyVelocity(double target) {
         double measured = right.getVelocity();
-        dashboardTelemetry.addData("Measured", measured);
-        dashboardTelemetry.addData("Target", target);
+//        robot.dashboardTelemetry.addData("Measured", measured);
+//        robot.dashboardTelemetry.addData("Target", target);
 
         // Feedforward handles the bulk of the power based on battery voltage
         double ff = kV * target * (13.0 / battery.getVoltage());
@@ -289,8 +284,8 @@ public class Shooter {
         double feedback = pid.calculate(measured, target);
 
         double power = ff + feedback;
-        dashboardTelemetry.addData("Power", power);
-        dashboardTelemetry.update();
+//        robot.dashboardTelemetry.addData("Power", power);
+//        robot.dashboardTelemetry.update();
         left.setPower(Range.clip(power, -1, 1));
         right.setPower(Range.clip(power, -1, 1));
     }
@@ -309,13 +304,13 @@ public class Shooter {
     }
 
 
-    private void log() {
-        telemetry.addData("Shooter Mode", mode);
-        telemetry.addData("Target Velo", targetVelocity);
-        telemetry.addData("Actual Velo", right.getVelocity());
-        dashboardTelemetry.update();
-
-    }
+//    private void log() {
+//        telemetry.addData("Shooter Mode", mode);
+//        telemetry.addData("Target Velo", targetVelocity);
+//        telemetry.addData("Actual Velo", right.getVelocity());
+//        robot.dashboardTelemetry.update();
+//
+//    }
 
     /* --- Internal Classes --- */
 

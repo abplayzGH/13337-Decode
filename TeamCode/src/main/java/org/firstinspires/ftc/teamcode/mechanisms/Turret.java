@@ -40,6 +40,10 @@ public class Turret {
         timer.reset();
         lastTime = timer.seconds();
     }
+    public void reset(){
+        resetController(0);
+        turretMotor.setPower(0);
+    }
 
     // ---- Soft Limits ----
     private double limitPower(double power) {
