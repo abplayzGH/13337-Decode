@@ -94,7 +94,6 @@ public class Blue extends LinearOpMode {
     public class TurretSub {
         private Turret turret;
         private VisionManager vision;
-
         public TurretSub(HardwareMap hw, VisionManager vision) {
             turret = new Turret();
             turret.init(hw, "turret_motor");
