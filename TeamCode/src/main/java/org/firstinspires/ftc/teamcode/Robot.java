@@ -77,7 +77,7 @@ public class Robot {
         intake = new Intake();
         intake.init(hardwareMap);
 
-        shooter = new Shooter(hardwareMap, this);
+        shooter = new Shooter(hardwareMap, telemetry);
         shooter.setMode(Shooter.Mode.RAW);
 
         turret = new Turret();

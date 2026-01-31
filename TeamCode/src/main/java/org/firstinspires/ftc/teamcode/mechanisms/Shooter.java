@@ -181,10 +181,10 @@ public class Shooter {
     public enum Mode { RAW, FIXED, DYNAMIC }
 
     /* ---------------- Tunable Config Values ---------------- */
-    public static double kP = 0.0001;
+    public static double kP = 0.001;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kV = 0.00035;
+    public static double kV = 0.001;
     public static double VELO_TOL = 50;
     public static double IDLE_VELO = 100; // Match your LUT sign (negative)
 
@@ -198,18 +198,26 @@ public class Shooter {
     private final VoltageSensor battery;
     private final PIDController pid = new PIDController();
     private final InterpLUT distToVelo;
+    public FtcDashboard dashboard;
+    public Telemetry dashboardTelemetry;
 
-    private Robot robot;
+//    private Robot robot;
 
-    public Shooter(HardwareMap hw, Robot robotInstance) {
-        this.robot = robotInstance; // Store the reference to the robot that owns this shooter
+    public Shooter(HardwareMap hw, Telemetry telemetry) {
+//        this.robot = robotInstance; // Store the reference to the robot that owns this shooter
 
         left = hw.get(DcMotorEx.class, "leftFlyWheel");
         right = hw.get(DcMotorEx.class, "rightFlyWheel");
         // ... rest of your hardware setup ...
 
+        left.setDirection(DcMotorSimple.Direction.REVERSE);
+        right.setDirection(DcMotorSimple.Direction.FORWARD);
+
         battery = hw.voltageSensor.iterator().next();
         distToVelo = buildLUT();
+
+        dashboard = FtcDashboard.getInstance();
+        dashboardTelemetry = dashboard.getTelemetry();
 
         // NO MORE Robot.get().Init() here!
     }
@@ -255,17 +263,17 @@ public class Shooter {
                     applyVelocity(targetVelocity);
 
                     // Debugging
-//                    robot.dashboardTelemetry.addLine("--- Vision Debug ---");
-//                    robot.dashboardTelemetry.addData("Dist (Inches)", distInches);
-//                    robot.dashboardTelemetry.addData("Dist (Feet)", distFeet);
-//                    robot.dashboardTelemetry.addData("Target RPM", targetVelocity);
+                    dashboardTelemetry.addLine("--- Vision Debug ---");
+                    dashboardTelemetry.addData("Dist (Inches)", distInches);
+                    dashboardTelemetry.addData("Dist (Feet)", distFeet);
+                    dashboardTelemetry.addData("Target RPM", targetVelocity);
                 } else {
                     // 4. PREVENT SPIN DOWN:
                     // If we lose the tag, keep spinning at the last known targetVelocity
                     // instead of dropping to IDLE_VELO immediately.
                     applyVelocity(targetVelocity);
 
-                    robot.dashboardTelemetry.addLine("No Tag - Holding Last Velocity");
+//                  dashboardTelemetry.addLine("No Tag - Holding Last Velocity");
                 }
                 break;
         }
@@ -274,8 +282,8 @@ public class Shooter {
 
     private void applyVelocity(double target) {
         double measured = right.getVelocity();
-//        robot.dashboardTelemetry.addData("Measured", measured);
-//        robot.dashboardTelemetry.addData("Target", target);
+        dashboardTelemetry.addData("Measured", measured);
+        dashboardTelemetry.addData("Target", target);
 
         // Feedforward handles the bulk of the power based on battery voltage
         double ff = kV * target * (13.0 / battery.getVoltage());
