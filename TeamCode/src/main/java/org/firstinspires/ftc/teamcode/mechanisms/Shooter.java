@@ -191,7 +191,7 @@ public class Shooter {
     public static double shootVelocity = 700;
     public static double targetVelocity = shootVelocity;
     public static double targetPower = 0;
-    public static double LUTKv = 1.3;
+    public static double LUTKv = 1.33;
 
     private final DcMotorEx left, right;
     private final VoltageSensor battery;
@@ -224,9 +224,9 @@ public class Shooter {
         InterpLUT lut = new InterpLUT();
         lut.add(0, 400* LUTKv);
         lut.add(2, 450* LUTKv);
-        lut.add(4, 500* LUTKv);
-        lut.add(7, 560* LUTKv);
-        lut.add(9, 740* LUTKv);
+        lut.add(4, 530* LUTKv);
+        lut.add(7, 570* LUTKv);
+        lut.add(9, 750* LUTKv);
         lut.add(12, 880* LUTKv);
         lut.add(13, 900* LUTKv);
         lut.add(14, 980* LUTKv);

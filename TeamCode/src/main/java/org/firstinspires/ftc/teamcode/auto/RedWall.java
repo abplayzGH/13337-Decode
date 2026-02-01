@@ -35,9 +35,9 @@ public class RedWall extends LinearOpMode {
     private static final int[] TARGET_TAGS = {20, 24};
 
     double GOAL_HEADING = Math.toRadians(135);
-    final Vector2d GOAL = new Vector2d(-25, 25);
+    public static Vector2d GOAL = new Vector2d(-25, 30);
     final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
-    final Pose2d PARK = new Pose2d(new Vector2d(37, -33), Math.toRadians(0));
+    public static Pose2d PARK = new Pose2d(new Vector2d(-25, 50), Math.toRadians(0));
     final Pose2d SPIKE_3 = new Pose2d((new Vector2d(-12, 25)), Math.toRadians(90));
     final Pose2d SPIKE_2 = new Pose2d((new Vector2d(12, 25)), Math.toRadians(90));
     final Pose2d SPIKE_1 = new Pose2d(new Vector2d(36, 25), Math.toRadians(90));
@@ -69,10 +69,10 @@ public class RedWall extends LinearOpMode {
 
                     // 1. Set the targets
                     shooter.setMode(Shooter.Mode.FIXED);
-                    shooter.setTargetVelocity(700);
+                    shooter.setTargetVelocity(750);
 
                     // 2. CRITICAL: Actually tell the hardware to move
-                    // Your Shooter class needs this to run the switch/case logic!
+                    // Your Shooter class needs this to runthe switch/case logic!
                     shooter.periodic(null);
 
                     packet.put("Velo", shooter.getVelocity());
@@ -87,7 +87,7 @@ public class RedWall extends LinearOpMode {
                 @Override
                 public boolean run(@NonNull TelemetryPacket packet) {
                     telemetry.addLine("FIRE");
-                    latch.setPosition(0.1);
+                    latch.setPosition(0.2);
                     intake.runTransfer();
                     intake.runIntake();
                     return false;
@@ -192,7 +192,8 @@ public class RedWall extends LinearOpMode {
         /* ---------------- TRAJECTORIES ---------------- */
 
         TrajectoryActionBuilder toFirstGoal = drive.actionBuilder(START_POSE)
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90));
+                .strafeToLinearHeading(GOAL, Math.toRadians(135));
+//                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90));
 
         TrajectoryActionBuilder toSpike3 = drive.actionBuilder(GOAL_POSE)
                 .splineToLinearHeading(SPIKE_3, 1);
@@ -215,6 +216,9 @@ public class RedWall extends LinearOpMode {
         TrajectoryActionBuilder parkTrajectory = drive.actionBuilder(GOAL_POSE)
                 .strafeTo(PARK.position);
 
+        TrajectoryActionBuilder toFirstGoalFinal = drive.actionBuilder(SPIKE_3_FINAL)
+                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90));
+
 
         /* ---------------- RUN AUTO ---------------- */
         Actions.runBlocking(
@@ -223,58 +227,62 @@ public class RedWall extends LinearOpMode {
                                 toFirstGoal.build(),
                                 shooter.spinUp()
                         ),
+                        shooter.spinUp(),
+                        new SleepAction(1.5),
                         shooter.fire(),
-                        new SleepAction(2),
+                        new SleepAction(3),
                         shooter.stop(),
 
-                        toSpike3.build(),
-
-                        new ParallelAction(
-                            shooter.runIntake(),
-                            driveIntoSpike3.build()
-                        ),
-                        shooter.stop(),
-
-                        new ParallelAction(
-                                toFirstGoal.build(),
-                                shooter.spinUp()
-                        ),
-
-                        shooter.fire(),
-                        new SleepAction(2),
-                        shooter.stop(),
-
-                        toSpike2.build(),
-
-                        new ParallelAction(
-                            driveIntoSpike2.build(),
-                            shooter.runIntake()
-                        ),
-                        shooter.stop(),
-
-                        new ParallelAction(
-                                toFirstGoal.build(),
-                                shooter.spinUp()
-                        ),
-                        shooter.fire(),
-                        new SleepAction(2),
-                        shooter.stop(),
-
-                        toSpike1.build(),
-
-                        new ParallelAction(
-                                driveIntoSpike1.build(),
-                                shooter.runIntake()
-                        ),
-
-                        new ParallelAction(
-                                toFirstGoal.build(),
-                                shooter.spinUp()
-                        ),
-
-                        shooter.fire(),
-                        new SleepAction(2),
-                        shooter.stop(),
+//                        toSpike3.build(),
+//
+//                        new ParallelAction(
+//                            shooter.runIntake(),
+//                            driveIntoSpike3.build()
+//                        ),
+//                        shooter.stop(),
+//
+//                        new ParallelAction(
+//                                toFirstGoalFinal.build(),
+//                                shooter.spinUp()
+//                        ),
+//                        shooter.spinUp(),
+//                        new SleepAction(2),
+//
+//                        shooter.fire(),
+//                        new SleepAction(2),
+//                        shooter.stop(),
+//
+//                        toSpike2.build(),
+//
+//                        new ParallelAction(
+//                            driveIntoSpike2.build(),
+//                            shooter.runIntake()
+//                        ),
+//                        shooter.stop(),
+//
+//                        new ParallelAction(
+//                                toFirstGoal.build(),
+//                                shooter.spinUp()
+//                        ),
+//                        shooter.fire(),
+//                        new SleepAction(2),
+//                        shooter.stop(),
+//
+//                        toSpike1.build(),
+//
+//                        new ParallelAction(
+//                                driveIntoSpike1.build(),
+//                                shooter.runIntake()
+//                        ),
+//
+//                        new ParallelAction(
+//                                toFirstGoal.build(),
+//                                shooter.spinUp()
+//                        ),
+//
+//                        shooter.fire(),
+//                        new SleepAction(2),
+//                        shooter.stop(),
 
 
                         parkTrajectory.build()

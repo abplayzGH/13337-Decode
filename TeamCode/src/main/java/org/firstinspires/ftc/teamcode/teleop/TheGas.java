@@ -25,11 +25,11 @@ import org.firstinspires.ftc.vision.opencv.ColorRange;
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas extends LinearOpMode {
 
-    private static final int[] TARGET_TAGS = {20, 24, 23};
+    private static final int[] TARGET_TAGS = {20, 24};
     private static final String MOTOR_NAME = "turret_motor";
 
     private static final double SHOOTER_READY_VELOCITY = 700;
-    private static final double LATCH_OPEN = 0.1;
+    private static final double LATCH_OPEN = 0.15;
     private static final double LATCH_CLOSED = 0;
 
     public FtcDashboard dashboard;
@@ -64,7 +64,7 @@ public class TheGas extends LinearOpMode {
         waitForStart();
 
         latch.setPosition(0);
-        vision.startDashboardStream(15);
+//        vision.startDashboardStream(15);
 
         dashboard = FtcDashboard.getInstance();
         dashboardTelemetry = dashboard.getTelemetry();

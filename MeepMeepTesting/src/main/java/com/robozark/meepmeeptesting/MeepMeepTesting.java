@@ -35,26 +35,6 @@ public class MeepMeepTesting {
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(START_POSE)
 
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-
-                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
-
-                .strafeTo(SPIKE_3_FINAL)
-
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-
-                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90))
-
-                .strafeTo(SPIKE_2_FINAL)
-
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-
-                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90))
-
-                .strafeTo(SPIKE_1_FINAL)
-
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-
                 .build());
 
 

@@ -60,7 +60,7 @@ public class Blue extends LinearOpMode {
                     packet.put("Velo", shooter.isAtTargetVelocity());
 
                     boolean atSpeed = shooter.getVelocity() >= 350;
-                    boolean timeout = (System.currentTimeMillis() - startTime) > 2500;
+                    boolean timeout = (System.currentTimeMillis() - startTime) > 6000;
 
                     return !(atSpeed || timeout);
                 }
@@ -149,7 +149,8 @@ public class Blue extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         driveToShootPos.build(),
-                        shooter.spinUp(),// Spins flywheels until fast
+                        shooter.spinUp(),
+                        // Spins flywheels until fast
                         shooter.fire(),        // Opens latch + starts intake/transfer
                         new SleepAction(5),  // WAIT: Give it 1.5s to actually shoot the ball
                         shooter.stop(),// Everything turns off

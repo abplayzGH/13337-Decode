@@ -130,14 +130,14 @@ public class Red extends LinearOpMode {
 
         Pose2d startPose = new Pose2d(60, 12, toRadians(180));
         Vector2d goalVec = new Vector2d(-10, 10);
-        Pose2d goalPose = new Pose2d(goalVec, Math.toRadians(135));
+        Pose2d goalPose = new Pose2d(goalVec, Math.toRadians(45));
         Vector2d parkVec = new Vector2d(-40,10);
         MecanumDrive drive = new MecanumDrive(hardwareMap, startPose);
 
         // ... Trajectories ...
 
         TrajectoryActionBuilder driveToShootPos = drive.actionBuilder(startPose)
-                .splineToLinearHeading(goalPose, 1);
+                .strafeToLinearHeading(goalPose.position, Math.toRadians(135));
 
         Action park = drive.actionBuilder(goalPose)
                 .strafeToLinearHeading(parkVec, Math.toRadians(180))
@@ -150,9 +150,10 @@ public class Red extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         driveToShootPos.build(),
-                        shooter.spinUp(),// Spins flywheels until fast
+                        shooter.spinUp(),
+                        new SleepAction(1),// Spins flywheels until fast
                         shooter.fire(),        // Opens latch + starts intake/transfer
-                        new SleepAction(5),  // WAIT: Give it 1.5s to actually shoot the ball
+                        new SleepAction(7),  // WAIT: Give it 1.5s to actually shoot the ball
                         shooter.stop(),// Everything turns off
                         park
                 )
