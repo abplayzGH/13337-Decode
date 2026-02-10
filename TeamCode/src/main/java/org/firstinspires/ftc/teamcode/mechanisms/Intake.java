@@ -14,7 +14,7 @@ public class Intake {
     public void init(HardwareMap hardwareMap) {
         IntakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
         // Use DcMotorSimple.Direction for consistency
-        IntakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        IntakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
         IntakeMotor.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         IntakeMotor.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 

@@ -5,6 +5,9 @@ import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -12,6 +15,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -28,22 +33,25 @@ public class TheGas2 extends LinearOpMode {
     private static final int[] TARGET_TAGS = {20, 24};
     private static final String MOTOR_NAME = "turret_motor";
 
-    private static final double SHOOTER_READY_VELOCITY = 700;
-    private static final double LATCH_OPEN = 0.1;
-    private static final double LATCH_CLOSED = 0;
+    public static double SHOOTER_READY_VELOCITY = 1400;
+    public static double LATCH_OPEN = 0.1;
+    public static double LATCH_CLOSED = 0;
 
-    public FtcDashboard dashboard;
-
-    public Telemetry dashboardTelemetry;
-
+    private Robot robot = null;
     @Override
     public void runOpMode() {
         //TODO Make subsystem robot class
         //TODO Make this in to a state machine
         //TODO Add better error handling
         //TODO Optimize
+
+        robot = Robot.get().Init(Robot.Mode.TELEOP, hardwareMap, telemetry);
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
         ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        telemetry.setMsTransmissionInterval(11);
+
+        limelight.pipelineSwitch(0);
 
         /* ---------------- SUBSYSTEMS ---------------- */
         Intake intake = new Intake();
@@ -55,19 +63,20 @@ public class TheGas2 extends LinearOpMode {
         Turret turret = new Turret();
         turret.init(hardwareMap, MOTOR_NAME);
 
-        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
+//        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+//        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
         Mecanum mecanum = new Mecanum();
         mecanum.Init(hardwareMap);
 
         waitForStart();
 
-        latch.setPosition(0);
-        vision.startDashboardStream(15);
+        latch.setPosition(LATCH_CLOSED);
+//        vision.startDashboardStream(15);
 
-        dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = dashboard.getTelemetry();
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
+        limelight.start();
 
         /* ================= MAIN LOOP ================= */
         while (opModeIsActive()) {
@@ -99,80 +108,105 @@ public class TheGas2 extends LinearOpMode {
 
             float hue = hsv[0]; // Hue is measured in degrees (0-360)
 
+
             /* -------- VISION / TURRET -------- */
-            AprilTagDetection target = null; //TODO Test edge cases with no target
-            for (int id : TARGET_TAGS) {
-                target = vision.getTargetDetection(id);
-                if (target != null) break;
+            LLResult result = limelight.getLatestResult();
+            boolean targetFound = false;
+            double targetTx = 0;
+            Double currentTA = null;
+
+
+            if (result != null && result.isValid() && !result.getFiducialResults().isEmpty()) {
+                // Look for your specific tags (20, 24)
+                for (LLResultTypes.FiducialResult fr : result.getFiducialResults()) {
+                    if (fr.getFiducialId() == 20 || fr.getFiducialId() == 24) {
+                        targetFound = true;
+                        targetTx = fr.getTargetXDegrees();
+                        currentTA = fr.getTargetArea();
+                        break;
+                    }
+                }
             }
 
 
-            //TODO Test turret tracking``
+// Pass TA to the shooter
+            shooter.periodic(currentTA);
+// Control logic
             if (Math.abs(gamepad2.right_stick_x) > 0.05) {
-                turret.setManualPower(gamepad2.right_stick_x * 0.8);
-            } else if (target != null){
-                turret.updateTracking(target);
+                turret.setManualPower(gamepad2.right_stick_x * 0.3);
             } else {
-                turret.setManualPower(0);
+                // This will either track the tag or stop the motor if targetFound is false
+                turret.updateTrackingLimelight(targetTx, targetFound);
             }
 
-            shooter.periodic(target);
+            shooter.periodic(null); //TODO need to use tag for limelight
 
+            if (result != null) {
+                if (result.isValid()) {
+                    Pose3D botpose = result.getBotpose();
 
-            if (shootRaw) {
-                shooter.setMode(Shooter.Mode.FIXED);
-                shooter.setTargetVelocity(SHOOTER_READY_VELOCITY);
-                if (shooter.isAtTargetVelocity()) {
-                    latch.setPosition(LATCH_OPEN);
-                    intake.runIntake();
-                    intake.runTransfer();
+                    telemetry.addData("Tag", result.getFiducialResults());
+                    telemetry.addData("tx", result.getTx());
+                    telemetry.addData("ty", result.getTy());
+                    telemetry.addData("Botpose", botpose.toString());
                 }
-            } else if (shootDynamic) {
-                shooter.setMode(Shooter.Mode.DYNAMIC);
-                if (shooter.isAtTargetVelocity()) {
-                    latch.setPosition(LATCH_OPEN);
-                    intake.runIntake();
-                    intake.runTransfer();
 
-                }
-            } else if (gamepad2.right_trigger >= .05){
-                shooter.setMode(Shooter.Mode.RAW);
-                shooter.setRaw(gamepad2.right_trigger);
-                if (gamepad2.left_bumper) {
+                if (shootRaw) {
+                    shooter.setMode(Shooter.Mode.FIXED);
+                    shooter.setTargetVelocity(SHOOTER_READY_VELOCITY);
+                    if (shooter.isAtTargetVelocity()) {
+                        latch.setPosition(LATCH_OPEN);
+                        intake.runIntake();
+                        intake.runTransfer();
+                    }
+                } else if (shootDynamic) {
+                    shooter.setMode(Shooter.Mode.DYNAMIC);
+                    if (shooter.isAtTargetVelocity()) {
+                        latch.setPosition(LATCH_OPEN);
+                        intake.runIntake();
+                        intake.runTransfer();
+
+                    }
+                } else if (gamepad2.right_trigger >= .05) {
+                    shooter.setMode(Shooter.Mode.RAW);
+                    shooter.setRaw(gamepad2.right_trigger);
+                    if (gamepad2.left_bumper) {
+                        latch.setPosition(LATCH_OPEN);
+                        intake.runIntake();
+                        intake.runTransfer();
+                    }
+                } else if (intakeOut) {
+                    shooter.setRaw(-0.5);
+                    intake.runOutTake();
                     latch.setPosition(LATCH_OPEN);
+                } else if (intakeIn) {
+                    shooter.setRaw(0);
                     intake.runIntake();
-                    intake.runTransfer();
-                }
-            } else if (intakeOut) {
-                shooter.setRaw(-0.5);
-                intake.runOutTake();
-                latch.setPosition(LATCH_OPEN);
-            } else if (intakeIn) {
-                shooter.setRaw(0);
-                intake.runIntake();
-                if (!(hue > 145 && hue < 205)) {
-                    telemetry.addLine("Transferring");
-                    intake.runTransfer();
-                }
-                latch.setPosition(LATCH_CLOSED);
-            } else {
-                shooter.setRaw(0);
-                intake.stopIntake();
-                latch.setPosition(LATCH_CLOSED);
+                    if (!(hue > 145 && hue < 205)) {
+                        telemetry.addLine("Transferring");
+                        intake.runTransfer();
+                    }
+                    latch.setPosition(LATCH_CLOSED);
+                } else {
+                    shooter.setRaw(0);
+                    intake.stopIntake();
+                    latch.setPosition(LATCH_CLOSED);
 //                shooter.setIdle();
-            }
+                }
 
 
-            /* -------- TELEMETRY -------- */
+                    /* -------- TELEMETRY -------- */
 //            telemetry.addData("Shooter Vel", shooter.getVelocity());
-            telemetry.addData("Turret Pos", turret.getPosition());
-            telemetry.addData("Tag", target != null ? target.id : "None");
-            telemetry.addData("Servo Position", latch.getPosition());
-            telemetry.addData("Color", colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue());
-            telemetry.addData("Hue", hue);
-            telemetry.update();
-            dashboardTelemetry.update();
+                    telemetry.addData("Turret Pos", turret.getPosition());
+//                    telemetry.addData("Tag", target != null ? target.id : "None");
+                    telemetry.addData("Servo Position", latch.getPosition());
+                    telemetry.addData("Color", colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue());
+                    telemetry.addData("Hue", hue);
+                    telemetry.addData("Velocity", shooter.getVelocity());
+                    telemetry.update();
+                    dashboardTelemetry.update();
 
+                }
+            }
         }
     }
-}

@@ -181,10 +181,10 @@ public class Shooter {
     public enum Mode { RAW, FIXED, DYNAMIC }
 
     /* ---------------- Tunable Config Values ---------------- */
-    public static double kP = 0.001;
+    public static double kP = 0.0001;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kV = 0.001;
+    public static double kV = 0.000444;
     public static double VELO_TOL = 50;
     public static double IDLE_VELO = 100; // Match your LUT sign (negative)
 
@@ -237,9 +237,8 @@ public class Shooter {
         return lut;
     }
 
-    public void periodic(AprilTagDetection detection) {
-//        robot.dashboardTelemetry.addData("Shooter Mode", mode);
-
+    /** DYNAMIC MODE: use Limelight Target Area (ta) to determine velocity */
+    public void periodic(Double targetArea) {
         switch (mode) {
             case RAW:
                 left.setPower(targetPower);
@@ -251,33 +250,20 @@ public class Shooter {
                 break;
 
             case DYNAMIC:
-                if (detection != null) {
-                    // 1. Calculate distance in INCHES
-                    double distInches = Math.hypot(detection.ftcPose.x, detection.ftcPose.y);
-                    // 2. Convert to FEET (since your LUT is 0-15)
-                    double distFeet = distInches / 12.0;
-
-                    // 3. Update target velocity
-                    targetVelocity = distToVelo.get(Range.clip(distFeet, 0, 15));
-
+                if (targetArea != null && targetArea > 0) {
+                    // targetArea is the percentage of the image (0-100)
+                    // You must re-tune your buildLUT() to use 'ta' values as the 'x'
+                    targetVelocity = distToVelo.get(targetArea);
                     applyVelocity(targetVelocity);
 
-                    // Debugging
-                    dashboardTelemetry.addLine("--- Vision Debug ---");
-                    dashboardTelemetry.addData("Dist (Inches)", distInches);
-                    dashboardTelemetry.addData("Dist (Feet)", distFeet);
+                    dashboardTelemetry.addData("Limelight TA", targetArea);
                     dashboardTelemetry.addData("Target RPM", targetVelocity);
                 } else {
-                    // 4. PREVENT SPIN DOWN:
-                    // If we lose the tag, keep spinning at the last known targetVelocity
-                    // instead of dropping to IDLE_VELO immediately.
+                    // If tag lost, maintain last known velocity to keep flywheels spinning
                     applyVelocity(targetVelocity);
-
-//                  dashboardTelemetry.addLine("No Tag - Holding Last Velocity");
                 }
                 break;
         }
-//        log();
     }
 
     private void applyVelocity(double target) {

@@ -61,8 +61,56 @@ public class Turret {
     }
 
     // ---- AprilTag Tracking ----
-    public double updateTracking(AprilTagDetection detection) {
+//    public double updateTracking(AprilTagDetection detection) {
+//
+//        double currentTime = timer.seconds();
+//        double dt = currentTime - lastTime;
+//
+//        if (dt <= 0.01) {
+//            return turretMotor.getPower();
+//        }
+//
+//        // Lost target → stop + reset controller
+//        if (detection == null) {
+//            resetController(currentTime);
+//            turretMotor.setPower(0);
+//            return 0;
+//        }
+//
+//        double error = -detection.ftcPose.bearing;
+//
+//        // Deadzone prevents jitter
+//        if (Math.abs(error) < DEADZONE_DEG) {
+//            turretMotor.setPower(0);
+//            lastError = error;
+//            lastTime = currentTime;
+//            return 0;
+//        }
+//
+//        // Derivative (clamped to reduce noise)
+//        double derivative = Range.clip(
+//                (error - lastError) / dt,
+//                -50, 50
+//        );
+//
+//        // PD + Feedforward
+//        double output =
+//                (kP * error) +
+//                        (kD * derivative) +
+//                        (Math.signum(error) * kF);
+//
+//        double power = Range.clip(output, -MAX_AUTO_POWER, MAX_AUTO_POWER);
+//        power = limitPower(power);
+//
+//        turretMotor.setPower(power);
+//
+//        lastError = error;
+//        lastTime = currentTime;
+//
+//        return power;
+//    }
 
+    public double updateTrackingLimelight(double tx, boolean targetVisible) {
         double currentTime = timer.seconds();
         double dt = currentTime - lastTime;
 
@@ -70,16 +118,17 @@ public class Turret {
             return turretMotor.getPower();
         }
 
-        // Lost target → stop + reset controller
-        if (detection == null) {
+        // If no target is seen, stop moving
+        if (!targetVisible) {
             resetController(currentTime);
             turretMotor.setPower(0);
             return 0;
         }
 
-        double error = -detection.ftcPose.bearing;
+        // tx is the horizontal offset.
+        // We want the turret to move until tx is 0.
+        double error = tx;
 
-        // Deadzone prevents jitter
         if (Math.abs(error) < DEADZONE_DEG) {
             turretMotor.setPower(0);
             lastError = error;
@@ -87,17 +136,10 @@ public class Turret {
             return 0;
         }
 
-        // Derivative (clamped to reduce noise)
-        double derivative = Range.clip(
-                (error - lastError) / dt,
-                -50, 50
-        );
+        double derivative = Range.clip((error - lastError) / dt, -50, 50);
 
         // PD + Feedforward
-        double output =
-                (kP * error) +
-                        (kD * derivative) +
-                        (Math.signum(error) * kF);
+        double output = (kP * error) + (kD * derivative) + (Math.signum(error) * kF);
 
         double power = Range.clip(output, -MAX_AUTO_POWER, MAX_AUTO_POWER);
         power = limitPower(power);
