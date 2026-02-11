@@ -8,8 +8,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.PoseMap;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -30,20 +28,23 @@ import org.firstinspires.ftc.teamcode.vision.VisionManager;
 
 @Config
 @Autonomous(name = "Universal Auto", group = "Auto")
+@SuppressWarnings("unused") // Registered via annotation; suppress static 'never used' warning
 public class tyt extends LinearOpMode {
 
-    private Robot robot;
+    // initialize singleton reference early so static analyzers see it as assigned
+    private Robot robot = Robot.get();
     private Shooter shooter;
     private Intake intake;
     private Servo latch;
 
     // Default to RED alliance
-    private boolean isRed = true;
+//    private boolean isRed = true;
 
     /* --- ACTIONS --- */
     public Action spinUpAction() {
         return new Action() {
             private double startTime = -1;
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 if (startTime < 0) startTime = System.currentTimeMillis();
@@ -82,23 +83,19 @@ public class tyt extends LinearOpMode {
         telemetry.update();
 
         while (!isStarted() && !isStopRequested()) {
-            if (gamepad1.b) isRed = true;
-            if (gamepad1.x) isRed = false;
-
-            telemetry.addData("Selected Alliance", isRed ? "RED" : "BLUE");
+            telemetry.addData("Selected Alliance", Robot.alliance == Robot.Alliance.RED ? "RED" : "BLUE");
             telemetry.addData("Status", "Waiting for Start...");
             telemetry.update();
         }
 
-        // --- INITIALIZATION (Happens immediately after start is pressed) ---
+        if (isStopRequested()) return;
 
-        // 1. Set Robot Global Alliance
-        Robot.alliance = isRed ? Robot.Alliance.RED : Robot.Alliance.BLUE;
+        // --- INITIALIZATION ---
+        // Initialize Robot singleton and set alliance so Robot.Init can pick correct constants
         robot = Robot.get().Init(Robot.Mode.AUTO, hardwareMap, telemetry);
 
-        // 2. Hardware Init
         latch = hardwareMap.get(Servo.class, "latchServo");
-        hardwareMap.get(ColorSensor.class, "colorSensor");
+        ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         intake = new Intake();
         intake.init(hardwareMap);
@@ -112,45 +109,39 @@ public class tyt extends LinearOpMode {
         Mecanum mecanum = new Mecanum();
         mecanum.Init(hardwareMap);
 
-        // Vision (Caution: Ensure VisionManager handles the alliance change internally if needed)
+        // Vision: construct and start stream immediately (no local variable needed)
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480));
+        try {
+            new VisionManager(hardwareMap, cam, new Size(640, 480)).startDashboardStream(15);
+        } catch (Exception ignored) {}
 
-        // 3. Define Pose Map
-        // If RED: Do nothing (Identity). If BLUE: Mirror Y and Heading.
-        PoseMap poseMap = isRed ?
-                (pose -> pose) :
-                (pose -> new Pose2dDual<>(
-                        pose.position.x,
-                        pose.position.y.unaryMinus(),
-                        pose.heading.inverse()));
-
-        // 4. Setup Drive with Start Pose
-        // Note: Write your coordinates as if you are always RED.
+        // --- POSE SETUP ---
+        // All poses written as RED
         Pose2d startPose = new Pose2d(60, 12, toRadians(180));
-        Vector2d goalVec = new Vector2d(-10, 10);
-        Pose2d goalPose = new Pose2d(goalVec, Math.toRadians(135));
+        Pose2d goalPose = new Pose2d(-10, 10, toRadians(135));
         Vector2d parkVec = new Vector2d(-40, 10);
 
-        // Initialize Drive with the correct starting pose
-        // IMPORTANT: If Blue, we must manually flip the startPose for the LOCALIZER initialization
-        Pose2d finalStartPose = isRed ? startPose :
+        // If BLUE alliance, mirror start pose for odometry/drive initialization
+        Pose2d finalStartPose = Robot.alliance == Robot.Alliance.RED ? startPose :
                 new Pose2d(startPose.position.x, -startPose.position.y, -startPose.heading.toDouble());
 
+        // --- DRIVE INIT ---
         MecanumDrive drive = new MecanumDrive(hardwareMap, finalStartPose);
 
-        // 5. Build Trajectories using the poseMap
-        // Pass 'poseMap' to the actionBuilder. It will flip the targets automatically for Blue.
-        TrajectoryActionBuilder driveToShootPos = drive.actionBuilder(startPose)
-                .splineToLinearHeading(goalPose, 1);
+        // --- TRAJECTORIES ---
+        TrajectoryActionBuilder driveToShootPos =
+                drive.actionBuilder(startPose)
+                        .splineToLinearHeading(goalPose, 1);
 
         Action park = drive.actionBuilder(goalPose)
                 .strafeToLinearHeading(parkVec, Math.toRadians(180))
                 .build();
 
-        // 6. Run the Sequence
+        // Wait for start (safety)
+        waitForStart();
         if (isStopRequested()) return;
 
+        // --- RUN SEQUENCE ---
         Actions.runBlocking(
                 new SequentialAction(
                         driveToShootPos.build(),

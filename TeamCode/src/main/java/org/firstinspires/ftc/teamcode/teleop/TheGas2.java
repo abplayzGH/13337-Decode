@@ -203,6 +203,8 @@ public class TheGas2 extends LinearOpMode {
                     telemetry.addData("Color", colorSensor.red() + ", " + colorSensor.green() + ", " + colorSensor.blue());
                     telemetry.addData("Hue", hue);
                     telemetry.addData("Velocity", shooter.getVelocity());
+                    telemetry.addData("Target Ta", currentTA != null ? currentTA : "None");
+                    telemetry.addData("Target Tx", targetTx);
                     telemetry.update();
                     dashboardTelemetry.update();
 
