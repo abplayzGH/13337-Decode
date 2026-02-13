@@ -20,11 +20,11 @@ public class Turret {
     private static  int RIGHT_LIMIT = 1000;
 
     // ---- Control Constants ----
-    private static  double kP = 0.02;
-    private static  double kD = 0.001;
-    private static  double kF = 0.05;      // Feedforward (helps overcome friction)
-    private static  double MAX_AUTO_POWER = 0.6;
-    private static  double DEADZONE_DEG = 0.5;
+    public static double kP = 0.025;
+    public static double kD = 0.007;
+    public static double kF = 0.007;      // Feedforward (helps overcome friction)
+    public static double MAX_AUTO_POWER = 0.6;
+    public static double DEADZONE_DEG = 0.5;
 
     // ---- State ----
     private double lastError = 0.0;
@@ -142,7 +142,6 @@ public class Turret {
         double output = (kP * error) + (kD * derivative) + (Math.signum(error) * kF);
 
         double power = Range.clip(output, -MAX_AUTO_POWER, MAX_AUTO_POWER);
-        power = limitPower(power);
 
         turretMotor.setPower(power);
 
@@ -157,7 +156,7 @@ public class Turret {
         lastTime = time;
     }
 
-    public int getPosition() {
+    public double getPosition() {
         return turretMotor.getCurrentPosition();
     }
 }
