@@ -1,15 +1,17 @@
 package org.firstinspires.ftc.teamcode.mechanisms;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
+@Config
 public class Intake {
     public DcMotorEx IntakeMotor;
     public CRServo IntakeServo1;
     public CRServo IntakeServo2;
+    public static double intakePower = .6;
 
     public void init(HardwareMap hardwareMap) {
         IntakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");
@@ -26,7 +28,7 @@ public class Intake {
 
     public void runIntake() {
 
-        IntakeMotor.setPower(1.0);
+        IntakeMotor.setPower(intakePower);
     }
     public void runTransfer(){
         IntakeServo1.setPower(1.0);
@@ -40,7 +42,7 @@ public class Intake {
     }
 
     public void runOutTake() {
-        IntakeMotor.setPower(-1.0);
+        IntakeMotor.setPower(-intakePower);
         IntakeServo1.setPower(-1.0);
         IntakeServo2.setPower(-1.0);
     }

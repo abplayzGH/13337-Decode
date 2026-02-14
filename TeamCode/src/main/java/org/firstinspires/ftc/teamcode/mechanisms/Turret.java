@@ -30,8 +30,8 @@ public class Turret {
     private double lastError = 0.0;
     private double lastTime = 0.0;
 
-    public void init(HardwareMap hardwareMap, String motorName) {
-        turretMotor = hardwareMap.get(DcMotorEx.class, motorName);
+    public void init(HardwareMap hardwareMap) {
+        turretMotor = hardwareMap.get(DcMotorEx.class, "turret_motor");
         turretMotor.setDirection(DcMotorEx.Direction.FORWARD);
         turretMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         turretMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

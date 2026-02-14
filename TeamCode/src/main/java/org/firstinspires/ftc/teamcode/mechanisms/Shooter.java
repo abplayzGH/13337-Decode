@@ -185,7 +185,7 @@ public class Shooter {
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kV = 0.000444;
-    public static double VELO_TOL = 50;
+    public static double VELO_TOL = 20;
     public static double IDLE_VELO = 100; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;

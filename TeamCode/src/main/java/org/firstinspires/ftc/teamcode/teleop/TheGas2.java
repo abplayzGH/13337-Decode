@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.util.Size;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -36,6 +37,7 @@ public class TheGas2 extends LinearOpMode {
     public static double SHOOTER_READY_VELOCITY = 1400;
     public static double LATCH_OPEN = 0.1;
     public static double LATCH_CLOSED = 0;
+    public MultipleTelemetry flightRecorder;
 
     private Robot robot = null;
     @Override
@@ -50,7 +52,7 @@ public class TheGas2 extends LinearOpMode {
         ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         telemetry.setMsTransmissionInterval(11);
-
+        flightRecorder = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         limelight.pipelineSwitch(0);
 
         /* ---------------- SUBSYSTEMS ---------------- */
@@ -61,10 +63,10 @@ public class TheGas2 extends LinearOpMode {
         shooter.setMode(Shooter.Mode.RAW);
 
         Turret turret = new Turret();
-        turret.init(hardwareMap, MOTOR_NAME);
+        turret.init(hardwareMap);
 
-//        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-//        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
+        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
         Mecanum mecanum = new Mecanum();
         mecanum.Init(hardwareMap);
@@ -180,13 +182,13 @@ public class TheGas2 extends LinearOpMode {
                     intake.runOutTake();
                     latch.setPosition(LATCH_OPEN);
                 } else if (intakeIn) {
+                    latch.setPosition(LATCH_CLOSED);
                     shooter.setRaw(0);
                     intake.runIntake();
                     if (!(hue > 145 && hue < 205)) {
                         telemetry.addLine("Transferring");
                         intake.runTransfer();
                     }
-                    latch.setPosition(LATCH_CLOSED);
                 } else {
                     shooter.setRaw(0);
                     intake.stopIntake();
