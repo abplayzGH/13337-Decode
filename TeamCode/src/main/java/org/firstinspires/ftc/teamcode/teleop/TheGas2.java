@@ -20,18 +20,15 @@ import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
+@SuppressWarnings("unused")
 @Config
 @TeleOp(name = "The Gas", group = "Teleop")
 public class TheGas2 extends LinearOpMode {
 
     private static final int[] TARGET_TAGS = {20, 24};
-    private static final String MOTOR_NAME = "turret_motor";
-
     public static double SHOOTER_READY_VELOCITY = 1400;
     public static double LATCH_OPEN = 0.1;
     public static double LATCH_CLOSED = 0;
-
-    private Robot robot = null;
 
     @Override
     public void runOpMode() {
@@ -40,7 +37,7 @@ public class TheGas2 extends LinearOpMode {
         //TODO Add better error handling
         //TODO Optimize
 
-        robot = Robot.get().Init(Robot.Mode.TELEOP, hardwareMap, telemetry);
+        Robot robot = Robot.get().Init(Robot.Mode.TELEOP, hardwareMap, telemetry);
         Servo latch = hardwareMap.get(Servo.class, "latchServo");
         ColorSensor colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
@@ -56,7 +53,7 @@ public class TheGas2 extends LinearOpMode {
         shooter.setMode(Shooter.Mode.RAW);
 
         Turret turret = new Turret();
-        turret.init(hardwareMap, MOTOR_NAME);
+        turret.init(hardwareMap);
 
 //        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
 //        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
@@ -104,7 +101,7 @@ public class TheGas2 extends LinearOpMode {
 
             float hue = hsv[0]; // Hue is measured in degrees (0-360)
 
-            Pose3D botPose = null;
+            Pose3D botPose;
 
             /* -------- VISION / TURRET -------- */
             LLResult result = limelight.getLatestResult();
