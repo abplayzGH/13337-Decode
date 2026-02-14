@@ -110,10 +110,7 @@ public class tyt extends LinearOpMode {
         mecanum.Init(hardwareMap);
 
         // Vision: construct and start stream immediately (no local variable needed)
-        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        try {
-            new VisionManager(hardwareMap, cam, new Size(640, 480)).startDashboardStream(15);
-        } catch (Exception ignored) {}
+
 
         // --- POSE SETUP ---
         // All poses written as RED
@@ -130,7 +127,7 @@ public class tyt extends LinearOpMode {
 
         // --- TRAJECTORIES ---
         TrajectoryActionBuilder driveToShootPos =
-                drive.actionBuilder(startPose)
+                drive.actionBuilder(finalStartPose)
                         .splineToLinearHeading(goalPose, 1);
 
         Action park = drive.actionBuilder(goalPose)

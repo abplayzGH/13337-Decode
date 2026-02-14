@@ -102,8 +102,8 @@ public class Goal extends LinearOpMode {
         Turret turret = new Turret();
         turret.init(hardwareMap, "turret_motor");
 
-        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
+//        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
+//        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
         Mecanum mecanum = new Mecanum();
         mecanum.Init(hardwareMap);
