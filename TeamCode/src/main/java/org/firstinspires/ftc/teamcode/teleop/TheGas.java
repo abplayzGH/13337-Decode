@@ -8,6 +8,7 @@
 //import com.acmerobotics.dashboard.FtcDashboard;
 //import com.acmerobotics.dashboard.config.Config;
 //import com.acmerobotics.roadrunner.ftc.FlightRecorder;
+//import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 //import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -25,7 +26,7 @@
 //import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 //import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 //import org.firstinspires.ftc.teamcode.Robot;
-//
+//@Disabled
 //@Config
 //@TeleOp(name = "The Gas", group = "Teleop")
 //public class TheGas extends LinearOpMode {
@@ -92,7 +93,7 @@
 //            }
 //
 //
-//            robot.shooter.periodic(target);
+//            robot.shooter.
 //
 //            boolean shootRaw = gamepad2.a || gamepad1.a;
 //            boolean shootDynamic = gamepad2.b || gamepad1.b;

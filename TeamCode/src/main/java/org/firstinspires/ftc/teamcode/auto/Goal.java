@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import static java.lang.Math.toRadians;
 
-import android.util.Size;
-
 import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
@@ -21,14 +19,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
+import org.firstinspires.ftc.teamcode.mechanisms.MecanumTeleop;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
-import org.firstinspires.ftc.teamcode.vision.VisionManager;
 
 @Config
 @Autonomous(name = "Start at Goal", group = "Auto")
@@ -38,7 +34,6 @@ public class Goal extends LinearOpMode {
     private Shooter shooter;
     private Intake intake;
     private Servo latch;
-    private boolean isRed = true;
     private int targetTag = 24;
 
     /* --- ROADRUNNER ACTIONS FOR ROBOT CLASS --- */
@@ -100,13 +95,13 @@ public class Goal extends LinearOpMode {
         shooter.setMode(Shooter.Mode.RAW);
 
         Turret turret = new Turret();
-        turret.init(hardwareMap, "turret_motor");
+        turret.init(hardwareMap);
 
 //        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
 //        VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
-        Mecanum mecanum = new Mecanum();
-        mecanum.Init(hardwareMap);
+        MecanumTeleop mecanumTeleop = new MecanumTeleop();
+        mecanumTeleop.Init(hardwareMap);
 
         PoseMap poseMap = Robot.alliance == Robot.Alliance.RED ? (pose -> pose) :
                 (pose -> new Pose2dDual<>(
@@ -121,6 +116,7 @@ public class Goal extends LinearOpMode {
         Pose2d goalPose = new Pose2d(goalVec, Math.toRadians(135));
         Vector2d parkVec = new Vector2d(-40,10);
 
+        boolean isRed = true;
         Pose2d finalStartPose = isRed ? startPose :
                 new Pose2d(startPose.position.x, -startPose.position.y, -startPose.heading.toDouble());
 

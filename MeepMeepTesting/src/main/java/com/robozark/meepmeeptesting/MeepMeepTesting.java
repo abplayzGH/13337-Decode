@@ -24,7 +24,7 @@ public class MeepMeepTesting {
         final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
         final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
 //        final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
-        final Pose2d START_POSE = new Pose2d(-49, 49, Math.toRadians(305));
+        final Pose2d START_POSE = new Pose2d(-49, 49, Math.toRadians(125));
 
         // Declare our first bot
         RoadRunnerBotEntity myFirstBot = new DefaultBotBuilder(meepMeep)
@@ -35,25 +35,26 @@ public class MeepMeepTesting {
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(START_POSE)
 
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
+                .strafeTo(GOAL_POSE.position)
 
                 .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
 
                 .strafeTo(SPIKE_3_FINAL)
-
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-
-                .strafeToLinearHeading(SPIKE_2, Math.toRadians(90))
-
-                .strafeTo(SPIKE_2_FINAL)
-
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
-
-                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90))
-
-                .strafeTo(SPIKE_1_FINAL)
-
-                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
+//
+                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
+//
+                .strafeTo(new Vector2d(12, 56))
+                .lineToX(100)
+//
+//                .strafeTo(SPIKE_2_FINAL)
+//
+//                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
+//
+//                .strafeToLinearHeading(SPIKE_1, Math.toRadians(90))
+//
+//                .strafeTo(SPIKE_1_FINAL)
+//
+//                .splineToSplineHeading(GOAL_POSE, Math.toRadians(90))
 
                 .build());
 

@@ -25,7 +25,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.mechanisms.Mecanum;
+import org.firstinspires.ftc.teamcode.mechanisms.MecanumTeleop;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
@@ -99,13 +99,13 @@ public class Wall extends LinearOpMode {
         shooter.setMode(Shooter.Mode.RAW);
 
         Turret turret = new Turret();
-        turret.init(hardwareMap, "turret_motor");
+        turret.init(hardwareMap);
 
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
         VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
-        Mecanum mecanum = new Mecanum();
-        mecanum.Init(hardwareMap);
+        MecanumTeleop mecanumTeleop = new MecanumTeleop();
+        mecanumTeleop.Init(hardwareMap);
 
         PoseMap poseMap = Robot.alliance == Robot.Alliance.RED ? (pose -> pose) :
                 (pose -> new Pose2dDual<>(

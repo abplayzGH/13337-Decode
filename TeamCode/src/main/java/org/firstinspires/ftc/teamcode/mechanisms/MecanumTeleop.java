@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class Mecanum {
+public class MecanumTeleop {
     private DcMotorEx leftFront, leftBack, rightFront, rightBack;
     double speedMult = 0.3;
     public void Init(HardwareMap hw){
@@ -25,7 +25,6 @@ public class Mecanum {
     }
 
     public void Drive(double leftX, double leftY, double rightX, double speed){
-        // Negate leftY because stick-up is negative in FTC
         double y = leftY;
         double x = -leftX;
         double rx = rightX;

@@ -3,12 +3,12 @@ package org.firstinspires.ftc.teamcode.teleop;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.mechanisms.MecanumDrive;
+import org.firstinspires.ftc.teamcode.mechanisms.MecanumDriveTest;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 @Disabled
 @TeleOp(name = "Field Orientated", group = "Teleop")
 public class MecanumFieldOrientatedOpMode extends OpMode {
-    MecanumDrive drive = new MecanumDrive();
+    MecanumDriveTest drive = new MecanumDriveTest();
     double forward, strafe, rotate;
 
     @Override
@@ -22,6 +22,6 @@ public class MecanumFieldOrientatedOpMode extends OpMode {
         strafe = gamepad1.left_stick_x;
         rotate = gamepad1.right_stick_x;
 
-        drive.driveFieldRelative(forward, strafe, rotate);
+        drive.driveFieldCentric(forward, strafe, rotate, 1);
     }
 }

@@ -30,10 +30,6 @@ import com.acmerobotics.dashboard.FtcDashboard;
 @Autonomous(name = "Auto Drive to Artifact", group = "Concept")
 public class AutoDriveToArtifact extends LinearOpMode {
 
-    // Vision variables
-    private VisionPortal portal;
-    private ColorBlobLocatorProcessor colorLocator;
-
     // Drivetrain motors
     private DcMotor leftFrontDrive = null;
     private DcMotor leftBackDrive = null;
@@ -76,7 +72,7 @@ public class AutoDriveToArtifact extends LinearOpMode {
     @Override
     public void runOpMode() {
         // --- VISION INITIALIZATION ---
-        colorLocator = new ColorBlobLocatorProcessor.Builder()
+        ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
                 .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)
                 .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
                 .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
@@ -89,7 +85,8 @@ public class AutoDriveToArtifact extends LinearOpMode {
                 .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
                 .build();
 
-        portal = new VisionPortal.Builder()
+        // Vision variables
+        VisionPortal portal = new VisionPortal.Builder()
                 .addProcessor(colorLocator)
                 .setCameraResolution(new Size(320, 240))
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
