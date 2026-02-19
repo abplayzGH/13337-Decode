@@ -1,168 +1,8 @@
-//package org.firstinspires.ftc.teamcode.mechanisms;
-//
-//import android.util.Size;
-//
-//import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-//import com.qualcomm.robotcore.hardware.DcMotor;
-//import com.qualcomm.robotcore.hardware.DcMotorEx;
-//import com.qualcomm.robotcore.hardware.DcMotorSimple;
-//import com.qualcomm.robotcore.hardware.HardwareMap;
-//import com.qualcomm.robotcore.hardware.Servo;
-//import com.qualcomm.robotcore.hardware.VoltageSensor;
-//import com.qualcomm.robotcore.util.Range;
-//
-//import org.firstinspires.ftc.robotcore.external.Telemetry;
-//import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-//import org.firstinspires.ftc.teamcode.vision.VisionManager;
-//import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
-//
-//import java.util.List;
-//
-//public class Shooter {
-//
-//    /* ---------------- Mode ---------------- */
-//    public enum Mode { RAW, FIXED, DYNAMIC }
-//
-//    /* ---------------- Tunable Config Values ---------------- */
-//    public static double kP = 0.007;
-//    public static double kI = 0.0;
-//    public static double kD = 0.0;
-//    public static double kV = 0.00045;   // feedforward
-//    public static double VELO_TOL = 50;
-//    public static double IDLE_VELO = 600;
-//
-//    public static boolean tuning = false;
-//    public static Mode mode = Mode.RAW;
-//
-//    public static double targetVelocity = 1000;
-//    public static double targetPower = 0;
-//
-//    /* ---------------- Hardware ---------------- */
-//    private final DcMotorEx left;
-//    private final DcMotorEx right;
-//
-//    private final VoltageSensor battery;
-//
-//    private final PIDFController pid = new PIDFController(kP, kI, kD, 0);
-//    private final InterpLUT distToVelo;
-//
-//    private final Telemetry telemetry;
-//
-//    /* ---------------- Constructor ---------------- */
-//    public Shooter(HardwareMap hw, Telemetry tele) {
-//        this.telemetry = tele;
-//
-//        left = hw.get(DcMotorEx.class, "leftFlyWheel");
-//        right = hw.get(DcMotorEx.class, "rightFlyWheel");
-//        left.setDirection(DcMotorSimple.Direction.REVERSE);
-//        right.setDirection(DcMotorSimple.Direction.FORWARD);
-//
-//        left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//
-//        left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-//        right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-//
-//        battery = hw.voltageSensor.iterator().next();
-//
-//        pid.setTolerance(VELO_TOL);
-//
-//        distToVelo = buildLUT();
-//    }
-//    public void setMode(Mode mode) {
-//        Shooter.mode = mode;
-//    }
-//    /* ---------------- LUT Setup ---------------- */
-//    private InterpLUT buildLUT() {
-//        InterpLUT lut = new InterpLUT();
-//        lut.add(-100, 0);
-//        lut.add(0, -970);
-//        lut.add(2, -990);
-//        lut.add(3, -1000);
-//        lut.add(4, -1050);
-//        lut.add(5, -1050);
-//        lut.add(6, -1240);
-//        lut.add(7, -1260);
-//        lut.add(9, -1440);
-//        lut.add(11, -1490);
-//        lut.add(12, -1525);
-//        lut.add(100, -1580);
-//        lut.build();
-//        return lut;
-//    }
-//
-//    /* ---------------- Periodic Update ---------------- */
-//    public void periodic(AprilTagDetection detections) {
-//        switch (mode) {
-//            case RAW:
-//                applyRaw();
-//                break;
-//            case FIXED:
-//                applyVelocity(targetVelocity);
-//                break;
-//            case DYNAMIC:
-//                applyDynamic(detections);
-//                break;
-//        }
-//        log();
-//    }
-//
-//    /* ---------------- Public Control ---------------- */
-//    public void setRaw(double p) {
-//        mode = Mode.RAW;
-//        targetPower = p;
-//    }
-//
-//    public void setVelocity(double v) {
-//        mode = Mode.FIXED;
-//        targetVelocity = v;
-//    }
-//
-//    public void setIdle() {
-//        setVelocity(IDLE_VELO);
-//    }
-//
-//    public boolean isAtTargetVelocity() {
-//        return pid.atSetPoint();
-//    }
-//
-//    /* ---------------- Control Modes ---------------- */
-//    public double getVelocity() {
-//        return right.getVelocity();
-//    }
-//
-//    /** RAW MODE: direct motor power */
-//    private void applyRaw() {
-//        left.setPower(targetPower);
-//        right.setPower(targetPower);
-//    }
-//
-//    /** FIXED MODE: hold a target RPM using PIDF+FF */
-//    private void applyVelocity(double target) {
-//
-//        if (tuning) {
-//            pid.setPIDF(kP, kI, kD, 0);
-//            pid.setTolerance(VELO_TOL);
-//        }
-//
-//        double measured = right.getVelocity();
-//        double ff = kV * target * voltageCompFactor();
-//
-//        double output = pid.calculate(measured, target) + ff;
-//
-//        left.setPower(output);
-//        right.setPower(output);
-//    }
-//
-//    /** DYNAMIC MODE: use Apriltag distance to determine velocity */
-//    private void applyDynamic(AprilTagDetection detections) {
-//        if (detections == null) {
-//            // No tag → hold idle or power off
-//            telemetry.addLine("No Tag");
 package org.firstinspires.ftc.teamcode.mechanisms;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -170,6 +10,8 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,16 +21,16 @@ public class Shooter {
     public enum Mode { RAW, FIXED, DYNAMIC }
 
     /* ---------------- Tunable Config Values ---------------- */
-    public static double kP = 0.0001;
+    public static double kP = 0.003;
     public static double kI = 0.0;
     public static double kD = 0.0;
-    public static double kF = 0.000444;
-    public static int VELO_TOL = 20;
-    public static double IDLE_VELO = 100; // Match your LUT sign (negative)
+    public static double kV = 0.000551;
+    public static double VELO_TOL = 20;
+    public static double IDLE_VELO = 600; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;
-    public static double shootVelocity = 700;
-    public static double targetVelocity = shootVelocity;
+//    public static double shootVelocity = Robot.SHOOTER_READY_VELOCITY;
+    public static double targetVelocity = Robot.SHOOTER_READY_VELOCITY;
     public static double targetPower = 0;
     public static double LUTKv = 1;
 
@@ -196,13 +38,12 @@ public class Shooter {
     private final VoltageSensor battery;
     private final PIDController pid = new PIDController();
     private final InterpLUT distToVelo;
-    public FtcDashboard dashboard;
-    public Telemetry dashboardTelemetry;
 
-//    private Robot robot;
+    private final Robot robot;
 
     public Shooter(HardwareMap hw, Telemetry telemetry) {
 //        this.robot = robotInstance; // Store the reference to the robot that owns this shooter
+        robot = Robot.get();
 
         left = hw.get(DcMotorEx.class, "leftFlyWheel");
         right = hw.get(DcMotorEx.class, "rightFlyWheel");
@@ -211,47 +52,27 @@ public class Shooter {
         left.setDirection(DcMotorSimple.Direction.REVERSE);
         right.setDirection(DcMotorSimple.Direction.FORWARD);
 
-        left.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        right.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-
-        left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        left.setVelocityPIDFCoefficients(kP, kI, kD, kF);
-        right.setVelocityPIDFCoefficients(kP, kI, kD, kF);
-        left.setTargetPositionTolerance(VELO_TOL);
-        right.setTargetPositionTolerance(VELO_TOL);
-
         battery = hw.voltageSensor.iterator().next();
         distToVelo = buildLUT();
 
-        dashboard = FtcDashboard.getInstance();
-        // Use provided telemetry for local dashboardTelemetry to avoid unused parameter warning
-        dashboardTelemetry = telemetry != null ? telemetry : dashboard.getTelemetry();
+        // NO MORE Robot.get().Init() here!
     }
-    //Units in inches and RPM
-    private InterpLUT buildLUT() { //TODO Tune this
+
+    private InterpLUT buildLUT() {
         InterpLUT lut = new InterpLUT();
-        lut.add(-100, 0);
-        lut.add(0, 970);
-        lut.add(78.7402, 990* LUTKv);
-        lut.add(118.11, 1000* LUTKv);
-        lut.add(157.48, 1050* LUTKv);
-        lut.add(196.85, 1050* LUTKv);
-        lut.add(236.22, 1240* LUTKv);
-        lut.add(275.591, 1260* LUTKv);
-        lut.add(354.331, 1440* LUTKv);
-        lut.add(433.071, 1490* LUTKv);
-        lut.add(472.441, 1525* LUTKv);
-        lut.add(3937.01, 1580* LUTKv);
+        // Add from SMALLEST X to LARGEST X
+        // (-80 is the smallest number, -13.5 is the largest)
+        lut.add(-80.0, 1510 * LUTKv);
+        lut.add(-75.0, 1460 * LUTKv);
+        lut.add(-38.0, 1170 * LUTKv);
+        lut.add(-20.5, 1150 * LUTKv);
+        lut.add(-13.5, 900 * LUTKv);
+
         lut.build();
         return lut;
     }
 
-    /** DYNAMIC MODE: use Limelight distance (inches) to determine velocity */
+    /** DYNAMIC MODE: use Limelight Target Area (ta) to determine velocity */
     public void periodic(Double dist) {
         switch (mode) {
             case RAW:
@@ -264,13 +85,14 @@ public class Shooter {
                 break;
 
             case DYNAMIC:
-                if (dist != null && dist > 0) {
+                if (dist != null) {
+                    // targetArea is the percentage of the image (0-100)
                     // You must re-tune your buildLUT() to use 'ta' values as the 'x'
                     targetVelocity = distToVelo.get(dist);
                     applyVelocity(targetVelocity);
+                    robot.flightRecorder.addData("Target dist", dist);
 
-                    dashboardTelemetry.addData("Limelight TA", dist);
-                    dashboardTelemetry.addData("Target RPM", targetVelocity);
+                    robot.flightRecorder.addData("Target RPM", targetVelocity);
                 } else {
                     // If tag lost, maintain last known velocity to keep flywheels spinning
                     applyVelocity(targetVelocity);
@@ -278,27 +100,23 @@ public class Shooter {
                 break;
         }
     }
-    @Deprecated
-    private void applyVelocityOld(double target) {
+
+    private void applyVelocity(double target) {
         double measured = right.getVelocity();
-        dashboardTelemetry.addData("Measured", measured);
-        dashboardTelemetry.addData("Target", target);
+        robot.flightRecorder.addData("Measured", measured);
+        robot.flightRecorder.addData("Target", target);
 
         // Feedforward handles the bulk of the power based on battery voltage
-        double ff = kF * target * (13.0 / battery.getVoltage());
+        double ff = kV * target * (13.0 / battery.getVoltage());
 
         // PID handles the correction
         double feedback = pid.calculate(measured, target);
 
         double power = ff + feedback;
+//        robot.dashboardTelemetry.addData("Power", power);
+//        robot.dashboardTelemetry.update();
         left.setPower(Range.clip(power, -1, 1));
         right.setPower(Range.clip(power, -1, 1));
-    }
-
-    private void applyVelocity(double target) {
-        left.setVelocity(target);
-        right.setVelocity(target);
-
     }
 
     public void setRaw(double p) { mode = Mode.RAW; targetPower = p; }
@@ -324,7 +142,7 @@ public class Shooter {
 //    }
 
     /* --- Internal Classes --- */
-    @Deprecated
+
     private static class PIDController {
         double prevError = 0;
         double integral = 0;
@@ -338,24 +156,60 @@ public class Shooter {
     }
 
     public double getVelocity(){
-        return right.getVelocity(); // Idiot use right motor lol
+        return left.getVelocity();
     }
 
-    private static class InterpLUT {
-        private final List<Double> xs = new ArrayList<>(), ys = new ArrayList<>();
-        public void add(double x, double y) { xs.add(x); ys.add(y); }
-        public void build() {} // Optional: add sorting logic here if needed
+//    private static class InterpLUT {
+//        private final List<Double> xs = new ArrayList<>(), ys = new ArrayList<>();
+//        public void add(double x, double y) { xs.add(x); ys.add(y); }
+//        public void build() {} // Optional: add sorting logic here if needed
+//        public double get(double x) {
+//            if (x <= xs.get(0)) return ys.get(0);
+//            if (x >= xs.get(xs.size()-1)) return ys.get(ys.size()-1);
+//            for (int i = 0; i < xs.size() - 1; i++) {
+//                if (x <= xs.get(i+1)) {
+//                    double t = (x - xs.get(i)) / (xs.get(i+1) - xs.get(i));
+//                    return ys.get(i) + t * (ys.get(i+1) - ys.get(i));
+//                }
+//            }
+//            return ys.get(0);
+//        }
+//    }
+
+    public class InterpLUT {
+        ArrayList<Double> xs = new ArrayList<>();
+        ArrayList<Double> ys = new ArrayList<>();
+
+        public void add(double x, double y) {
+            xs.add(x);
+            ys.add(y);
+        }    public void build() {
+            // No changes needed here, just ensure they are added in ascending order (-80, -75...)
+        }
+
         public double get(double x) {
+            if (xs.isEmpty()) return 0;
+
+            // 1. Handle Out of Bounds (Closest)
             if (x <= xs.get(0)) return ys.get(0);
-            if (x >= xs.get(xs.size()-1)) return ys.get(ys.size()-1);
+
+            // 2. Handle Out of Bounds (Furthest)
+            if (x >= xs.get(xs.size() - 1)) return ys.get(ys.size() - 1);
+
+            // 3. Interpolate
             for (int i = 0; i < xs.size() - 1; i++) {
-                if (x <= xs.get(i+1)) {
-                    double t = (x - xs.get(i)) / (xs.get(i+1) - xs.get(i));
-                    return ys.get(i) + t * (ys.get(i+1) - ys.get(i));
+                double x0 = xs.get(i);
+                double x1 = xs.get(i + 1);
+
+                if (x >= x0 && x <= x1) {
+                    double y0 = ys.get(i);
+                    double y1 = ys.get(i + 1);
+
+                    // Linear interpolation formula: y = y0 + (x - x0) * ((y1 - y0) / (x1 - x0))
+                    return y0 + (x - x0) * (y1 - y0) / (x1 - x0);
                 }
             }
-            return ys.get(0);
+            return ys.get(ys.size() - 1);
         }
     }
 }
-

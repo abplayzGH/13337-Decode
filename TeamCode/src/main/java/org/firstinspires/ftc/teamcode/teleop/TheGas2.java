@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
+import static org.firstinspires.ftc.teamcode.Robot.LATCH_CLOSED;
+import static org.firstinspires.ftc.teamcode.Robot.LATCH_OPEN;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -17,7 +20,7 @@ public class TheGas2 extends LinearOpMode {
         Robot robot = Robot.get().Init(Robot.Mode.TELEOP, hardwareMap, telemetry);
 
         // ✅ Persistent state (does NOT reset every loop)
-        Robot.RobotState state = Robot.RobotState.IDLE;
+//        Robot.RobotState state = Robot.RobotState.IDLE;
         if (robot.limelight != null) robot.limelight.getAprilTags();
         waitForStart();
 
@@ -50,130 +53,82 @@ public class TheGas2 extends LinearOpMode {
             }
 
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
+                robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
                 tagDistance = robot.limelight.getTagDistance();
                 tagX = robot.limelight.getTagLocationX();
                 hasTarget = true;
             }
 
             // Always call shooter.periodic and turret update so they can handle lost/seen targets
-            robot.shooter.periodic(hasTarget ? tagDistance : null);
             robot.turret.updateTrackingLimelight(tagX, hasTarget);
 
 
             /* ================= TUNE SHOOTER ================= */
 
-            if (gamepad1.dpad_up) {
+            if (gamepad1.dpadUpWasPressed()) {
                 Robot.SHOOTER_READY_VELOCITY += 10;
-            } else if (gamepad1.dpad_down) {
+            } else if (gamepad1.dpadDownWasPressed()) {
                 Robot.SHOOTER_READY_VELOCITY -= 10;
             }
 
             /* ================= STATE TRANSITIONS ================= */
-
-            switch (state) {
-                case IDLE:
-                    if (shootFixed) {
-                        state = Robot.RobotState.SPINUP_FIXED;
-                    } else if (shootDynamic) {
-                        state = Robot.RobotState.SPINUP_DYNAMIC;
-                    } else if (intakeIn) {
-                        state = Robot.RobotState.INTAKING;
-                    } else if (intakeOut) {
-                        state = Robot.RobotState.OUTTAKING;
-                    }
-                    break;
-
-                case INTAKING:
-                    if (!intakeIn) {
-                        state = Robot.RobotState.IDLE;
-                    }
-                    break;
-
-                case OUTTAKING:
-                    if (!intakeOut) {
-                        state = Robot.RobotState.IDLE;
-                    }
-                    break;
-
-                case SPINUP_FIXED:
-                    if (!shootFixed) {
-                        state = Robot.RobotState.IDLE;
-                    } else if (robot.shooter.isAtTargetVelocity()) {
-                        state = Robot.RobotState.SHOOTING;
-                    }
-                    break;
-
-                case SPINUP_DYNAMIC:
-                    if (!shootDynamic) {
-                        state = Robot.RobotState.IDLE;
-                    } else if (robot.shooter.isAtTargetVelocity()) {
-                        state = Robot.RobotState.SHOOTING;
-                    }
-                    break;
-
-                case SHOOTING:
-                    if (!shootFixed && !shootDynamic) {
-                        state = Robot.RobotState.IDLE;
-                    }
-                    break;
-            }
-
-            /* ================= STATE ACTIONS ================= */
-
-            Shooter.Mode mode = Shooter.Mode.RAW;
-
-            switch (state) {
-
-                case IDLE:
-                    robot.intake.stopIntake();
-                    robot.latch.setPosition(Robot.LATCH_CLOSED);
-                    robot.shooter.setIdle();
-                    break;
-
-                case INTAKING:
-                    robot.shooter.setRaw(0);
-                    robot.intake.runIntake();
-
-                    if (robot.ranger.getDistance() < 10) {
-                        robot.intake.runTransfer();
-                    }
-
-                    robot.latch.setPosition(Robot.LATCH_CLOSED);
-                    break;
-
-                case OUTTAKING:
-                    robot.shooter.setRaw(-0.5);
-                    robot.intake.runOutTake();
-                    robot.latch.setPosition(Robot.LATCH_OPEN);
-                    break;
-
-                case SPINUP_FIXED:
-                    mode = Shooter.Mode.FIXED;
-                    robot.shooter.setTargetVelocity(Robot.SHOOTER_READY_VELOCITY);
-                    break;
-
-                case SPINUP_DYNAMIC:
-                    mode = Shooter.Mode.DYNAMIC;
-                    break;
-
-                case SHOOTING:
-                    mode = shootFixed ? Shooter.Mode.FIXED : Shooter.Mode.DYNAMIC;
-
-                    robot.latch.setPosition(Robot.LATCH_OPEN);
+            if (shootFixed) {
+                robot.shooter.setMode(Shooter.Mode.FIXED);
+                robot.shooter.setTargetVelocity(Robot.SHOOTER_READY_VELOCITY);
+                if (robot.shooter.isAtTargetVelocity()) {
+                    robot.latch.setPosition(LATCH_OPEN);
                     robot.intake.runIntake();
                     robot.intake.runTransfer();
-                    break;
-            }
+                }
+            } else if (shootDynamic) {
+                robot.shooter.setMode(Shooter.Mode.DYNAMIC);
+                if (robot.shooter.isAtTargetVelocity()) {
+                    robot.latch.setPosition(LATCH_OPEN);
+                    robot.intake.runIntake();
+                    robot.intake.runTransfer();
 
-            // Only changes internally if different
-            robot.shooter.setMode(mode);
+                }
+//            } else if (gamepad2.right_trigger >= .05) {
+//                robot.shooter.setMode(Shooter.Mode.RAW);
+//                robot.shooter.setRaw(gamepad2.right_trigger);
+//                if (gamepad2.left_bumper) {
+//                    robot.latch.setPosition(LATCH_OPEN);
+//                    robot.intake.runIntake();
+//                    robot.intake.runTransfer();
+//                }
+            } else if (intakeOut) {
+                robot.shooter.setRaw(-0.5);
+                robot.intake.runOutTake();
+                robot.latch.setPosition(LATCH_OPEN);
+            } else if (intakeIn) {
+                robot.shooter.setRaw(0);
+                robot.intake.runIntake();
+                if (robot.ranger.getDistance() >= .2) {
+                    telemetry.addLine("Transferring");
+                    robot.intake.runTransfer();
+                }
+                robot.latch.setPosition(LATCH_CLOSED);
+            } else {
+                robot.shooter.setRaw(0);
+                robot.intake.stopIntake();
+                robot.latch.setPosition(LATCH_CLOSED);
+//                shooter.setIdle();
+            }
+            robot.shooter.periodic(tagDistance);
+
 
             /* ================= TELEMETRY ================= */
 
-            robot.flightRecorder.addData("State", state);
+//            robot.flightRecorder.addData("State", state);
+            robot.flightRecorder.addData("Ranger", robot.ranger.getDistance());
             robot.flightRecorder.addData("Turret Pos", robot.turret.getPosition());
             robot.flightRecorder.addData("Tag", hasTarget ? robot.limelight.getTagID() : "None");
             robot.flightRecorder.addData("Velocity", robot.shooter.getVelocity());
+            robot.flightRecorder.addData("Distance", tagDistance);
+            robot.flightRecorder.addData("X", tagX);
+            robot.flightRecorder.addData("Pose", robot.limelight.tagPose);
+            robot.flightRecorder.addData("Y", robot.limelight.getTagLocationY());
+            robot.flightRecorder.addData("Ready Velocity", Robot.SHOOTER_READY_VELOCITY);
             robot.flightRecorder.update();
         }
     }

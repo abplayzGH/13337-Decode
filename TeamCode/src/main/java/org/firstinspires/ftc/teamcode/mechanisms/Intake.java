@@ -11,7 +11,7 @@ public class Intake {
     public DcMotorEx IntakeMotor;
     public CRServo IntakeServo1;
     public CRServo IntakeServo2;
-    public static double intakePower = .6;
+    public static double intakePower = 1;
 
     public void init(HardwareMap hardwareMap) {
         IntakeMotor = hardwareMap.get(DcMotorEx.class, "intakeMotor");

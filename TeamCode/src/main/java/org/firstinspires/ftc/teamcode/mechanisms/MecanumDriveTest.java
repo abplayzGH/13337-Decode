@@ -81,11 +81,15 @@ public class MecanumDriveTest {
         imu.resetYaw();
     }
 
-    public void driveFieldCentric(double y, double x, double rx, double accelerator) {
-        double imuBotHeading = -imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
 
-        double rotX = x * Math.cos(imuBotHeading) - y * Math.sin(imuBotHeading);
-        double rotY = x * Math.sin(imuBotHeading) + y * Math.cos(imuBotHeading);
+    public void driveFieldCentric(double y, double x, double rx, double accelerator) {
+        double imuBotHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+        // 2. Standard Rotation Matrix for Field Centric
+        double rotX = x * Math.cos(-imuBotHeading) - y * Math.sin(-imuBotHeading);
+        double rotY = x * Math.sin(-imuBotHeading) + y * Math.cos(-imuBotHeading);
+
+        // 3. Pass to the standard drive method
         drive(rotY, rotX, rx, accelerator);
     }
 
@@ -110,29 +114,15 @@ public class MecanumDriveTest {
         odometry.setPosY(y, DistanceUnit.INCH);
     }
 
-    public void odometryUpdate() {
+    public void odometryUpdate(double radians) {
+
+        // This allows us to tell the IMU/Odometry that "Forward" is
+        // a different direction based on where we started.
+        imu.resetYaw();
+        // Note: If using GoBilda Pinpoint, you can also use:
         odometry.update();
+        odometry.setHeading(radians, AngleUnit.RADIANS);
+    }
     }
 
-    public void setLightPWM(double pwm) {
-        //0.0 off
-        //0.277 red
-        //0.333 orange
-        //0.388 yellow
-        //0.5 green
-        //0.611 blue
-        //0.722 violet
-        //1.0 white
-        lights.setPosition(pwm);
-    }
-
-    public void autoLight(boolean full, boolean empty) {
-        if (full) {
-            setLightPWM(0.5);
-        } else if (empty) {
-            setLightPWM(0.28);
-        } else {
-            setLightPWM(0.33);
-        }
-    }
 }

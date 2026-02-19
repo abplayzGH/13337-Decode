@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.ftc.PinpointIMU;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -24,7 +25,7 @@ public class Robot{
     private static final Robot inst = new Robot();
 
     public static int TARGET_TAG = 20;
-    public static double SHOOTER_READY_VELOCITY = 700;
+    public static double SHOOTER_READY_VELOCITY = 1400;
     public static double LATCH_OPEN = 0.1;
     public static double LATCH_CLOSED = 0;
 //
@@ -42,7 +43,7 @@ public class Robot{
     public MultipleTelemetry flightRecorder;
     public SwyftRanger ranger;
     public LimeLight limelight;
-    public PinpointIMU imu;
+    public IMU imu;
 
     public enum Mode {
         AUTO,
@@ -96,6 +97,7 @@ public class Robot{
 
 //        WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
 //        vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
+        ranger = new SwyftRanger(hardwareMap, "ranger");
 
         mecanumTeleop = new MecanumTeleop();
         mecanumTeleop.Init(hardwareMap);
@@ -110,7 +112,7 @@ public class Robot{
         Limelight3A ll = hardwareMap.get(Limelight3A.class, "limelight");
         limelight = new LimeLight(ll);
 
-        imu = hardwareMap.get(PinpointIMU.class, "pinpoint");
+        imu = hardwareMap.get(IMU.class, "imu");
         telemetry.setMsTransmissionInterval(11);
 
 
