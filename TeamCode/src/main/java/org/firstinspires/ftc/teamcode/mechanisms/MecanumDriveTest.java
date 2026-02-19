@@ -123,6 +123,4 @@ public class MecanumDriveTest {
         odometry.update();
         odometry.setHeading(radians, AngleUnit.RADIANS);
     }
-    }
-
 }
