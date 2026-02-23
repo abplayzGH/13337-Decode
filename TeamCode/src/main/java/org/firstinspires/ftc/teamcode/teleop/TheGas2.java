@@ -28,12 +28,13 @@ public class TheGas2 extends LinearOpMode {
 
             /* ================= DRIVE ================= */
 
-            double forward = -gamepad1.left_stick_y;   // Forward/back
+            double forward = gamepad1.left_stick_y;   // Forward/back
             double strafe  =  gamepad1.left_stick_x;   // Left/right
             double rotate  = -gamepad1.right_stick_x;  // Turn
             double speed   = 0.3 + 0.7 * gamepad1.right_trigger;
 
             robot.mecanumTeleop.Drive(strafe, forward, rotate, speed);
+
 
             /* ================= INPUTS ================= */
 
@@ -53,10 +54,13 @@ public class TheGas2 extends LinearOpMode {
             }
 
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
-                robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
-                tagDistance = robot.limelight.getTagDistance();
-                tagX = robot.limelight.getTagLocationX();
-                hasTarget = true;
+                if (robot.limelight.getTagID() == Robot.TARGET_TAG){
+                    robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
+                    tagDistance = robot.limelight.getTagDistance();
+                    tagX = robot.limelight.getTagLocationX();
+
+                    hasTarget = true;
+                }
             }
 
             // Always call shooter.periodic and turret update so they can handle lost/seen targets

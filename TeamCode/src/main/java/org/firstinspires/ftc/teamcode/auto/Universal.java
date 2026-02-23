@@ -13,7 +13,7 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.MecanumDriveRR;
 import org.firstinspires.ftc.teamcode.Robot;
 
 @Config
@@ -49,7 +49,7 @@ public class Universal extends LinearOpMode {
                 new Pose2d(startPose.position.x, -startPose.position.y, -startPose.heading.toDouble());
 
         // --- DRIVE INIT ---
-        MecanumDrive drive = new MecanumDrive(hardwareMap, finalStartPose);
+        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, finalStartPose);
 
         // --- TRAJECTORIES ---
         TrajectoryActionBuilder driveToShootPos =

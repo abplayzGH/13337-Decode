@@ -110,7 +110,7 @@ public class Robot{
         flightRecorder = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         Limelight3A ll = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight = new LimeLight(ll);
+        limelight = new LimeLight(ll, 1);
 
         imu = hardwareMap.get(IMU.class, "imu");
         telemetry.setMsTransmissionInterval(11);

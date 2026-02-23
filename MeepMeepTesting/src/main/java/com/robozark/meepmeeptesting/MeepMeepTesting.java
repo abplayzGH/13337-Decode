@@ -44,7 +44,7 @@ public class MeepMeepTesting {
                 .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
 //
                 .strafeTo(new Vector2d(12, 56))
-                .lineToX(100)
+                .lineToX(20)
 //
 //                .strafeTo(SPIKE_2_FINAL)
 //

@@ -19,7 +19,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.MecanumDriveRR;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.MecanumTeleop;
@@ -120,7 +120,7 @@ public class Goal extends LinearOpMode {
         Pose2d finalStartPose = isRed ? startPose :
                 new Pose2d(startPose.position.x, -startPose.position.y, -startPose.heading.toDouble());
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, finalStartPose);
+        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, finalStartPose);
 
 
 

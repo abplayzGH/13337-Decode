@@ -9,8 +9,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Pose2dDual;
-import com.acmerobotics.roadrunner.PoseMap;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -22,10 +20,9 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.MecanumDriveRR;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.mechanisms.MecanumTeleop;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 import org.firstinspires.ftc.teamcode.vision.VisionManager;
@@ -104,14 +101,13 @@ public class Wall extends LinearOpMode {
         WebcamName cam = hardwareMap.get(WebcamName.class, "Webcam 1");
         VisionManager vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
 
-        MecanumTeleop mecanumTeleop = new MecanumTeleop();
-        mecanumTeleop.Init(hardwareMap);
 
-        PoseMap poseMap = Robot.alliance == Robot.Alliance.RED ? (pose -> pose) :
-                (pose -> new Pose2dDual<>(
-                        pose.position.x,
-                        pose.position.y.unaryMinus(),
-                        pose.heading.inverse()));
+
+//        PoseMap poseMap = Robot.alliance == Robot.Alliance.RED ? (pose -> pose) :
+//                (pose -> new Pose2dDual<>(
+//                        pose.position.x,
+//                        pose.position.y.unaryMinus(),
+//                        pose.heading.inverse()));
 
 
         // 2. Setup Roadrunner Drive
@@ -123,7 +119,7 @@ public class Wall extends LinearOpMode {
         Pose2d finalStartPose = Robot.alliance == Robot.Alliance.RED ? startPose :
                 new Pose2d(startPose.position.x, -startPose.position.y, -startPose.heading.toDouble());
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, finalStartPose);
+        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, finalStartPose);
 
 
 
