@@ -43,6 +43,7 @@ public class LimeLight {
     {
         return tagDistance;
     }
+    public double getTagArea() {return tagLocationArea;}
     public LimeLight(Limelight3A vision)
     {
         this.vision = vision;
@@ -95,7 +96,7 @@ public class LimeLight {
             tagLocationY = fiducial.getTargetYDegrees();
             tagLocationWidth = fiducial.getTargetXPixels();
             tagLocationHeight = fiducial.getTargetYPixels();
-            tagLocationArea = tagLocationWidth * tagLocationHeight;
+            tagLocationArea = fiducial.getTargetArea();
             angleToGoal = Math.toRadians(0 + tagLocationY);
             tagPose = fiducial.getRobotPoseTargetSpace();
             tagDistance = tagPose.getPosition().toUnit(DistanceUnit.INCH).z;

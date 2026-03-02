@@ -62,18 +62,22 @@ public class Shooter {
         InterpLUT lut = new InterpLUT();
         // Add from SMALLEST X to LARGEST X
         // (-80 is the smallest number, -13.5 is the largest)
-        lut.add(-80.0, 1510 * LUTKv);
-        lut.add(-75.0, 1460 * LUTKv);
-        lut.add(-38.0, 1170 * LUTKv);
-        lut.add(-20.5, 1150 * LUTKv);
-        lut.add(-13.5, 900 * LUTKv);
-
+//        lut.add(-80.0, 1510 * LUTKv);
+//        lut.add(-75.0, 1460 * LUTKv);
+//        lut.add(-38.0, 1170 * LUTKv);
+//        lut.add(-20.5, 1150 * LUTKv);
+//        lut.add(-13.5, 900 * LUTKv);
+        lut.add(0.00298709003254771, 1510* LUTKv);
+        lut.add(0.00866690184921026, 1300* LUTKv);
+        lut.add(0.0116988373920321, 1280* LUTKv);
+        lut.add(0.0156725514680147, 1200* LUTKv);
+        lut.add(0.0353688970208168, 1000* LUTKv);
         lut.build();
         return lut;
     }
 
     /** DYNAMIC MODE: use Limelight Target Area (ta) to determine velocity */
-    public void periodic(Double dist) {
+    public void periodic(Double area) {
         switch (mode) {
             case RAW:
                 left.setPower(targetPower);
@@ -85,12 +89,12 @@ public class Shooter {
                 break;
 
             case DYNAMIC:
-                if (dist != null) {
+                if (area != null) {
                     // targetArea is the percentage of the image (0-100)
                     // You must re-tune your buildLUT() to use 'ta' values as the 'x'
-                    targetVelocity = distToVelo.get(dist);
+                    targetVelocity = distToVelo.get(area);
                     applyVelocity(targetVelocity);
-                    robot.flightRecorder.addData("Target dist", dist);
+                    robot.flightRecorder.addData("Target area", area);
 
                     robot.flightRecorder.addData("Target RPM", targetVelocity);
                 } else {
@@ -101,6 +105,26 @@ public class Shooter {
         }
     }
 
+    // Old
+//    private void applyVelocity(double target) {
+//        double measured = right.getVelocity();
+//        robot.flightRecorder.addData("Measured", measured);
+//        robot.flightRecorder.addData("Target", target);
+//
+//        // Feedforward handles the bulk of the power based on battery voltage
+//        double ff = kV * target * (13.0 / battery.getVoltage());
+//
+//        // PID handles the correction
+//        double feedback = pid.calculate(measured, target);
+//
+//        double power = ff + feedback;
+////        robot.dashboardTelemetry.addData("Power", power);
+////        robot.dashboardTelemetry.update();
+//        left.setPower(Range.clip(power, -1, 1));
+//        right.setPower(Range.clip(power, -1, 1));
+//    }
+
+    //New Gemini Code?
     private void applyVelocity(double target) {
         double measured = right.getVelocity();
         robot.flightRecorder.addData("Measured", measured);
@@ -113,12 +137,12 @@ public class Shooter {
         double feedback = pid.calculate(measured, target);
 
         double power = ff + feedback;
-//        robot.dashboardTelemetry.addData("Power", power);
-//        robot.dashboardTelemetry.update();
-        left.setPower(Range.clip(power, -1, 1));
-        right.setPower(Range.clip(power, -1, 1));
-    }
 
+        // Clip between 0 and 1 to prevent aggressive reverse-braking.
+        // (Change to -1 and 0 if your motors need negative power to shoot)
+        left.setPower(Range.clip(power, 0, 1));
+        right.setPower(Range.clip(power, 0, 1));
+    }
     public void setRaw(double p) { mode = Mode.RAW; targetPower = p; }
     public void setMode(Mode m) { mode = m; }
     public void setIdle() { mode = Mode.FIXED; targetVelocity = IDLE_VELO; }
@@ -143,15 +167,56 @@ public class Shooter {
 
     /* --- Internal Classes --- */
 
+//    private static class PIDController {
+//        double prevError = 0;
+//        double integral = 0;
+//        public double calculate(double measured, double target) {
+//            double error = target - measured;
+//            integral = Range.clip(integral + error, -2000, 2000);
+//            double derivative = error - prevError;
+//            prevError = error;
+//            return (kP * error) + (kI * integral) + (kD * derivative);
+//        }
+//    }
+
     private static class PIDController {
-        double prevError = 0;
-        double integral = 0;
+        private double prevError = 0;
+        private double integral = 0;
+        private com.qualcomm.robotcore.util.ElapsedTime timer = new com.qualcomm.robotcore.util.ElapsedTime();
+        private boolean hasRun = false;
+
         public double calculate(double measured, double target) {
             double error = target - measured;
-            integral = Range.clip(integral + error, -2000, 2000);
-            double derivative = error - prevError;
+
+            // Get delta time in seconds
+            double dt = timer.seconds();
+            timer.reset();
+
+            // Prevent massive derivative spike on the very first loop
+            if (!hasRun) {
+                dt = 0.001;
+                hasRun = true;
+            }
+
+            // Time-based Integral
+            integral += error * dt;
+
+            // Still clip the integral to prevent runaway windup
+            // Note: Since we multiplied by dt, you may need to re-tune your clipping bounds!
+            integral = Range.clip(integral, -500, 500);
+
+            // Time-based Derivative
+            double derivative = (error - prevError) / dt;
             prevError = error;
+
             return (kP * error) + (kI * integral) + (kD * derivative);
+        }
+
+        // Call this when you completely stop the shooter to wipe out old data
+        public void reset() {
+            integral = 0;
+            prevError = 0;
+            hasRun = false;
         }
     }
 

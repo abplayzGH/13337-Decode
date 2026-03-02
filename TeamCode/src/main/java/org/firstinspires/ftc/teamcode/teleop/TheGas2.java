@@ -56,7 +56,7 @@ public class TheGas2 extends LinearOpMode {
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
                 if (robot.limelight.getTagID() == Robot.TARGET_TAG){
                     robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
-                    tagDistance = robot.limelight.getTagDistance();
+                    tagDistance = robot.limelight.getTagArea();
                     tagX = robot.limelight.getTagLocationX();
 
                     hasTarget = true;

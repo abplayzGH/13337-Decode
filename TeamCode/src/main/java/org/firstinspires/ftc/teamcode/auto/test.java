@@ -51,22 +51,31 @@ public class test extends LinearOpMode {
         final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
 //        final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
         final Pose2d startPose = new Pose2d(-49, 49, Math.toRadians(125));
+        final Pose2d Gate = new Pose2d(2, 53, Math.toRadians(90));
+
 
         MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, startPose);
 
 
         Action thing = drive.actionBuilder(startPose)
-                .strafeTo(GOAL_POSE.position)
 
-                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
-
-                .strafeTo(SPIKE_3_FINAL)
+//                .strafeTo(GOAL_POSE.position)
 //
-                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
+//                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
 //
-                .strafeTo(new Vector2d(12, 56))
-                .lineToX(20)
+//                .strafeTo(SPIKE_3_FINAL)
+////
+//                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
+////
+////                .strafeTo(new Vector2d(12, 56))
+////                .lineToX(20)
+//                .splineToLinearHeading(new Pose2d( new Vector2d(11, 34), Math.toRadians(90)), 1)
+//                .strafeTo(new Vector2d(11, 50))
+//                .strafeToLinearHeading(new Vector2d(GOAL_POSE.position.x, GOAL_POSE.position.y), GOAL_HEADING)
+//                .splineToLinearHeading(Gate, Math.toRadians(200))
 
+                .strafeToLinearHeading(new Vector2d(GOAL_POSE.position.x, GOAL_POSE.position.y), GOAL_HEADING)
+                .splineToSplineHeading(Gate, Math.toRadians(230))
                 .build();
 
         waitForStart();
