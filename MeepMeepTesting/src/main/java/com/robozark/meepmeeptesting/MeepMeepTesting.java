@@ -3,6 +3,7 @@ package com.robozark.meepmeeptesting;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.VelConstraint;
 import com.noahbres.meepmeep.MeepMeep;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueDark;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
@@ -38,21 +39,21 @@ public class MeepMeepTesting {
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(START_POSE)
 
-//                .strafeTo(GOAL_POSE.position)
+                .strafeTo(GOAL_POSE.position)
+
+                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
+
+                .strafeTo(SPIKE_3_FINAL)
 //
-//                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
+                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
 //
-//                .strafeTo(SPIKE_3_FINAL)
-////
-//                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
-////
-////                .strafeTo(new Vector2d(12, 56))
-////                .lineToX(20)
-//                .splineToLinearHeading(new Pose2d( new Vector2d(11, 34), Math.toRadians(90)), 1)
-//                .strafeTo(new Vector2d(11, 50))
-                .strafeToLinearHeading(new Vector2d(GOAL_POSE.position.x, GOAL_POSE.position.y), GOAL_HEADING)
-                .splineToSplineHeading(Gate, Math.toRadians(230))
-                                .strafeToLinearHeading(new Vector2d(8, 52), Math.toRadians(120))
+//                .strafeTo(new Vector2d(12, 56))
+//                .lineToX(20)
+                .splineToLinearHeading(new Pose2d( new Vector2d(11, 34), Math.toRadians(90)), 4)
+                .strafeTo(new Vector2d(11, 50))
+                                .lineToY(27)
+                                .splineToLinearHeading(GOAL_POSE, 3)//                .splineToSplineHeading(Gate, Math.toRadians(230))
+//                                .strafeToLinearHeading(new Vector2d(8, 52), Math.toRadians(120))
 //                        .strafeToSplineHeading(new Vector2d(2,53), Math.toRadians(200))
 
                 .build());

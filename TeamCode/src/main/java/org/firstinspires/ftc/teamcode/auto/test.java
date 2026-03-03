@@ -59,23 +59,20 @@ public class test extends LinearOpMode {
 
         Action thing = drive.actionBuilder(startPose)
 
-//                .strafeTo(GOAL_POSE.position)
-//
-//                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
-//
-//                .strafeTo(SPIKE_3_FINAL)
-////
-//                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
-////
-////                .strafeTo(new Vector2d(12, 56))
-////                .lineToX(20)
-//                .splineToLinearHeading(new Pose2d( new Vector2d(11, 34), Math.toRadians(90)), 1)
-//                .strafeTo(new Vector2d(11, 50))
-//                .strafeToLinearHeading(new Vector2d(GOAL_POSE.position.x, GOAL_POSE.position.y), GOAL_HEADING)
-//                .splineToLinearHeading(Gate, Math.toRadians(200))
+                .strafeTo(GOAL_POSE.position)
 
-                .strafeToLinearHeading(new Vector2d(GOAL_POSE.position.x, GOAL_POSE.position.y), GOAL_HEADING)
-                .splineToSplineHeading(Gate, Math.toRadians(230))
+                .strafeToLinearHeading(SPIKE_3, Math.toRadians(90))
+
+                .strafeTo(SPIKE_3_FINAL)
+//
+                .strafeToLinearHeading(GOAL_POSE.position, GOAL_POSE.heading)
+//
+//                .strafeTo(new Vector2d(12, 56))
+//                .lineToX(20)
+                .splineToLinearHeading(new Pose2d( new Vector2d(11, 34), Math.toRadians(90)), 4)
+                .strafeTo(new Vector2d(11, 50))
+                .lineToY(27)
+                .splineToLinearHeading(GOAL_POSE, 3)//
                 .build();
 
         waitForStart();

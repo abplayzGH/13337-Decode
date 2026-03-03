@@ -14,9 +14,9 @@ public class Turret {
     private final ElapsedTime timer = new ElapsedTime();
 
     // ---- Control Constants ----
-    public static double kP = 0.025;
-    public static double kD = 0.007;
-    public static double kF = 0.007;      // Feedforward (helps overcome friction)
+    public static double kP = 0.006;
+    public static double kD = 0.005;
+    public static double kF = 0.01;      // Feedforward (helps overcome friction)
     public static double MAX_AUTO_POWER = 0.6;
     public static double DEADZONE_DEG = 0.5;
     public static int LEFT_LIMIT = -1000;

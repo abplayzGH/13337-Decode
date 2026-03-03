@@ -61,17 +61,15 @@ public class Shooter {
     private InterpLUT buildLUT() {
         InterpLUT lut = new InterpLUT();
         // Add from SMALLEST X to LARGEST X
-        // (-80 is the smallest number, -13.5 is the largest)
-//        lut.add(-80.0, 1510 * LUTKv);
-//        lut.add(-75.0, 1460 * LUTKv);
-//        lut.add(-38.0, 1170 * LUTKv);
-//        lut.add(-20.5, 1150 * LUTKv);
-//        lut.add(-13.5, 900 * LUTKv);
-        lut.add(0.00298709003254771, 1510* LUTKv);
-        lut.add(0.00866690184921026, 1300* LUTKv);
-        lut.add(0.0116988373920321, 1280* LUTKv);
-        lut.add(0.0156725514680147, 1200* LUTKv);
-        lut.add(0.0353688970208168, 1000* LUTKv);
+        lut.add(0.00350514333695173, 1450* LUTKv);
+        lut.add(0.00481295445933938, 1320* LUTKv);
+        lut.add(0.00584955001249909, 1310* LUTKv);
+        lut.add(0.00899484194815158, 1270* LUTKv);
+        lut.add(0.012061595916748, 1130* LUTKv);
+        lut.add(0.015129355713725, 1050* LUTKv);
+        lut.add(0.0171866100281476, 1320* LUTKv);
+        lut.add(0.0277808532118797, 1000* LUTKv);
+        lut.add(0.0429647862911224, 950* LUTKv);
         lut.build();
         return lut;
     }
