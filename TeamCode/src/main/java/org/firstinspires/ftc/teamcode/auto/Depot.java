@@ -2,8 +2,13 @@ package org.firstinspires.ftc.teamcode.auto;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.PoseMap;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Trajectory;
+import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
+import com.acmerobotics.roadrunner.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -17,7 +22,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import com.acmerobotics.roadrunner.Pose2dDual;
 
 @Config
-@Autonomous(name = "test", group = "Auto")
+@Autonomous(name = "Depot", group = "Auto")
 public class Depot extends LinearOpMode {
 
     private Robot robot;
@@ -49,90 +54,101 @@ public class Depot extends LinearOpMode {
         final Pose2d startPose = new Pose2d(-49, 49, Math.toRadians(125));
         final Vector2d Gate = new Vector2d(10, 55);
 
-        PoseMap poseMap = Robot.alliance == Robot.Alliance.RED
-                ? (pose -> pose)
-                : (pose -> new Pose2dDual<>(
-                pose.position.x,
-                pose.position.y.unaryMinus(),
-                pose.heading.inverse()
-        ));
+//        PoseMap poseMap = Robot.alliance == Robot.Alliance.RED
+//                ? (pose -> pose)
+//                : (pose -> new Pose2dDual<>(
+//                pose.position.x,
+//                pose.position.y.unaryMinus(),
+//                pose.heading.inverse()
+//        ));
+//
+//        Pose2d mappedStartPose = Robot.alliance == Robot.Alliance.RED
+//                ? startPose
+//                : new Pose2d(
+//                startPose.position.x,
+//                -startPose.position.y,
+//                -startPose.heading.toDouble()
+//        );
 
-        Pose2d mappedStartPose = Robot.alliance == Robot.Alliance.RED
-                ? startPose
-                : new Pose2d(
-                startPose.position.x,
-                -startPose.position.y,
-                -startPose.heading.toDouble()
-        );
-
-        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, mappedStartPose);
+        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, startPose);
 
 
-        Action auto = drive.actionBuilder(startPose, poseMap)
+        TrajectoryActionBuilder auto = drive.actionBuilder(startPose)
 
                 // Preload score
-                .afterTime(0.0, autoActions.spinUp())
-                .setTangent(GOAL_HEADING)
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire())
-                .waitSeconds(1.5)
-                .stopAndAdd(autoActions.stopShooter())
+//                .afterTime(0.0, autoActions.spinUp())
+//                .setTangent(GOAL_HEADING)
+                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING);
+//                .stopAndAdd(autoActions.fire())
+//                .waitSeconds(1.5)
+//                .stopAndAdd(autoActions.stopShooter())
 
 
-                //Go to Middle Balls
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
+//                //Go to Middle Balls
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
+//
+//
+//                //Intake Middle Balls
+////                .afterTime(0.0, autoActions.intake())
+//                .setTangent(Math.toRadians(90))
+//                .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
+////                .afterTime(1.0, autoActions.spinUp())
+//
+//
+//                // Return to goal smoothly
+//                .setTangent(Math.toRadians(-90))
+//                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+////                .stopAndAdd(autoActions.fire())
+////                .waitSeconds(1.5)
+////                .stopAndAdd(autoActions.stopShooter())
+//
+//                // Open gate
+////                .afterTime(1, autoActions.intake())
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+//
+//
+//                //Return to goal
+//                .setTangent(Math.toRadians(-90))
+//                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+//
+//                // Open gate
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+//
+//                //Return to goal
+//                .setTangent(Math.toRadians(-90))
+//                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+//
+//                // Open go to spike 3
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
+//
+//                // Intake spike 3
+//                .setTangent(Math.toRadians(90))
+//                .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
+//
+//
+//                //Return to goal
+//                .setTangent(Math.toRadians(-90))
+//                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
 
-
-                //Intake Middle Balls
-                .afterTime(0.0, autoActions.intake())
-                .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
-                .afterTime(1.0, autoActions.spinUp())
-
-
-                // Return to goal smoothly
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire())
-                .waitSeconds(1.5)
-                .stopAndAdd(autoActions.stopShooter())
-
-                // Open gate
-                .afterTime(1, autoActions.intake())
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
-
-
-                //Return to goal
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-
-                // Open gate
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
-
-                //Return to goal
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-
-                // Open go to spike 3
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
-
-                // Intake spike 3
-                .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
-
-
-                //Return to goal
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+        Action park = drive.actionBuilder(startPose)
+                .strafeToLinearHeading(PARK, Math.toRadians(180))
                 .build();
+
+
+
+
 
         waitForStart();
         if (isStopRequested()) return;
 
-        Actions.runBlocking(auto);
+        Actions.runBlocking(
+                new SequentialAction(
+                        park
+                )
+        );
     }
 }

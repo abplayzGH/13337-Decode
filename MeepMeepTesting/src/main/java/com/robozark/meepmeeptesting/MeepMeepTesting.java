@@ -27,7 +27,7 @@ public class MeepMeepTesting {
         final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
         final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
 //        final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
-        final Pose2d START_POSE = new Pose2d(-49, 49, Math.toRadians(125));
+        final Pose2d START_POSE = new Pose2d(-57, 43, Math.toRadians(125));
         final Pose2d START_POSE2 = new Pose2d(55, 10, Math.toRadians(180));
 
 //        final Pose2d Gate = new Pose2d(-2, 45, Math.toRadians(90));
@@ -45,78 +45,78 @@ public class MeepMeepTesting {
                 .build();
 
         // GOAL
-//        myFirstBot.runAction(
-//                myFirstBot.getDrive().actionBuilder(START_POSE)
-//
-//                        // Preload score
-//                        .setTangent(GOAL_HEADING)
-//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-//
-//                        //Go to Middle Balls
-//                        .setTangent(Math.toRadians(90))
-//                        .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
-//
-//                        //Intake Middle Balls
-//                        .setTangent(Math.toRadians(90))
-//                        .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
-//
-////                        // Return to goal smoothly
-//                        .setTangent(Math.toRadians(-90))
-//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-////
-////                        // Open gate
-//                        .setTangent(Math.toRadians(90))
-//                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
-//
-//                        //Return to goal
-//                        .setTangent(Math.toRadians(-90))
-//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+        myFirstBot.runAction(
+                myFirstBot.getDrive().actionBuilder(START_POSE)
+
+                        // Preload score
+                        .setTangent(GOAL_HEADING)
+                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+
+                        //Go to Middle Balls
+                        .setTangent(Math.toRadians(90))
+                        .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
+
+                        //Intake Middle Balls
+                        .setTangent(Math.toRadians(90))
+                        .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
+
+//                        // Return to goal smoothly
+                        .setTangent(Math.toRadians(-90))
+                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
 //
 //                        // Open gate
-//                        .setTangent(Math.toRadians(90))
-//                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
-//
-//                        //Return to goal
-//                        .setTangent(Math.toRadians(-90))
-//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-//
-//                        // Open go to spike 3
-//                        .setTangent(Math.toRadians(90))
-//                        .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
-//
-//                        // Intake spike 3
-//                        .setTangent(Math.toRadians(90))
-//                        .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
-//
-//
-//                        //Return to goal
-//                        .setTangent(Math.toRadians(-90))
-//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-//
-//                        .build()
-//        );
+                        .setTangent(Math.toRadians(90))
+                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
 
-        myFirstBot.runAction(
-                myFirstBot.getDrive().actionBuilder(new Pose2d(60, 10, Math.toRadians(180)))
+                        //Return to goal
+                        .setTangent(Math.toRadians(-90))
+                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+
+                        // Open gate
+                        .setTangent(Math.toRadians(90))
+                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+
+                        //Return to goal
+                        .setTangent(Math.toRadians(-90))
+                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+
+                        // Open go to spike 3
+                        .setTangent(Math.toRadians(90))
+                        .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
+
+                        // Intake spike 3
+                        .setTangent(Math.toRadians(90))
+                        .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
 
 
-                        .splineToLinearHeading(new Pose2d(SPIKE_1_FINAL, Math.toRadians(90)), Math.toRadians(90))
-                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
-
-                        .splineToLinearHeading(new Pose2d(new Vector2d(55, 55), Math.toRadians(90)), Math.toRadians(90))
-                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
-
-                        .splineToLinearHeading(new Pose2d(new Vector2d(50, 55), Math.toRadians(90)), Math.toRadians(90))
-                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
-
-                        .splineToLinearHeading(new Pose2d(new Vector2d(45, 55), Math.toRadians(90)), Math.toRadians(90))
-                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
-
-
-
+                        //Return to goal
+                        .setTangent(Math.toRadians(-90))
+                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
 
                         .build()
         );
+
+//        myFirstBot.runAction(
+//                myFirstBot.getDrive().actionBuilder(new Pose2d(60, 10, Math.toRadians(180)))
+//
+//
+//                        .splineToLinearHeading(new Pose2d(SPIKE_1_FINAL, Math.toRadians(90)), Math.toRadians(90))
+//                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
+//
+//                        .splineToLinearHeading(new Pose2d(new Vector2d(55, 55), Math.toRadians(90)), Math.toRadians(90))
+//                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
+//
+//                        .splineToLinearHeading(new Pose2d(new Vector2d(50, 55), Math.toRadians(90)), Math.toRadians(90))
+//                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
+//
+//                        .splineToLinearHeading(new Pose2d(new Vector2d(45, 55), Math.toRadians(90)), Math.toRadians(90))
+//                        .splineToLinearHeading(START_POSE2, Math.toRadians(270))
+//
+//
+//
+//
+//                        .build()
+//        );
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_DECODE_OFFICIAL)
                 .setDarkMode(true)

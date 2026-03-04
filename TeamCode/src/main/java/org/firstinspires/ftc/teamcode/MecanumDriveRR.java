@@ -73,9 +73,9 @@ public final class MecanumDriveRR {
         public double kA = 0.000056;
 
         // path profile parameters (in inches)
-        public double maxWheelVel = 100; // TODO: tune this based on your robot's capabilities; also used by dashboard for visualization, so set it to your actual max velocity
+        public double maxWheelVel = 50; // TODO: tune this based on your robot's capabilities; also used by dashboard for visualization, so set it to your actual max velocity
         public double minProfileAccel = -30;
-        public double maxProfileAccel = 70;
+        public double maxProfileAccel = 50;
 
         // turn profile parameters (in radians)
         public double maxAngVel = Math.PI; // shared with path

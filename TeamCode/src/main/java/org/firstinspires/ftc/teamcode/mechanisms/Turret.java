@@ -6,6 +6,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Vector2d;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @Config
 public class Turret {
@@ -96,6 +100,22 @@ public class Turret {
         lastError = error;
         lastTime = currentTime;
 
+    }
+
+    // Inside Turret.java
+    public void updateFieldCentric(Pose2d robotPose, Vector2d targetVec) {
+        // 1. Find vector from robot to goal
+        double dx = targetVec.x - robotPose.position.x;
+        double dy = targetVec.y - robotPose.position.y;
+
+        // 2. Calculate the absolute field angle to the goal
+        double angleToGoal = Math.atan2(dy, dx);
+
+        // 3. Subtract robot heading to get angle relative to robot chassis
+        double relativeAngle = AngleUnit.normalizeRadians(angleToGoal - robotPose.heading.toDouble());
+
+        // 4. Convert to degrees (if your tx logic uses degrees) and update
+        updateTrackingLimelight(Math.toDegrees(relativeAngle), true);
     }
 
     private void resetController(double time) {

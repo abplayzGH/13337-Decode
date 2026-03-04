@@ -17,7 +17,7 @@ import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import com.acmerobotics.roadrunner.Pose2dDual;
 
 @Config
-@Autonomous(name = "test", group = "Auto")
+@Autonomous(name = "Audience", group = "Auto")
 public class Audience extends LinearOpMode {
 
     private Robot robot;
@@ -52,26 +52,26 @@ public class Audience extends LinearOpMode {
         final Vector2d GOAL_BACK = new Vector2d(-36, 30);
         final Pose2d GOAL_BACK_POSE = new Pose2d(GOAL_BACK, GOAL_BACk_HEADING);
 
-        PoseMap poseMap = Robot.alliance == Robot.Alliance.RED
-                ? (pose -> pose)
-                : (pose -> new Pose2dDual<>(
-                pose.position.x,
-                pose.position.y.unaryMinus(),
-                pose.heading.inverse()
-        ));
+//        PoseMap poseMap = Robot.alliance == Robot.Alliance.RED
+//                ? (pose -> pose)
+//                : (pose -> new Pose2dDual<>(
+//                pose.position.x,
+//                pose.position.y.unaryMinus(),
+//                pose.heading.inverse()
+//        ));
+//
+//        Pose2d mappedStartPose = Robot.alliance == Robot.Alliance.RED
+//                ? startPose
+//                : new Pose2d(
+//                startPose.position.x,
+//                -startPose.position.y,
+//                -startPose.heading.toDouble()
+//        );
 
-        Pose2d mappedStartPose = Robot.alliance == Robot.Alliance.RED
-                ? startPose
-                : new Pose2d(
-                startPose.position.x,
-                -startPose.position.y,
-                -startPose.heading.toDouble()
-        );
-
-        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, mappedStartPose);
+        MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, startPose);
 
 
-        Action auto = drive.actionBuilder(startPose, poseMap)
+        Action auto = drive.actionBuilder(startPose)
 
                 .splineToLinearHeading(new Pose2d(SPIKE_1_FINAL, Math.toRadians(90)), Math.toRadians(90))
                 .splineToLinearHeading(startPose, Math.toRadians(270))
