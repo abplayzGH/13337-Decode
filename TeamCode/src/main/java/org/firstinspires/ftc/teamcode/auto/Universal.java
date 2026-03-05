@@ -85,7 +85,6 @@ public class Universal extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         driveToShootPos.build(),
-                        autoActions.spinUp(),
                         autoActions.fire(),
                         new SleepAction(1.5),
                         autoActions.stopShooter(),

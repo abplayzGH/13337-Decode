@@ -1,21 +1,29 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import static org.firstinspires.ftc.teamcode.Robot.LATCH_OPEN;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Vector2d;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.MecanumDriveRR;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
+import org.firstinspires.ftc.teamcode.mechanisms.Turret;
 
 public class AutoActions {
     private final Robot robot;
     private final Shooter shooter;
     private final Intake intake;
     private final Servo latch;
+    double tagArea = 0;
+    double tagX = 0;
+    boolean hasTarget = false;
 
     public AutoActions(){
         robot = Robot.get();
@@ -24,47 +32,74 @@ public class AutoActions {
         latch = robot.latch;
     }
 
-    public Action spinUp() {
-        return new Action() {
-            final ElapsedTime timer = new ElapsedTime();
-            boolean started = false;
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                if (!started) {
-                    timer.reset();
-                    started = true;
-                }
+//    public Action spinUp() {
+//        return new Action() {
+//            final ElapsedTime timer = new ElapsedTime();
+//            boolean started = false;
+//            @Override
+//            public boolean run(@NonNull TelemetryPacket packet) {
+//                if (!started) {
+//                    timer.reset();
+//                    started = true;
+//                }
+//
+//                shooter.setMode(Shooter.Mode.DYNAMIC);
+////                shooter.setTargetVelocity(Robot.SHOOTER_READY_VELOCITY);
+//                // Explicitly pass null when no vision data is available
+//                shooter.periodic(tagArea);
+//
+//                // Publish helpful telemetry for tuning/debugging
+//                try {
+//                    packet.put("shooter_target_rpm", Robot.SHOOTER_READY_VELOCITY);
+//                    packet.put("shooter_rpm", shooter.getVelocity());
+//                    packet.put("spinup_elapsed_s", timer.seconds());
+//                } catch (Exception ignored) {}
+//
+//                boolean timeout = timer.seconds() > 3;
+//                return !(shooter.isAtTargetVelocity() || timeout);
+//            }
+//        };
+//    }
 
-                shooter.setMode(Shooter.Mode.FIXED);
-                shooter.setTargetVelocity(Robot.SHOOTER_READY_VELOCITY);
-                // Explicitly pass null when no vision data is available
-                shooter.periodic(null);
+    public Action updateLL(){
+        return packet -> {
 
-                // Publish helpful telemetry for tuning/debugging
-                try {
-                    packet.put("shooter_target_rpm", Robot.SHOOTER_READY_VELOCITY);
-                    packet.put("shooter_rpm", shooter.getVelocity());
-                    packet.put("spinup_elapsed_s", timer.seconds());
-                } catch (Exception ignored) {}
-
-                boolean timeout = timer.seconds() > 3;
-                return !(shooter.isAtTargetVelocity() || timeout);
+            //Update tags
+            if (robot.limelight != null) {
+                robot.limelight.getAprilTags();
             }
+
+            if (robot.limelight != null && robot.limelight.hasValidTarget()) {
+                if (robot.limelight.getTagID() == Robot.TARGET_TAG){
+                    robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
+                    tagArea = robot.limelight.getTagArea();
+                    tagX = robot.limelight.getTagLocationX();
+
+                    hasTarget = true;
+                }
+            }
+            return true;
         };
     }
 
     public Action fire() {
         return packet -> {
-            latch.setPosition(Robot.LATCH_OPEN);
-            intake.runTransfer();
-            intake.runIntake();
-            return false;
+
+            shooter.setMode(Shooter.Mode.DYNAMIC);
+
+            if (shooter.isAtTargetVelocity()) {
+                latch.setPosition(LATCH_OPEN);
+                intake.runIntake();
+                intake.runTransfer();
+            }
+
+            return true;
         };
     }
 
     public Action intake() {
         return packet -> {
-            shooter.setRaw(0);
+//            shooter.setRaw(0);
             intake.runIntake();
 
             if (robot.ranger.getDistance() < 10) {
@@ -72,6 +107,14 @@ public class AutoActions {
             }
 
             latch.setPosition(Robot.LATCH_CLOSED);
+            return true; // keep running
+        };
+    }
+
+    public Action stopIntake() {
+        return packet -> {
+//            shooter.setRaw(0);
+            intake.stopIntake();
             return false;
         };
     }
@@ -83,5 +126,27 @@ public class AutoActions {
             return false;
         };
     }
+
+    public Action shooterIdle() {
+        return packet -> {
+            shooter.setIdle();
+            return false;
+        };
+    }
+
+    public Action turretTrack() {
+        return packet -> {
+            robot.turret.updateTrackingLimelight(tagX, hasTarget);
+
+            return true;
+        };
+    }
+    public Action updateShooter() {
+        return packet -> {
+            shooter.periodic(tagArea);
+            return true; // keep running forever
+        };
+    }
+
 
 }

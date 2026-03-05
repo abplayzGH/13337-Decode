@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.auto;
 
-import android.util.Size;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -10,16 +8,10 @@ import com.acmerobotics.roadrunner.*;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.MecanumDriveRR;
-import org.firstinspires.ftc.teamcode.mechanisms.Intake;
-import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
+import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Turret;
-import org.firstinspires.ftc.teamcode.vision.VisionManager;
-import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 
 import java.lang.Math;
 
@@ -45,95 +37,97 @@ public class why extends LinearOpMode {
 
     /* ---------------- ACTIONS ---------------- */
 
-    public class TurretTrackAction implements Action {
-        private Turret turret;
-        private MecanumDriveRR drive;
-        private Vector2d target;
-
-        public TurretTrackAction(Turret t, MecanumDriveRR d, Vector2d goal) {
-            this.turret = t;
-            this.drive = d;
-            this.target = goal;
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket packet) {
-            // This runs every loop cycle
-            turret.updateFieldCentric(drive.localizer.getPose(), target);
-
-            // Return true to keep the action running indefinitely
-            // (until the ParallelAction it's in finishes)
-            return true;
-        }
-    }
     @Override
     public void runOpMode() {
 
         /* ---------------- INIT ---------------- */
         MecanumDriveRR drive = new MecanumDriveRR(hardwareMap, startPose);
 
-        Turret turret = new Turret();
-        turret.init(hardwareMap);
+//        Turret turret = new Turret();
+//        turret.init(hardwareMap);
 
-        waitForStart();
-        if (isStopRequested()) return;
+        Robot robot = Robot.get();
+        robot.Init(Robot.Mode.AUTO, hardwareMap, telemetry);
 
         /* ---------------- TRAJECTORIES ---------------- */
 
-        TrajectoryActionBuilder toFirstGoal = drive.actionBuilder(startPose)
+        TrajectoryActionBuilder tab1 = drive.actionBuilder(startPose)
 
                 // Preload score
+                .stopAndAdd(autoActions.shooterIdle())
                 .setTangent(GOAL_HEADING)
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+                .stopAndAdd(autoActions.fire())
+                .afterTime(2, autoActions.stopShooter())
 
                 //Go to Middle Balls
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
 
                 //Intake Middle Balls
+                .stopAndAdd(autoActions.intake())
                 .setTangent(Math.toRadians(90))
                 .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
+                .stopAndAdd(autoActions.stopIntake())
 
-//                        // Return to goal smoothly
+//              // Return to goal smoothly
+                .stopAndAdd(autoActions.shooterIdle())
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+                .stopAndAdd(autoActions.fire())
+                .afterTime(2, autoActions.stopShooter())
 //
-//                        // Open gate
+//              // Open gate
+                .stopAndAdd(autoActions.intake())
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+                .afterTime(.1, autoActions.stopIntake())
 
                 //Return to goal
+                .stopAndAdd(autoActions.shooterIdle())
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+                .stopAndAdd(autoActions.fire())
+                .afterTime(2, autoActions.stopShooter())
 
                 // Open gate
+                .stopAndAdd(autoActions.intake())
                 .setTangent(Math.toRadians(90))
                 .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+                .afterTime(.1, autoActions.stopIntake())
 
                 //Return to goal
+                .stopAndAdd(autoActions.shooterIdle())
                 .setTangent(Math.toRadians(-90))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+                .stopAndAdd(autoActions.fire())
+                .afterTime(2, autoActions.stopShooter());
 
-                // Open go to spike 3
-                .setTangent(Math.toRadians(90))
-                .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
+//                // Open go to spike 3
+//                .setTangent(Math.toRadians(90))
+//                .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
+//
+//                // Intake spike 3
+//                .setTangent(Math.toRadians(90))
+//                .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
+//
+//
+//                //Return to goal
+//                .setTangent(Math.toRadians(-90))
+//                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING);
 
-                // Intake spike 3
-                .setTangent(Math.toRadians(90))
-                .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
+
+        waitForStart();
 
 
-                //Return to goal
-                .setTangent(Math.toRadians(-90))
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING);
-
-
-
+        if (isStopRequested()) return;
         /* ---------------- RUN AUTO ---------------- */
         Actions.runBlocking(
                 new ParallelAction(
-                        toFirstGoal.build(), // The driving path
-                        new TurretTrackAction(turret, drive, GOAL) // The tracking logic
+                        tab1.build(), // The driving path
+                        autoActions.updateLL(),
+                        autoActions.turretTrack(),
+                        autoActions.updateShooter()
                 )
         );
     }

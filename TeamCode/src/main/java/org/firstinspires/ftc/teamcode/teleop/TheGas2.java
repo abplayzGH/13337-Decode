@@ -45,7 +45,7 @@ public class TheGas2 extends LinearOpMode {
 
             /* ================= SAFE VISION ================= */
 
-            double tagDistance = 0;
+            double tagArea = 0;
             double tagX = 0;
             boolean hasTarget = false;
             //Update tags
@@ -56,7 +56,7 @@ public class TheGas2 extends LinearOpMode {
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
                 if (robot.limelight.getTagID() == Robot.TARGET_TAG){
                     robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
-                    tagDistance = robot.limelight.getTagArea();
+                    tagArea = robot.limelight.getTagArea();
                     tagX = robot.limelight.getTagLocationX();
 
                     hasTarget = true;
@@ -118,7 +118,7 @@ public class TheGas2 extends LinearOpMode {
                 robot.latch.setPosition(LATCH_CLOSED);
 //                shooter.setIdle();
             }
-            robot.shooter.periodic(tagDistance);
+            robot.shooter.periodic(tagArea);
 
 
             /* ================= TELEMETRY ================= */
@@ -128,7 +128,7 @@ public class TheGas2 extends LinearOpMode {
             robot.flightRecorder.addData("Turret Pos", robot.turret.getPosition());
             robot.flightRecorder.addData("Tag", hasTarget ? robot.limelight.getTagID() : "None");
             robot.flightRecorder.addData("Velocity", robot.shooter.getVelocity());
-            robot.flightRecorder.addData("Distance", tagDistance);
+            robot.flightRecorder.addData("Distance", tagArea);
             robot.flightRecorder.addData("X", tagX);
             robot.flightRecorder.addData("Pose", robot.limelight.tagPose);
             robot.flightRecorder.addData("Y", robot.limelight.getTagLocationY());
