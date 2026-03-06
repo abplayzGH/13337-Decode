@@ -99,8 +99,10 @@ public class Robot{
 //        vision = new VisionManager(hardwareMap, cam, new Size(640, 480)); //TODO Tune webcam
         ranger = new SwyftRanger(hardwareMap, "ranger");
 
-        mecanumTeleop = new MecanumTeleop();
-        mecanumTeleop.Init(hardwareMap);
+        if (mode == Mode.TELEOP) {
+            mecanumTeleop = new MecanumTeleop();
+            mecanumTeleop.Init(hardwareMap);
+        }
         TARGET_TAG = (alliance == Alliance.RED) ? 24 : 20;
 
         latch.setPosition(0);
@@ -110,7 +112,7 @@ public class Robot{
         flightRecorder = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
         Limelight3A ll = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight = new LimeLight(ll, 1);
+        limelight = new LimeLight(ll, 0);
 
         imu = hardwareMap.get(IMU.class, "imu");
         telemetry.setMsTransmissionInterval(11);

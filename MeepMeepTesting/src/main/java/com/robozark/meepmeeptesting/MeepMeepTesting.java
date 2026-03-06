@@ -49,48 +49,80 @@ public class MeepMeepTesting {
                 myFirstBot.getDrive().actionBuilder(START_POSE)
 
                         // Preload score
-                        .setTangent(GOAL_HEADING)
+//                        .setTangent(GOAL_HEADING)
+//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+//
+//                        //Go to Middle Balls
+//                        .setTangent(Math.toRadians(90))
+//                        .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
+//
+//                        //Intake Middle Balls
+//                        .setTangent(Math.toRadians(90))
+//                        .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
+//
+////                        // Return to goal smoothly
+//                        .setTangent(Math.toRadians(-90))
+//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+////
+////                        // Open gate
+//                        .setTangent(Math.toRadians(90))
+//                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+//
+//                        //Return to goal
+//                        .setTangent(Math.toRadians(-90))
+//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+//
+//                        // Open gate
+//                        .setTangent(Math.toRadians(90))
+//                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+//
+//                        //Return to goal
+//                        .setTangent(Math.toRadians(-90))
+//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+//
+//                        // Open go to spike 3
+//                        .setTangent(Math.toRadians(90))
+//                        .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
+//
+//                        // Intake spike 3
+//                        .setTangent(Math.toRadians(90))
+//                        .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
+//
+//
+//                        //Return to goal
+//                        .setTangent(Math.toRadians(-90))
+//                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+
+
+                        .setTangent(Math.toRadians(315))
                         .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
 
                         //Go to Middle Balls
-                        .setTangent(Math.toRadians(90))
+                        .setTangent(Math.toRadians(0))
                         .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
 
                         //Intake Middle Balls
                         .setTangent(Math.toRadians(90))
                         .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
-
-//                        // Return to goal smoothly
-                        .setTangent(Math.toRadians(-90))
+//
+////              // Return to goal smoothly
+                        .setTangent(Math.toRadians(220))
+                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
+////
+////              // Open gate
+                        .setTangent(Math.toRadians(45))
+                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
+//
+//                //Return to goal
+                        .setTangent(Math.toRadians(240))
                         .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
 //
-//                        // Open gate
-                        .setTangent(Math.toRadians(90))
+//                // Open gate
+                        .setTangent(Math.toRadians(0))
                         .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
-
-                        //Return to goal
-                        .setTangent(Math.toRadians(-90))
-                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-
-                        // Open gate
-                        .setTangent(Math.toRadians(90))
-                        .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(115)), Math.toRadians(90))
-
-                        //Return to goal
-                        .setTangent(Math.toRadians(-90))
-                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-
-                        // Open go to spike 3
-                        .setTangent(Math.toRadians(90))
-                        .splineToLinearHeading(new Pose2d(SPIKE_3, Math.toRadians(90)), Math.toRadians(90))
-
-                        // Intake spike 3
-                        .setTangent(Math.toRadians(90))
-                        .splineToConstantHeading(SPIKE_3_FINAL, Math.toRadians(90))
-
-
-                        //Return to goal
-                        .setTangent(Math.toRadians(-90))
+//
+//                //Return to goal
+                        .setTangent(Math.toRadians(240))
                         .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
 
                         .build()

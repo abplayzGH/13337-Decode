@@ -6,10 +6,13 @@ import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.Vector2d;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.MecanumDriveRR;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
@@ -25,8 +28,8 @@ public class AutoActions {
     double tagX = 0;
     boolean hasTarget = false;
 
-    public AutoActions(){
-        robot = Robot.get();
+    public AutoActions(Robot r){
+        robot = r;
         shooter = robot.shooter;
         intake = robot.intake;
         latch = robot.latch;
@@ -82,18 +85,35 @@ public class AutoActions {
         };
     }
 
+
     public Action fire() {
-        return packet -> {
+        return new Action() {
+            final ElapsedTime timer = new ElapsedTime();
+            boolean started = false;
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!started) {
+                    timer.reset();
+                    started = true;
+                }
 
-            shooter.setMode(Shooter.Mode.DYNAMIC);
+                shooter.setMode(Shooter.Mode.DYNAMIC);
 
-            if (shooter.isAtTargetVelocity()) {
-                latch.setPosition(LATCH_OPEN);
-                intake.runIntake();
-                intake.runTransfer();
+                if (shooter.isAtTargetVelocity()) {
+                    latch.setPosition(LATCH_OPEN);
+                    intake.runIntake();
+                    intake.runTransfer();
+                }
+                // Publish helpful telemetry for tuning/debugging
+                try {
+                    packet.put("shooter_target_rpm", Robot.SHOOTER_READY_VELOCITY);
+                    packet.put("shooter_rpm", shooter.getVelocity());
+                    packet.put("spinup_elapsed_s", timer.seconds());
+                } catch (Exception ignored) {}
+
+                boolean timeout = timer.seconds() > 2.5;
+                return !(timeout);
             }
-
-            return true;
         };
     }
 
@@ -107,7 +127,7 @@ public class AutoActions {
             }
 
             latch.setPosition(Robot.LATCH_CLOSED);
-            return true; // keep running
+            return false; // keep running?
         };
     }
 
@@ -122,6 +142,9 @@ public class AutoActions {
     public Action stopShooter() {
         return packet -> {
             robot.reset();
+            shooter.setMode(Shooter.Mode.FIXED);
+            shooter.setTargetVelocity(0);
+            intake.stopIntake();
             latch.setPosition(Robot.LATCH_CLOSED);
             return false;
         };
@@ -134,13 +157,19 @@ public class AutoActions {
         };
     }
 
-    public Action turretTrack() {
-        return packet -> {
-            robot.turret.updateTrackingLimelight(tagX, hasTarget);
+    // Change Pose2d to MecanumDriveRR
+//    public Action turretTrack(MecanumDriveRR drive, Vector2d target) {return packet -> {
+//        // Now it gets the fresh pose every loop
+//        robot.turret.updateFieldCentric(drive.localizer.getPose(), target);
+//        return true; };
+//        }
+        public Action turretTrack() {
+            return packet -> {
+                robot.turret.updateTrackingLimelight(tagX, hasTarget);
+                return true; // keep running forever
+            };
+        }
 
-            return true;
-        };
-    }
     public Action updateShooter() {
         return packet -> {
             shooter.periodic(tagArea);

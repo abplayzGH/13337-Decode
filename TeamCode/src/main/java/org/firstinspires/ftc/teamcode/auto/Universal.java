@@ -52,7 +52,8 @@ public class Universal extends LinearOpMode {
         // Initialize Robot singleton and set alliance so Robot.Init can pick correct constants
         // initialize singleton reference early so static analyzers see it as assigned
         Robot robot = Robot.get().Init(Robot.Mode.AUTO, hardwareMap, telemetry);
-        AutoActions autoActions = new AutoActions();
+
+        AutoActions autoActions = new AutoActions(robot);
 
         // --- POSE SETUP ---
         // All poses written as RED

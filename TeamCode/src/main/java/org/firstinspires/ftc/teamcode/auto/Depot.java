@@ -35,8 +35,9 @@ public class Depot extends LinearOpMode {
         // 1. Initialize the Robot Class
         // Ensure you set the alliance BEFORE Init so TARGET_TAG is correct
 
-        robot = Robot.get().Init(Robot.Mode.AUTO, hardwareMap, telemetry);
-        AutoActions autoActions = new AutoActions();
+        Robot robot = Robot.get().Init(Robot.Mode.AUTO, hardwareMap, telemetry);
+
+        AutoActions autoActions = new AutoActions(robot);
 
 //        Robot.alliance = Robot.Alliance.RED;
 
