@@ -25,7 +25,10 @@ public class Turret {
     public static double DEADZONE_DEG = 0.5;
     public static int LEFT_LIMIT = -1000;
     public static int RIGHT_LIMIT = 1000;
-
+    public static int HOME_POSITION = 0;
+    public static double HOME_kP = 0.004;
+    private double lastTargetSeenTime = 0;
+    public static double TARGET_LOST_DELAY = 0.4;
 
     // ---- State ----
     private double lastError = 0.0;
@@ -102,6 +105,27 @@ public class Turret {
 
     }
 
+    private void resetController(double time) {
+        lastError = 0;
+        lastTime = time;
+    }
+
+    public double getPosition() {
+        // Return a safe value if motor is not initialized to avoid NPEs when debugging
+        if (turretMotor == null) {
+            return Double.NaN;
+        }
+        return turretMotor.getCurrentPosition();
+    }
+
+    // Diagnostic helper: returns a short, human readable status string for telemetry
+    public String getDiagnostics() {
+        if (turretMotor == null) return "turretMotor=null";
+        String mode = (turretMotor.getMode() != null) ? turretMotor.getMode().toString() : "null";
+        String zp = (turretMotor.getZeroPowerBehavior() != null) ? turretMotor.getZeroPowerBehavior().toString() : "null";
+        return String.format("pos=%d mode=%s power=%.2f zp=%s", turretMotor.getCurrentPosition(), mode, turretMotor.getPower(), zp);
+    }
+
     // Inside Turret.java
     public void updateFieldCentric(Pose2d robotPose, Vector2d targetVec) {
         // 1. Find vector from robot to goal
@@ -118,12 +142,19 @@ public class Turret {
         updateTrackingLimelight(Math.toDegrees(relativeAngle), true);
     }
 
-    private void resetController(double time) {
-        lastError = 0;
-        lastTime = time;
+    public void returnToHome() {
+        int pos = turretMotor.getCurrentPosition();
+        double error = HOME_POSITION - pos;
+
+        // small deadzone so it doesn't jitter
+        if (Math.abs(error) < 5) {
+            turretMotor.setPower(0);
+            return;
+        }
+
+        double power = Range.clip(error * HOME_kP, -0.4, 0.4);
+
+        turretMotor.setPower(limitPower(power));
     }
 
-    public double getPosition() {
-        return turretMotor.getCurrentPosition();
-    }
 }

@@ -126,6 +126,7 @@ public class TheGas2 extends LinearOpMode {
 //            robot.flightRecorder.addData("State", state);
             robot.flightRecorder.addData("Ranger", robot.ranger.getDistance());
             robot.flightRecorder.addData("Turret Pos", robot.turret.getPosition());
+            robot.flightRecorder.addData("TurretDiag", robot.turret.getDiagnostics());
             robot.flightRecorder.addData("Tag", hasTarget ? robot.limelight.getTagID() : "None");
             robot.flightRecorder.addData("Velocity", robot.shooter.getVelocity());
             robot.flightRecorder.addData("Distance", tagArea);
