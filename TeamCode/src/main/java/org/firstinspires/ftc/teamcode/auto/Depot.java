@@ -19,17 +19,17 @@ public class Depot extends LinearOpMode {
     final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
     final Vector2d PARK = new Vector2d(37, -33);
     final Vector2d SPIKE_3 = new Vector2d(-12, 20);
-    final Vector2d SPIKE_2 = new Vector2d(12, 22);
+    final Vector2d SPIKE_2 = new Vector2d(12, 20);
     final Vector2d SPIKE_1 = new Vector2d(36, 25);
     final Vector2d SPIKE_3_FINAL = new Vector2d(-12, 50);
-    final Vector2d SPIKE_2_FINAL = new Vector2d(12, 54);
+    final Vector2d SPIKE_2_FINAL = new Vector2d(12, 50);
     final Vector2d SPIKE_1_FINAL = new Vector2d(36, 50);
     //        final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
     final Pose2d startPose = new Pose2d(-57, 43, Math.toRadians(125));
     final Pose2d START_POSE2 = new Pose2d(55, 10, Math.toRadians(180));
 
     //        final Pose2d Gate = new Pose2d(-2, 45, Math.toRadians(90));
-    final Vector2d Gate = new Vector2d(10.5, 55.5);
+    final Vector2d Gate = new Vector2d(11, 55.5);
     double GOAL_BACk_HEADING = Math.toRadians(135);
     final Vector2d GOAL_BACK = new Vector2d(-36, 30);
     final Pose2d GOAL_BACK_POSE = new Pose2d(GOAL_BACK, GOAL_BACk_HEADING);
@@ -87,14 +87,14 @@ public class Depot extends LinearOpMode {
 //
 ////              // Return to goal smoothly
                 .stopAndAdd(autoActions.shooterIdle())
-                .setTangent(Math.toRadians(250))
+                .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
                 .stopAndAdd(autoActions.fire())
                 .stopAndAdd(autoActions.stopShooter())
 ////
 ////              // Open gate
                 .stopAndAdd(autoActions.intake())
-                .setTangent(Math.toRadians(45))
+                .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(114)), Math.toRadians(90))
                 .stopAndAdd(new ParallelAction(
                         autoActions.intake(),
@@ -104,7 +104,7 @@ public class Depot extends LinearOpMode {
 //
 //                //Return to goal
                 .stopAndAdd(autoActions.shooterIdle())
-                .setTangent(Math.toRadians(240))
+                .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
                 .stopAndAdd(autoActions.fire())
                 .stopAndAdd(autoActions.stopShooter())
@@ -121,7 +121,7 @@ public class Depot extends LinearOpMode {
 //
 //                //Return to goal
                 .stopAndAdd(autoActions.shooterIdle())
-                .setTangent(Math.toRadians(240))
+                .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
                 .stopAndAdd(autoActions.fire())
                 .stopAndAdd(autoActions.stopShooter());

@@ -71,6 +71,7 @@ public class AutoActions {
             if (robot.limelight != null) {
                 robot.limelight.getAprilTags();
             }
+            hasTarget = false;
 
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
                 if (robot.limelight.getTagID() == Robot.TARGET_TAG){
@@ -119,14 +120,14 @@ public class AutoActions {
 
     public Action intake() {
         return packet -> {
+            latch.setPosition(Robot.LATCH_CLOSED);
+
 //            shooter.setRaw(0);
             intake.runIntake();
 
             if (robot.ranger.getDistance() < 10) {
                 intake.runTransfer();
             }
-
-            latch.setPosition(Robot.LATCH_CLOSED);
             return false; // keep running?
         };
     }
@@ -135,6 +136,7 @@ public class AutoActions {
         return packet -> {
 //            shooter.setRaw(0);
             intake.stopIntake();
+            robot.latch.setPosition(Robot.LATCH_CLOSED);
             return false;
         };
     }
@@ -153,6 +155,7 @@ public class AutoActions {
     public Action shooterIdle() {
         return packet -> {
             shooter.setIdle();
+            robot.latch.setPosition(Robot.LATCH_CLOSED);
             return false;
         };
     }

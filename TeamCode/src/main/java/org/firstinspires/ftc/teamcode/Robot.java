@@ -33,7 +33,6 @@ public class Robot{
     public Telemetry dashboardTelemetry;
 
     public Servo latch;
-    public ColorSensor colorSensor;
     public Intake intake;
     public Shooter shooter;
     public Turret turret;
@@ -83,7 +82,6 @@ public class Robot{
         Robot.mode = mode;
 
         latch = hardwareMap.get(Servo.class, "latchServo");
-        colorSensor = hardwareMap.get(ColorSensor.class, "colorSensor");
 
         /* ---------------- SUBSYSTEMS ---------------- */
         intake = new Intake();

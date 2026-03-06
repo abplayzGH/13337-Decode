@@ -75,6 +75,10 @@ public class TheGas2 extends LinearOpMode {
                 Robot.SHOOTER_READY_VELOCITY -= 10;
             }
 
+            if (gamepad1.x){
+                robot.turret.returnToHome();
+            }
+
             /* ================= STATE TRANSITIONS ================= */
             if (shootFixed) {
                 robot.shooter.setMode(Shooter.Mode.FIXED);
