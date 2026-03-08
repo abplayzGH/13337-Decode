@@ -53,8 +53,18 @@ public class TheGas2 extends LinearOpMode {
                 robot.limelight.getAprilTags();
             }
 
+//            if (robot.limelight != null && robot.limelight.hasValidTarget()) {
+//                if (robot.limelight.getTagID() == Robot.TARGET_TAG){
+//                    robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
+//                    tagArea = robot.limelight.getTagArea();
+//                    tagX = robot.limelight.getTagLocationX();
+//
+//                    hasTarget = true;
+//                }
+//            }
+
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
-                if (robot.limelight.getTagID() == Robot.TARGET_TAG){
+                if (robot.limelight.getTagID() == 20 || robot.limelight.getTagID() == 24){
                     robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
                     tagArea = robot.limelight.getTagArea();
                     tagX = robot.limelight.getTagLocationX();
@@ -62,6 +72,8 @@ public class TheGas2 extends LinearOpMode {
                     hasTarget = true;
                 }
             }
+
+
 
             // Always call shooter.periodic and turret update so they can handle lost/seen targets
             robot.turret.updateTrackingLimelight(tagX, hasTarget);

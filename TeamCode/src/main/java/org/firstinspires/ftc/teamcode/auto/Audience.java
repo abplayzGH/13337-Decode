@@ -11,6 +11,7 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -19,7 +20,7 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.mechanisms.Intake;
 import org.firstinspires.ftc.teamcode.mechanisms.Shooter;
 import com.acmerobotics.roadrunner.Pose2dDual;
-
+@Disabled
 @Config
 @Autonomous(name = "Audience", group = "Auto")
 public class Audience extends LinearOpMode {
@@ -109,7 +110,7 @@ public class Audience extends LinearOpMode {
                                         shoot.build(), // Drive to shooting position and spinup
                                         autoActions.shooterIdle()
                                 ),
-                                autoActions.fire(),
+                                autoActions.fire(1),
 
 
                                 new ParallelAction(
@@ -122,7 +123,7 @@ public class Audience extends LinearOpMode {
                                         shoot.build(),
                                         autoActions.shooterIdle()
                                 ),
-                                autoActions.fire(),
+                                autoActions.fire(1),
 
                                 new ParallelAction(
                                         intake1.build(),
@@ -134,7 +135,7 @@ public class Audience extends LinearOpMode {
                                         shoot.build(),
                                         autoActions.shooterIdle()
                                 ),
-                                autoActions.fire(),
+                                autoActions.fire(1),
 
                                 new ParallelAction(
                                         intake2.build(),
@@ -146,7 +147,7 @@ public class Audience extends LinearOpMode {
                                         shoot.build(),
                                         autoActions.shooterIdle()
                                 ),
-                                autoActions.fire(),
+                                autoActions.fire(1),
 
                                 new ParallelAction(
                                         intake3.build(),
@@ -158,7 +159,7 @@ public class Audience extends LinearOpMode {
                                         shoot.build(),
                                         autoActions.shooterIdle()
                                 ),
-                                autoActions.fire(),
+                                autoActions.fire(1),
 
                                 end.build()
 

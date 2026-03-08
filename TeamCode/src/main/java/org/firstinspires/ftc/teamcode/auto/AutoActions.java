@@ -74,7 +74,7 @@ public class AutoActions {
             hasTarget = false;
 
             if (robot.limelight != null && robot.limelight.hasValidTarget()) {
-                if (robot.limelight.getTagID() == Robot.TARGET_TAG){
+                if (robot.limelight.getTagID() == 24 || robot.limelight.getTagID() == 20){
                     robot.flightRecorder.addData("Tag", robot.limelight.getTagID());
                     tagArea = robot.limelight.getTagArea();
                     tagX = robot.limelight.getTagLocationX();
@@ -87,7 +87,7 @@ public class AutoActions {
     }
 
 
-    public Action fire() {
+    public Action fire(double rpm) {
         return new Action() {
             final ElapsedTime timer = new ElapsedTime();
             boolean started = false;
@@ -98,7 +98,9 @@ public class AutoActions {
                     started = true;
                 }
 
-                shooter.setMode(Shooter.Mode.DYNAMIC);
+//                shooter.setMode(Shooter.Mode.DYNAMIC);
+                shooter.setMode(Shooter.Mode.FIXED);
+                shooter.setTargetVelocity(rpm);
 
                 if (shooter.isAtTargetVelocity()) {
                     latch.setPosition(LATCH_OPEN);
@@ -112,7 +114,7 @@ public class AutoActions {
                     packet.put("spinup_elapsed_s", timer.seconds());
                 } catch (Exception ignored) {}
 
-                boolean timeout = timer.seconds() > 2.5;
+                boolean timeout = timer.seconds() > 2.4;
                 return !(timeout);
             }
         };

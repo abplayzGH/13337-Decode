@@ -17,11 +17,11 @@ import java.awt.Robot;
 
 public class MeepMeepTesting {
     public static void main(String[] args) {
-        MeepMeep meepMeep = new MeepMeep(800);
+        MeepMeep meepMeep = new MeepMeep(700);
 
 
         double GOAL_HEADING = Math.toRadians(135);
-        final Vector2d GOAL = new Vector2d(-32, 34);
+        final Vector2d GOAL = new Vector2d(-20, 22);
         final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
         final Vector2d PARK = new Vector2d(37, -33);
         final Vector2d SPIKE_3 = new Vector2d(-12, 20);
@@ -33,7 +33,9 @@ public class MeepMeepTesting {
 //        final Pose2d START_POSE = new Pose2d(60, -12, Math.toRadians(180));
         final Pose2d startPose = new Pose2d(-57, 43, Math.toRadians(125));
         final Pose2d START_POSE2 = new Pose2d(55, 10, Math.toRadians(180));
-
+        double GOAL_HEADING2 = Math.toRadians(135);
+        final Vector2d GOAL2 = new Vector2d(-35, 20);
+        final Pose2d GOAL_POSE2 = new Pose2d(GOAL2, GOAL_HEADING);
 
 //        final Pose2d Gate = new Pose2d(-2, 45, Math.toRadians(90));
         final Vector2d Gate = new Vector2d(10.5, 55.5);
@@ -55,10 +57,10 @@ public class MeepMeepTesting {
                         // Preload score
                         .setTangent(Math.toRadians(315))
                         .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-
+                        .waitSeconds(2.5)
 
                         //Go to Middle Balls
-                        .setTangent(Math.toRadians(0))
+                        .setTangent(Math.toRadians(270))
                         .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
 
                         //Intake Middle Balls
@@ -68,30 +70,32 @@ public class MeepMeepTesting {
 ////              // Return to goal smoothly
                         .setTangent(Math.toRadians(270))
                         .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-
+                        .waitSeconds(2.5)
 ////
 ////              // Open gate
                         .setTangent(Math.toRadians(0))
                         .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(114)), Math.toRadians(90))
                         .stopAndAdd(new ParallelAction(
-                                new SleepAction(2)
+                                new SleepAction(1.5)
                         ))
 //
 //                //Return to goal
                         .setTangent(Math.toRadians(270))
                         .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-//
+                        .waitSeconds(2.5)
 //                // Open gate
                         .setTangent(Math.toRadians(0))
                         .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(114)), Math.toRadians(90))
                         .stopAndAdd(new ParallelAction(
-                                new SleepAction(2)
+                                new SleepAction(1.5)
                         ))
 //
 //                //Return to goal
                         .setTangent(Math.toRadians(240))
-                        .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                    .build()
+                        .splineToLinearHeading(GOAL_POSE2, GOAL_HEADING)
+                        .waitSeconds(2.5)
+
+                        .build()
     );
 
 //        myFirstBot.runAction(

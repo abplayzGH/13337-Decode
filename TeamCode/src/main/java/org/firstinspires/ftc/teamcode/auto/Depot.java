@@ -15,7 +15,7 @@ import java.lang.Math;
 @Autonomous(name = "Depot", group = "Auto")
 public class Depot extends LinearOpMode {
     double GOAL_HEADING = Math.toRadians(135);
-    final Vector2d GOAL = new Vector2d(-32, 34);
+    final Vector2d GOAL = new Vector2d(-20, 22);
     final Pose2d GOAL_POSE = new Pose2d(GOAL, GOAL_HEADING);
     final Vector2d PARK = new Vector2d(37, -33);
     final Vector2d SPIKE_3 = new Vector2d(-12, 20);
@@ -33,7 +33,8 @@ public class Depot extends LinearOpMode {
     double GOAL_BACk_HEADING = Math.toRadians(135);
     final Vector2d GOAL_BACK = new Vector2d(-36, 30);
     final Pose2d GOAL_BACK_POSE = new Pose2d(GOAL_BACK, GOAL_BACk_HEADING);
-
+    final Vector2d GOAL2 = new Vector2d(-35, 20);
+    final Pose2d GOAL_POSE2 = new Pose2d(GOAL2, GOAL_HEADING);
     PoseMap poseMap = Robot.alliance == Robot.Alliance.RED
             ? (pose -> pose)
             : (pose -> new Pose2dDual<>(
@@ -69,36 +70,36 @@ public class Depot extends LinearOpMode {
 
         TrajectoryActionBuilder tab = drive.actionBuilder(startPose, poseMap)
                 // Preload score
-                .stopAndAdd(autoActions.shooterIdle())
+                .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(315))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire())
+                .stopAndAdd(autoActions.fire(1160))
                 .stopAndAdd(autoActions.stopShooter())
 
                 //Go to Middle Balls
-                .setTangent(Math.toRadians(0))
+                .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(new Pose2d(SPIKE_2, Math.toRadians(90)), Math.toRadians(0))
 
                 //Intake Middle Balls
-                .stopAndAdd(autoActions.intake())
+                .afterTime(0, autoActions.intake())
                 .setTangent(Math.toRadians(90))
                 .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
                 .stopAndAdd(autoActions.stopIntake())
 //
 ////              // Return to goal smoothly
-                .stopAndAdd(autoActions.shooterIdle())
+                .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire())
+                .stopAndAdd(autoActions.fire(1160))
                 .stopAndAdd(autoActions.stopShooter())
 ////
 ////              // Open gate
-                .stopAndAdd(autoActions.intake())
+                .afterTime(0, autoActions.intake())
                 .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(114)), Math.toRadians(90))
                 .stopAndAdd(new ParallelAction(
                         autoActions.intake(),
-                        new SleepAction(2)
+                        new SleepAction(1)
                 ))
                 .stopAndAdd(autoActions.stopIntake())
 //
@@ -106,24 +107,24 @@ public class Depot extends LinearOpMode {
                 .stopAndAdd(autoActions.shooterIdle())
                 .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire())
+                .stopAndAdd(autoActions.fire(1160))
                 .stopAndAdd(autoActions.stopShooter())
 //
 //                // Open gate
-                .stopAndAdd(autoActions.intake())
+                .afterTime(0, autoActions.intake())
                 .setTangent(Math.toRadians(0))
                 .splineToLinearHeading(new Pose2d(Gate, Math.toRadians(114)), Math.toRadians(90))
                 .stopAndAdd(new ParallelAction(
                         autoActions.intake(),
-                        new SleepAction(2)
+                        new SleepAction(1)
                 ))
                 .stopAndAdd(autoActions.stopIntake())
 //
 //                //Return to goal
-                .stopAndAdd(autoActions.shooterIdle())
+                .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(270))
-                .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire())
+                .splineToLinearHeading(GOAL_POSE2, GOAL_HEADING)
+                .stopAndAdd(autoActions.fire(1050))
                 .stopAndAdd(autoActions.stopShooter());
 
 //                // Open go to spike 3

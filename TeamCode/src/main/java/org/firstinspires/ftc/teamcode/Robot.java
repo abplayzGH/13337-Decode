@@ -25,7 +25,7 @@ public class Robot{
     private static final Robot inst = new Robot();
 
     public static int TARGET_TAG = 20;
-    public static double SHOOTER_READY_VELOCITY = 1400;
+    public static double SHOOTER_READY_VELOCITY = 1100;
     public static double LATCH_OPEN = 0.1;
     public static double LATCH_CLOSED = 0;
 //
@@ -51,15 +51,6 @@ public class Robot{
 
     public enum Alliance {
         RED, BLUE
-    }
-
-    public enum RobotState {
-        IDLE,
-        INTAKING,
-        OUTTAKING,
-        SPINUP_FIXED,
-        SPINUP_DYNAMIC,
-        SHOOTING
     }
 
     public static Alliance alliance = Alliance.RED;
