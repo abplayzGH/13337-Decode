@@ -114,7 +114,7 @@ public class AutoActions {
                     packet.put("spinup_elapsed_s", timer.seconds());
                 } catch (Exception ignored) {}
 
-                boolean timeout = timer.seconds() > 2.4;
+                boolean timeout = timer.seconds() > 2;
                 return !(timeout);
             }
         };

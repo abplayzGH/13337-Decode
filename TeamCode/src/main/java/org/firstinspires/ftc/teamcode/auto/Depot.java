@@ -73,8 +73,8 @@ public class Depot extends LinearOpMode {
                 .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(315))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire(1160))
-                .stopAndAdd(autoActions.stopShooter())
+                .afterTime(0, autoActions.fire(1160))
+                .afterTime(0, autoActions.stopShooter())
 
                 //Go to Middle Balls
                 .setTangent(Math.toRadians(270))
@@ -84,14 +84,14 @@ public class Depot extends LinearOpMode {
                 .afterTime(0, autoActions.intake())
                 .setTangent(Math.toRadians(90))
                 .splineToConstantHeading(SPIKE_2_FINAL, Math.toRadians(90))
-                .stopAndAdd(autoActions.stopIntake())
+                .afterTime(0, autoActions.stopIntake())
 //
 ////              // Return to goal smoothly
                 .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire(1160))
-                .stopAndAdd(autoActions.stopShooter())
+                .afterTime(0, autoActions.fire(1160))
+                .afterTime(0, autoActions.stopShooter())
 ////
 ////              // Open gate
                 .afterTime(0, autoActions.intake())
@@ -101,14 +101,14 @@ public class Depot extends LinearOpMode {
                         autoActions.intake(),
                         new SleepAction(1)
                 ))
-                .stopAndAdd(autoActions.stopIntake())
+                .afterTime(0, autoActions.stopIntake())
 //
 //                //Return to goal
-                .stopAndAdd(autoActions.shooterIdle())
+                .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire(1160))
-                .stopAndAdd(autoActions.stopShooter())
+                .afterTime(0, autoActions.fire(1160))
+                .afterTime(0, autoActions.stopShooter())
 //
 //                // Open gate
                 .afterTime(0, autoActions.intake())
@@ -118,14 +118,14 @@ public class Depot extends LinearOpMode {
                         autoActions.intake(),
                         new SleepAction(1)
                 ))
-                .stopAndAdd(autoActions.stopIntake())
+                .afterTime(0, autoActions.stopIntake())
 //
 //                //Return to goal
                 .afterTime(0, autoActions.shooterIdle())
                 .setTangent(Math.toRadians(270))
                 .splineToLinearHeading(GOAL_POSE2, GOAL_HEADING)
-                .stopAndAdd(autoActions.fire(1050))
-                .stopAndAdd(autoActions.stopShooter());
+                .afterTime(0, autoActions.fire(1050))
+                .afterTime(0, autoActions.stopShooter());
 
 //                // Open go to spike 3
 //                .setTangent(Math.toRadians(90))

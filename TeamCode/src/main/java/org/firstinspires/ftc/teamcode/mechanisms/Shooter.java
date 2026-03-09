@@ -26,7 +26,7 @@ public class Shooter {
     public static double kD = 0.0;
     public static double kV = 0.000551;
     public static double VELO_TOL = 20;
-    public static double IDLE_VELO = 950; // Match your LUT sign (negative)
+    public static double IDLE_VELO = 1100; // Match your LUT sign (negative)
 
     public static Mode mode = Mode.RAW;
 //    public static double shootVelocity = Robot.SHOOTER_READY_VELOCITY;
